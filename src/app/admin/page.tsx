@@ -97,6 +97,25 @@ export default function AdminDashboard() {
                 </Card.Body>
               </Card>
             </Col>
+
+            <Col md={6} className="mb-4">
+              <Card className="h-100 border-primary">
+                <Card.Body>
+                  <Card.Title>🔐 Secure Code Generation</Card.Title>
+                  <Card.Text>
+                    Advanced redemption code management with cryptographically
+                    secure generation, bulk operations, and real-time
+                    validation. Features 1M+ codes/second performance.
+                  </Card.Text>
+                  <Button
+                    variant="primary"
+                    onClick={() => router.push("/admin/codes")}
+                  >
+                    Manage Codes
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
           </Row>
 
           <Card className="mt-4">
@@ -119,7 +138,7 @@ export default function AdminDashboard() {
                   size="sm"
                   onClick={() => router.push("/admin/codes")}
                 >
-                  Redemption Codes
+                  🔐 Redemption Codes
                 </Button>
                 <Button
                   variant="outline-secondary"

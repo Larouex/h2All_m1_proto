@@ -23,6 +23,13 @@ export interface RedemptionCodeEntity {
   UserId: string | null;
   CreatedDateTime: Date;
   UserEmail?: string;
+  ExpiresAt?: Date | string; // Code expiration date
+  RedemptionValue?: number; // Value when redeemed
+  RedemptionSource?: string; // Source of redemption (email, social, etc.)
+  RedemptionDevice?: string; // Device used for redemption
+  RedemptionLocation?: string; // Location of redemption
+  RedemptionUrl?: string; // URL where code was redeemed
+  UpdatedAt?: Date | string; // Last update timestamp
 }
 
 // Redemption code creation data transfer object
@@ -33,9 +40,16 @@ export interface CreateRedemptionCodeDto {
 
 // Redemption code usage data transfer object
 export interface RedeemCodeDto {
-  uniqueCode: string;
-  userId: string;
+  campaignId: string;
+  code: string;
   userEmail: string;
+  redemptionUrl?: string; // Optional - URL where code was redeemed from
+  metadata?: {
+    source?: string;
+    device?: string;
+    location?: string;
+    [key: string]: string | number | boolean | undefined;
+  };
 }
 
 // Redemption code query filters

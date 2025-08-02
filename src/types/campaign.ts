@@ -25,6 +25,10 @@ export interface CampaignEntity {
   Description?: string;
   MaxRedemptions?: number;
   CurrentRedemptions: number;
+  Status?: string; // active, inactive, expired
+  TotalRedemptions?: number; // Total redemptions processed
+  TotalRedemptionValue?: number; // Total value redeemed
+  UpdatedAt?: Date | string; // Last update timestamp
 }
 
 // Campaign creation data transfer object

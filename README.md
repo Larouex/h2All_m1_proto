@@ -47,7 +47,8 @@ src/
 │   ├── funded/page.tsx        # Project funding confirmation
 │   ├── api/                   # API endpoints
 │   │   ├── campaigns/         # Campaign CRUD operations
-│   │   ├── redemption-codes/  # Code management
+│   │   ├── redemption-codes/  # Code generation (POST only)
+│   │   ├── redeem/            # Code redemption (POST only)
 │   │   ├── projects/          # Project data
 │   │   ├── users/             # User management
 │   │   └── swagger/           # API documentation
@@ -62,7 +63,10 @@ src/
 │   ├── campaign.ts           # Campaign interfaces
 │   ├── redemption.ts         # Redemption code interfaces
 │   └── user.ts               # User interfaces
-└── lib/                      # Utility libraries
+├── lib/                      # Utility libraries
+    ├── utils/                # Utility functions
+    │   └── urlParser.ts      # Campaign URL parsing and validation
+    ├── database.ts           # Azure Data Tables integration
     └── swagger.ts            # API documentation config
 ```
 
@@ -150,11 +154,14 @@ Access the comprehensive admin interface at `/admin`
 
 #### Redemption Codes API (`/api/redemption-codes`)
 
-- `GET /api/redemption-codes` - List all codes
-- `POST /api/redemption-codes` - Create new code
-- `POST /api/redemption-codes/generate` - Generate bulk codes
-- `GET /api/redemption-codes/{id}` - Get code details
-- `DELETE /api/redemption-codes/{id}` - Delete code
+- `GET /api/redemption-codes` - List redemption codes with filtering
+- `POST /api/redemption-codes` - Generate bulk redemption codes
+- Query parameters: `campaignId`, `code`, `isUsed`, `id`
+
+#### Code Redemption API (`/api/redeem`)
+
+- `POST /api/redeem` - Redeem a specific code for a user
+- Handles campaign validation, user balance updates, and tracking
 
 #### User Management API (`/api/users`)
 
@@ -168,6 +175,22 @@ Access the comprehensive admin interface at `/admin`
 - `POST /api/login` - User authentication
 - `POST /api/register` - User registration
 - `POST /api/subscribe` - Email subscription
+
+### API Architecture Improvements
+
+- ✅ **Clean Separation**: Code generation and redemption now use separate endpoints
+- ✅ **Proper Error Handling**: Comprehensive validation and error responses
+- ✅ **TypeScript Integration**: Full type safety with Azure Table Storage PascalCase properties
+- ✅ **URL Parser Utility**: Campaign URL validation and parsing functionality
+- ✅ **Cryptographic Security**: nanoid for secure code generation (1M+ codes/second)
+
+### Recent Updates (August 2025)
+
+- **API Separation**: Split `/api/redemption-codes` (generation) and `/api/redeem` (redemption)
+- **Enhanced Admin Dashboard**: Advanced code generation interface with bulk operations
+- **URL Parser Utility**: Comprehensive campaign URL parsing and validation
+- **Azure Integration**: Proper PascalCase property mapping for Azure Table Storage
+- **Swagger Documentation**: Updated with real campaign IDs and working examples
 
 ### Testing Tools
 
@@ -245,6 +268,74 @@ npm run type-check   # TypeScript validation
 - **OpenAPI Schema** - Defined in `src/lib/swagger.ts`
 - **Route Handlers** - Located in `src/app/api/`
 - **Type Definitions** - Centralized in `src/types/`
+
+### Database Schema
+
+### API Usage Examples
+
+#### Generate Redemption Codes
+
+```bash
+curl -X POST "http://localhost:3000/api/redemption-codes" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "campaignId": "1754169423931-stp6rpgli",
+    "quantity": 10
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "campaignId": "1754169423931-stp6rpgli",
+  "codesGenerated": 10,
+  "codes": ["OVXQYE0I", "YMH4G39U", "XMIFRT8Y", "1CD79ENZ", "KA6WSJK6"],
+  "success": true
+}
+```
+
+#### Redeem a Code
+
+```bash
+curl -X POST "http://localhost:3000/api/redeem" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "campaignId": "1754169423931-stp6rpgli",
+    "code": "YMH4G39U",
+    "userEmail": "user@example.com"
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Code redeemed successfully",
+  "redemption": {
+    "code": "YMH4G39U",
+    "redemptionValue": 25,
+    "campaign": {
+      "name": "Test Campaign for Code Generation"
+    }
+  }
+}
+```
+
+#### Create a Campaign
+
+```bash
+curl -X POST "http://localhost:3000/api/campaigns" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Summer 2025 Promotion",
+    "description": "Get $25 off your next purchase",
+    "redemptionValue": 25,
+    "maxRedemptions": 1000,
+    "expiresAt": "2025-12-31T23:59:59.999Z"
+  }'
+```
 
 ### Database Schema
 

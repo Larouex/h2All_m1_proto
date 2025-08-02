@@ -23,13 +23,14 @@ export interface UserEntity {
   FirstName: string;
   LastName: string;
   Country: string;
-  PasswordHash: string;
+  PasswordHash?: string;
   Balance: number; // New field
   CreatedDateTime: Date;
   LastLoginAt?: Date;
   IsActive: boolean;
   TotalRedemptions: number; // New field
   TotalRedemptionValue: number; // New field
+  UpdatedAt?: Date | string; // Last update timestamp
 }
 
 // User registration data transfer object
