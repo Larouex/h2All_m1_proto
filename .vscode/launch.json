@@ -16,21 +16,30 @@
       "console": "integratedTerminal",
       "serverReadyAction": {
         "pattern": "- Local:.+(https?://.+)",
-        "uriFormat": "%s",
+        "uriFormat": "%s/admin",
         "action": "openExternally"
-      }
+      },
+      "postDebugTask": "open-test-pages"
     },
     {
       "name": "Debug Next.js Client",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:3000",
+      "url": "http://localhost:3000/admin",
       "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
         "webpack://_N_E/*": "${webRoot}/*",
         "webpack:///./*": "${webRoot}/*",
         "webpack:///./~/*": "${webRoot}/node_modules/*"
       }
+    },
+    {
+      "name": "Launch API Documentation",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000/admin/api-docs",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "start-dev-server"
     }
   ]
 }
