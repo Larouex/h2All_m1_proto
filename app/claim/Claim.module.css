@@ -1,0 +1,43 @@
+.claimContainer {
+  min-height: 100vh;
+  padding-top: 80px;
+}
+
+.waterBottleCard {
+  max-width: 240px;
+  background-color: #dbeafe !important;
+  /* bg-blue-100 */
+  border: 0 !important;
+  border-radius: 1.5rem !important;
+  /* rounded-3xl */
+}
+
+.bottleIconContainer {
+  height: 220px;
+  /* increased to accommodate 200px icon */
+}
+
+.bottleIcon {
+  font-size: 100px;
+  color: #3b82f6;
+  /* text-blue-500 - Bootstrap Icons use font-size, not width/height */
+}
+
+.mainContent {
+  max-width: 320px;
+}
+
+.claimButton {
+  max-width: 320px;
+}
+
+.featuresList {
+  max-width: 320px;
+}
+
+.featureDot {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  /* bg-green-500 */
+}

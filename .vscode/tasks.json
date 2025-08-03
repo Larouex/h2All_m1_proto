@@ -1,0 +1,72 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "dev",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: dev",
+      "detail": "next dev"
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: build",
+      "detail": "next build"
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: start",
+      "detail": "next start"
+    },
+    {
+      "label": "start-dev-server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Local:",
+          "endsPattern": "Ready"
+        }
+      }
+    },
+    {
+      "label": "open-test-pages",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Opening API test pages..."],
+      "group": "test",
+      "dependsOrder": "sequence",
+      "dependsOn": ["open-campaign-test-page"]
+    },
+    {
+      "label": "open-campaign-test-page",
+      "type": "shell",
+      "command": "open",
+      "args": ["http://localhost:3000/test-campaign-api.html"],
+      "group": "test",
+      "options": {
+        "shell": {
+          "executable": "/bin/bash",
+          "args": ["-c"]
+        }
+      }
+    }
+  ]
+}
