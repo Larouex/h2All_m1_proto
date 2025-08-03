@@ -1,9 +1,9 @@
 // Version and Build Information
 // Update these values when checking into GitHub
 
-export const APP_VERSION = "1.0.1";
+export const APP_VERSION = "1.0.2";
 export const BUILD_DATE = "August 3, 2025";
-export const BUILD_TIME = "3:45 PM PST";
+export const BUILD_TIME = "4:52 PM PST";
 
 // Instructions for updating:
 // 1. Increment APP_VERSION following semantic versioning (major.minor.patch)
