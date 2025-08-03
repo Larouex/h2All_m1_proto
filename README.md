@@ -12,6 +12,48 @@ H2All M1 is a comprehensive platform that provides:
 - **Real-time database operations** with Azure Data Tables
 - **Interactive testing tools** for development and QA
 
+## ⚡ TL;DR
+
+**Quick Start for Project Managers**: Read the [H2All M1 Capabilities and Features Guide](./H2All-M1-Capabilities-and-Features.md) for a comprehensive, non-technical overview of all platform capabilities, testing procedures, and admin interfaces.
+
+**Quick Start for Developers**:
+
+1. `npm install && npm run dev`
+2. Access admin dashboard at [/admin](http://localhost:3000/admin)
+3. View API docs at [/admin/api-docs](http://localhost:3000/admin/api-docs)
+4. Test APIs with the interactive admin tools
+
+**Key Features**:
+
+- 🏗️ **Campaign Management**: Create campaigns with redemption codes (1M+ codes/second generation)
+- 🔗 **UTM Tracking**: Multi-channel marketing with detailed analytics
+- 🍪 **Cookie Persistence**: Campaign data tracking across user sessions
+- 📊 **Real-time Analytics**: Dashboard with performance metrics and reporting
+- 🔒 **Secure**: Cryptographically secure code generation and validation
+- 📱 **Mobile-First**: Responsive design optimized for all devices
+
+## 📚 Documentation Library
+
+### 📋 Project Management & Business
+
+- **[H2All M1 Capabilities and Features](./H2All-M1-Capabilities-and-Features.md)** - _Complete guide for project managers, testing procedures, and business use cases_
+- **[UX Cleanup Summary](./UX_CLEANUP_SUMMARY.md)** - _User experience improvements and admin restructuring_
+
+### 🔧 Technical Documentation
+
+- **[Campaign System Architecture](./CAMPAIGN_SYSTEM.md)** - _Database schema, interfaces, and system design_
+- **[Code Generation Documentation](./CODE_GENERATION_DOCS.md)** - _Secure code generation utilities and performance specs_
+- **[URL Parser Documentation](./URL_PARSER_DOCS.md)** - _Campaign URL parsing and validation utilities_
+- **[API Documentation Setup](./API_DOCUMENTATION_SETUP.md)** - _Swagger integration and testing infrastructure_
+
+### 📊 Analytics & Tracking
+
+- **[UTM Parameters Guide](./docs/UTM-Parameters-Guide.md)** - _Comprehensive guide to marketing attribution and tracking_
+
+### 🚀 Development & Deployment
+
+- **[Git Commit Summary](./GIT_COMMIT_SUMMARY.md)** - _Development history and major updates_
+
 ## 📋 Table of Contents
 
 - [Architecture](#architecture)
@@ -443,6 +485,32 @@ interface User {
 - **Real-time Statistics** - Live system overview
 - **Activity Monitoring** - Recent system activities
 - **Export Capabilities** - Data analysis and reporting
+
+## 🔗 Quick Access Links
+
+### 🎛️ Admin Interfaces (Development)
+
+- **[Admin Dashboard](http://localhost:3000/admin)** - Central control panel
+- **[Campaign Manager](http://localhost:3000/admin/campaigns)** - Create and manage campaigns
+- **[Code Manager](http://localhost:3000/admin/codes)** - Generate and track redemption codes
+- **[Cookie Testing](http://localhost:3000/admin/test-cookies)** - Test campaign tracking functionality
+- **[API Documentation](http://localhost:3000/admin/api-docs)** - Interactive Swagger UI
+- **[Data Management](http://localhost:3000/admin/data)** - System analytics and data export
+- **[User Management](http://localhost:3000/admin/users)** - User accounts and activity
+
+### 📖 Documentation Quick Links
+
+- **[📋 PM Guide](./H2All-M1-Capabilities-and-Features.md)** - Complete project manager guide
+- **[🔧 Campaign System](./CAMPAIGN_SYSTEM.md)** - Technical architecture
+- **[⚡ Code Generation](./CODE_GENERATION_DOCS.md)** - Performance and security specs
+- **[📊 UTM Tracking](./docs/UTM-Parameters-Guide.md)** - Marketing analytics guide
+- **[🔗 URL Parser](./URL_PARSER_DOCS.md)** - URL validation utilities
+
+### 🧪 Testing & Development
+
+- **[System Health](http://localhost:3000/api/health)** - API status check
+- **[Database Test](http://localhost:3000/api/test)** - Database connectivity
+- **[Interactive API Tests](http://localhost:3000/test-campaign-api.html)** - Browser-based API testing
 
 ## 🤝 Contributing
 

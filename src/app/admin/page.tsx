@@ -116,6 +116,25 @@ export default function AdminDashboard() {
                 </Card.Body>
               </Card>
             </Col>
+
+            <Col md={6} className="mb-4">
+              <Card className="h-100 border-info">
+                <Card.Body>
+                  <Card.Title>🍪 Cookie Utilities Testing</Card.Title>
+                  <Card.Text>
+                    Comprehensive testing suite for campaign cookie management.
+                    Test setting, retrieving, expiration handling, and UTM
+                    parameter management with real-time validation.
+                  </Card.Text>
+                  <Button
+                    variant="info"
+                    onClick={() => router.push("/admin/test-cookies")}
+                  >
+                    Test Cookie Utils
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
           </Row>
 
           <Card className="mt-4">
@@ -146,6 +165,13 @@ export default function AdminDashboard() {
                   onClick={() => router.push("/admin/users")}
                 >
                   User Management
+                </Button>
+                <Button
+                  variant="outline-info"
+                  size="sm"
+                  onClick={() => router.push("/admin/test-cookies")}
+                >
+                  🍪 Cookie Tests
                 </Button>
                 <Button
                   variant="outline-warning"
