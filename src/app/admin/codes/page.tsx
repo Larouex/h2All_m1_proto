@@ -27,14 +27,25 @@ import {
 
 interface RedemptionCode {
   id: string;
-  code: string;
+  uniqueCode: string; // Changed from 'code' to match API
   campaignId: string;
-  campaignName: string;
-  isRedeemed: boolean;
-  redeemedBy?: string;
-  redeemedAt?: string;
-  expiresAt: string;
-  createdAt: string;
+  campaignName?: string; // Made optional since it might not come from API
+  isUsed: boolean; // Changed from 'isRedeemed' to match API
+  userId?: string | null; // Changed from 'redeemedBy'
+  redeemedAt?: Date | string | null;
+  createdAt: Date | string;
+  userEmail?: string;
+}
+
+interface Campaign {
+  id: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+  startDate: string;
+  endDate: string;
+  maxRedemptions: number;
+  currentRedemptions: number;
 }
 
 export default function RedemptionCodeManager() {
@@ -62,9 +73,31 @@ export default function RedemptionCodeManager() {
     uppercase: true,
   });
 
+  // URL Generation state
+  const [urlGenerating, setUrlGenerating] = useState(false);
+  const [urlForm, setUrlForm] = useState({
+    campaignId: "",
+    baseUrl: typeof window !== "undefined" ? window.location.origin : "",
+    utmSource: "",
+    utmMedium: "",
+    utmContent: "",
+  });
+  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
+  const [availableCodes, setAvailableCodes] = useState<number>(0);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(false);
+
   useEffect(() => {
     fetchCodes();
+    fetchCampaigns();
   }, []);
+
+  // Check available codes when campaign changes
+  useEffect(() => {
+    if (urlForm.campaignId) {
+      checkAvailableCodes(urlForm.campaignId);
+    }
+  }, [urlForm.campaignId]);
 
   const fetchCodes = async () => {
     try {
@@ -81,6 +114,25 @@ export default function RedemptionCodeManager() {
       setError("Error fetching redemption codes");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCampaigns = async () => {
+    try {
+      setCampaignsLoading(true);
+      const response = await fetch("/api/campaigns");
+      if (response.ok) {
+        const data = await response.json();
+        setCampaigns(data);
+      } else {
+        console.error("Failed to load campaigns");
+        // Don't set error for campaigns, just log it
+      }
+    } catch (err) {
+      console.error("Error fetching campaigns:", err);
+      // Don't set error for campaigns, just log it
+    } finally {
+      setCampaignsLoading(false);
     }
   };
 
@@ -183,15 +235,125 @@ export default function RedemptionCodeManager() {
     }
   };
 
+  // URL Generation handlers
+  const checkAvailableCodes = async (campaignId: string) => {
+    if (!campaignId) {
+      setAvailableCodes(0);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/admin/generate-redeem-url?campaignId=${encodeURIComponent(
+          campaignId
+        )}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableCodes(data.availableCodes || 0);
+      } else {
+        setAvailableCodes(0);
+      }
+    } catch (err) {
+      console.error("Error checking available codes:", err);
+      setAvailableCodes(0);
+    }
+  };
+
+  const handleGenerateUrl = async () => {
+    if (!urlForm.campaignId) {
+      setError("Please select a campaign for URL generation");
+      return;
+    }
+
+    try {
+      setUrlGenerating(true);
+      setError(null);
+      setGeneratedUrl(null);
+
+      const payload: {
+        campaignId: string;
+        baseUrl: string;
+        utmParams?: {
+          source?: string;
+          medium?: string;
+          content?: string;
+        };
+      } = {
+        campaignId: urlForm.campaignId,
+        baseUrl: urlForm.baseUrl || `${window.location.origin}/redeem`,
+      };
+
+      // Add UTM parameters if provided
+      const utmParams: { source?: string; medium?: string; content?: string } =
+        {};
+      if (urlForm.utmSource) utmParams.source = urlForm.utmSource;
+      if (urlForm.utmMedium) utmParams.medium = urlForm.utmMedium;
+      if (urlForm.utmContent) utmParams.content = urlForm.utmContent;
+
+      // Only add utmParams if at least one UTM parameter is provided
+      if (Object.keys(utmParams).length > 0) {
+        payload.utmParams = utmParams;
+      }
+
+      const response = await fetch("/api/admin/generate-redeem-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGeneratedUrl(data.redemptionUrl || data.url);
+        setSuccess(
+          `Successfully generated redemption URL using code: ${
+            data.code?.uniqueCode || data.uniqueCode || "N/A"
+          }`
+        );
+
+        // Refresh available codes count
+        checkAvailableCodes(urlForm.campaignId);
+
+        // Refresh codes list to show the newly used code
+        fetchCodes();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to generate redemption URL");
+      }
+    } catch (err) {
+      console.error("Error generating URL:", err);
+      setError(
+        "Error generating redemption URL: " +
+          (err instanceof Error ? err.message : String(err))
+      );
+    } finally {
+      setUrlGenerating(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setSuccess("URL copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+      setError("Failed to copy to clipboard");
+    }
+  };
+
   const filteredCodes = codes.filter((code) => {
     const matchesSearch =
-      code.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      code.campaignName.toLowerCase().includes(searchTerm.toLowerCase());
+      code.uniqueCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (code.campaignName &&
+        code.campaignName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      code.campaignId.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       filterStatus === "all" ||
-      (filterStatus === "redeemed" && code.isRedeemed) ||
-      (filterStatus === "available" && !code.isRedeemed);
+      (filterStatus === "redeemed" && code.isUsed) ||
+      (filterStatus === "available" && !code.isUsed);
 
     return matchesSearch && matchesStatus;
   });
@@ -232,10 +394,43 @@ export default function RedemptionCodeManager() {
             <Alert
               variant="success"
               dismissible
-              onClose={() => setSuccess(null)}
+              onClose={() => {
+                setSuccess(null);
+                setGeneratedUrl(null);
+              }}
             >
               <Alert.Heading>Success</Alert.Heading>
-              {success}
+              {generatedUrl ? (
+                <div>
+                  <p className="mb-3">{success}</p>
+                  <div className="border rounded p-3 bg-light">
+                    <div className="mb-2">
+                      <strong>Generated URL:</strong>
+                    </div>
+                    <div className="d-flex gap-2 align-items-center">
+                      <code className="flex-grow-1 bg-white p-2 rounded border text-break small">
+                        <a
+                          href={generatedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-decoration-none"
+                        >
+                          {generatedUrl}
+                        </a>
+                      </code>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => copyToClipboard(generatedUrl)}
+                      >
+                        📋 Copy
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                success
+              )}
             </Alert>
           )}
 
@@ -266,11 +461,20 @@ export default function RedemptionCodeManager() {
                         })
                       }
                       aria-label="Select campaign"
+                      disabled={campaignsLoading}
                     >
-                      <option value="">Select Campaign...</option>
-                      <option value="campaign1">Sample Campaign 1</option>
-                      <option value="campaign2">Sample Campaign 2</option>
-                      <option value="test-campaign">Test Campaign</option>
+                      <option value="">
+                        {campaignsLoading
+                          ? "Loading campaigns..."
+                          : "Select Campaign..."}
+                      </option>
+                      {campaigns
+                        .filter((campaign) => campaign.isActive)
+                        .map((campaign) => (
+                          <option key={campaign.id} value={campaign.id}>
+                            {campaign.id}
+                          </option>
+                        ))}
                     </Form.Select>
                   </Form.Group>
                 </Col>
@@ -513,6 +717,157 @@ export default function RedemptionCodeManager() {
             </Card.Body>
           </Card>
 
+          {/* URL Generation Section */}
+          <Card className="mb-4">
+            <Card.Body>
+              <Card.Title>🔗 Generate Redemption URLs</Card.Title>
+              <Card.Text>
+                Create fully qualified redemption URLs using the next available
+                unused code from your campaigns.
+              </Card.Text>
+
+              <Row>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Campaign</Form.Label>
+                    <Form.Select
+                      value={urlForm.campaignId}
+                      onChange={(e) =>
+                        setUrlForm({
+                          ...urlForm,
+                          campaignId: e.target.value,
+                        })
+                      }
+                      aria-label="Select campaign for URL generation"
+                      disabled={campaignsLoading}
+                    >
+                      <option value="">
+                        {campaignsLoading
+                          ? "Loading campaigns..."
+                          : "Select Campaign..."}
+                      </option>
+                      {campaigns
+                        .filter((campaign) => campaign.isActive)
+                        .map((campaign) => (
+                          <option key={campaign.id} value={campaign.id}>
+                            {campaign.id}
+                          </option>
+                        ))}
+                    </Form.Select>
+                    {urlForm.campaignId && (
+                      <Form.Text className="text-muted">
+                        Available codes: {availableCodes}
+                      </Form.Text>
+                    )}
+                  </Form.Group>
+                </Col>
+
+                <Col md={8}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Base URL</Form.Label>
+                    <Form.Control
+                      type="url"
+                      placeholder="https://your-domain.com/redeem"
+                      value={urlForm.baseUrl}
+                      onChange={(e) =>
+                        setUrlForm({
+                          ...urlForm,
+                          baseUrl: e.target.value,
+                        })
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              {/* UTM Parameters */}
+              <Card className="mb-3 border-secondary">
+                <Card.Header className="bg-light">
+                  <strong>📊 UTM Tracking Parameters (Optional)</strong>
+                </Card.Header>
+                <Card.Body>
+                  <Row>
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>UTM Source</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="e.g., email, social"
+                          value={urlForm.utmSource}
+                          onChange={(e) =>
+                            setUrlForm({
+                              ...urlForm,
+                              utmSource: e.target.value,
+                            })
+                          }
+                        />
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={3}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>UTM Medium</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="e.g., newsletter, banner"
+                          value={urlForm.utmMedium}
+                          onChange={(e) =>
+                            setUrlForm({
+                              ...urlForm,
+                              utmMedium: e.target.value,
+                            })
+                          }
+                        />
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={6}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>UTM Content</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="e.g., header-link"
+                          value={urlForm.utmContent}
+                          onChange={(e) =>
+                            setUrlForm({
+                              ...urlForm,
+                              utmContent: e.target.value,
+                            })
+                          }
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+
+              <div className="d-flex gap-2 align-items-center">
+                <Button
+                  variant="success"
+                  onClick={handleGenerateUrl}
+                  disabled={
+                    urlGenerating || !urlForm.campaignId || availableCodes === 0
+                  }
+                >
+                  {urlGenerating ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      Generating URL...
+                    </>
+                  ) : (
+                    "🚀 Generate Redemption URL"
+                  )}
+                </Button>
+
+                {availableCodes === 0 && urlForm.campaignId && (
+                  <Alert variant="warning" className="mb-0 py-2 px-3">
+                    No available codes for this campaign. Generate codes first.
+                  </Alert>
+                )}
+              </div>
+            </Card.Body>
+          </Card>
+
           {/* Filter and Search */}
           <Card className="mb-4">
             <Card.Body>
@@ -562,9 +917,9 @@ export default function RedemptionCodeManager() {
                     <th>Code</th>
                     <th>Campaign</th>
                     <th>Status</th>
-                    <th>Redeemed By</th>
+                    <th>User</th>
                     <th>Redeemed At</th>
-                    <th>Expires</th>
+                    <th>Created</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -573,28 +928,28 @@ export default function RedemptionCodeManager() {
                     <tr key={code.id}>
                       <td>
                         <code className="bg-light p-1 rounded">
-                          {code.code}
+                          {code.uniqueCode}
                         </code>
                       </td>
-                      <td>{code.campaignName}</td>
+                      <td>{code.campaignName || code.campaignId}</td>
                       <td>
-                        <Badge bg={code.isRedeemed ? "success" : "primary"}>
-                          {code.isRedeemed ? "Redeemed" : "Available"}
+                        <Badge bg={code.isUsed ? "success" : "primary"}>
+                          {code.isUsed ? "Redeemed" : "Available"}
                         </Badge>
                       </td>
-                      <td>{code.redeemedBy || "-"}</td>
+                      <td>{code.userEmail || code.userId || "-"}</td>
                       <td>
                         {code.redeemedAt
                           ? new Date(code.redeemedAt).toLocaleString()
                           : "-"}
                       </td>
-                      <td>{new Date(code.expiresAt).toLocaleDateString()}</td>
+                      <td>{new Date(code.createdAt).toLocaleDateString()}</td>
                       <td>
                         <Button
                           variant="outline-danger"
                           size="sm"
                           onClick={() => handleDeleteCode(code.id)}
-                          disabled={code.isRedeemed}
+                          disabled={code.isUsed}
                         >
                           Delete
                         </Button>

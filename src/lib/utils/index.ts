@@ -35,8 +35,20 @@ export {
 } from "./codeGenerator.test";
 
 // Re-export everything for convenience
-export * from "./codeGenerator";
-export * from "./codeGenerator.test";
+export * from "./urlParser";
+
+/**
+ * Redemption URL Parser Utilities
+ *
+ * Simplified parser specifically for redemption URLs with campaign_id and code parameters
+ */
+export {
+  parseRedemptionUrl,
+  validateCampaignData,
+  testUrlParser,
+  type CampaignData,
+  type ParserConfig,
+} from "./redemptionUrlParser";
 
 /**
  * URL Parser Utilities
