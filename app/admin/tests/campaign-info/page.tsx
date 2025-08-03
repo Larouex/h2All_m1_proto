@@ -12,7 +12,7 @@ import {
 import CampaignInfo, {
   Campaign,
   CampaignState,
-} from "../components/CampaignInfo";
+} from "@/components/CampaignInfo";
 
 // Mock campaign data
 const mockCampaign: Campaign = {

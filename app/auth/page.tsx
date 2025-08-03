@@ -116,6 +116,13 @@ export default function AuthPage() {
   if (!mounted) {
     return (
       <Container className="py-5">
+        {/* Header */}
+        <div className="text-center mb-5">
+          <h1 className="fs-3 fw-bold text-dark mb-0">
+            H2<span className="text-primary">ALL</span> WATER
+          </h1>
+        </div>
+
         <Row className="justify-content-center">
           <Col md={6} lg={5}>
             <div className="d-flex justify-content-center">
@@ -131,6 +138,13 @@ export default function AuthPage() {
 
   return (
     <Container className="py-5">
+      {/* Header */}
+      <div className="text-center mb-5">
+        <h1 className="fs-3 fw-bold text-dark mb-0">
+          H2<span className="text-primary">ALL</span> WATER
+        </h1>
+      </div>
+
       <Row className="justify-content-center">
         <Col md={6} lg={5}>
           <Card>
@@ -252,19 +266,6 @@ export default function AuthPage() {
                   </Button>
                 </div>
               </Form>
-            </Card.Body>
-          </Card>
-
-          <Card className="mt-4">
-            <Card.Body>
-              <h6>Security Features:</h6>
-              <ul className="small mb-0">
-                <li>Passwords encrypted with bcrypt (12 rounds)</li>
-                <li>JWT tokens with secure HTTP-only cookies</li>
-                <li>Rate limiting for login and registration attempts</li>
-                <li>Strong password requirements</li>
-                <li>Session management with CSRF protection</li>
-              </ul>
             </Card.Body>
           </Card>
         </Col>

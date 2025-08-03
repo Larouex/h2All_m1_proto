@@ -13,6 +13,13 @@ function RedemptionContent() {
   if (!campaignId || !redemptionCode) {
     return (
       <div className="container-fluid">
+        {/* Header */}
+        <div className="text-center mb-5">
+          <h1 className="fs-3 fw-bold text-dark mb-0">
+            H2<span className="text-primary">ALL</span> WATER
+          </h1>
+        </div>
+
         <div className="row justify-content-center">
           <div className="col-12 col-md-8 col-lg-6">
             <div className="alert alert-warning text-center">
@@ -28,6 +35,13 @@ function RedemptionContent() {
 
   return (
     <div className="container-fluid">
+      {/* Header */}
+      <div className="text-center mb-5">
+        <h1 className="fs-3 fw-bold text-dark mb-0">
+          H2<span className="text-primary">ALL</span> WATER
+        </h1>
+      </div>
+
       <div className="row justify-content-center">
         <div className="col-12 col-md-8 col-lg-6">
           <RedemptionConfirmation

@@ -90,6 +90,41 @@ export default function NavBar({
               Track
             </Nav.Link>
 
+            <Nav.Link
+              onClick={() => handleNavigation("/share")}
+              active={pathname === "/share"}
+            >
+              Share
+            </Nav.Link>
+
+            <Nav.Link
+              onClick={() => handleNavigation("/claim")}
+              active={pathname === "/claim"}
+            >
+              Claim
+            </Nav.Link>
+
+            <Nav.Link
+              onClick={() => handleNavigation("/emailclaim")}
+              active={pathname === "/emailclaim"}
+            >
+              Email Claim
+            </Nav.Link>
+
+            <Nav.Link
+              onClick={() => handleNavigation("/claimed")}
+              active={pathname === "/claimed"}
+            >
+              Claimed
+            </Nav.Link>
+
+            <Nav.Link
+              onClick={() => handleNavigation("/project")}
+              active={pathname === "/project"}
+            >
+              Project
+            </Nav.Link>
+
             {isAuthenticated && (
               <>
                 <Nav.Link
@@ -129,6 +164,33 @@ export default function NavBar({
                 <NavDropdown.Item onClick={() => handleNavigation("/profile")}>
                   <i className="bi bi-person me-2"></i>
                   Profile
+                </NavDropdown.Item>
+
+                <NavDropdown.Item onClick={() => handleNavigation("/share")}>
+                  <i className="bi bi-share me-2"></i>
+                  Share
+                </NavDropdown.Item>
+
+                <NavDropdown.Item onClick={() => handleNavigation("/claim")}>
+                  <i className="bi bi-droplet me-2"></i>
+                  Claim
+                </NavDropdown.Item>
+
+                <NavDropdown.Item
+                  onClick={() => handleNavigation("/emailclaim")}
+                >
+                  <i className="bi bi-envelope me-2"></i>
+                  Email Claim
+                </NavDropdown.Item>
+
+                <NavDropdown.Item onClick={() => handleNavigation("/claimed")}>
+                  <i className="bi bi-megaphone me-2"></i>
+                  Claimed
+                </NavDropdown.Item>
+
+                <NavDropdown.Item onClick={() => handleNavigation("/project")}>
+                  <i className="bi bi-geo-alt me-2"></i>
+                  Project
                 </NavDropdown.Item>
 
                 <NavDropdown.Item onClick={() => handleNavigation("/redeem")}>

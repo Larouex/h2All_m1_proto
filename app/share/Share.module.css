@@ -1,0 +1,32 @@
+.shareContainer {
+  min-height: 100vh;
+  padding-top: 80px;
+}
+
+.progressDot {
+  width: 32px;
+  height: 4px;
+}
+
+.starContainer {
+  width: 128px;
+  height: 128px;
+  background-color: #c6f6d5;
+}
+
+.starIcon {
+  font-size: 32px;
+  color: #fbbf24;
+}
+
+.mainContent {
+  max-width: 320px;
+}
+
+.shareButton {
+  max-width: 320px;
+}
+
+.impactCard {
+  max-width: 320px;
+}

@@ -16,6 +16,13 @@ export default function Home() {
 
   return (
     <Container className="py-5">
+      {/* Header */}
+      <div className="text-center mb-5">
+        <h1 className="fs-3 fw-bold text-dark mb-0">
+          H2<span className="text-primary">ALL</span> WATER
+        </h1>
+      </div>
+
       <Row className="justify-content-center">
         <Col md={8}>
           <Card className="mb-4">
