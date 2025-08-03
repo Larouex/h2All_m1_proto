@@ -70,12 +70,30 @@ export default function AdminDashboard() {
                     Automated database testing and validation. Test Azure Data
                     Tables operations and data integrity checks.
                   </Card.Text>
-                  <Button
-                    variant="outline-success"
-                    onClick={() => window.open("/api/test", "_blank")}
-                  >
-                    Run Database Tests
-                  </Button>
+                  <div className="d-flex gap-2 flex-wrap">
+                    <Button
+                      variant="outline-success"
+                      onClick={() => window.open("/api/test", "_blank")}
+                    >
+                      Run Database Tests
+                    </Button>
+                    <Button
+                      variant="outline-primary"
+                      onClick={() =>
+                        window.open("/test-validation-api.html", "_blank")
+                      }
+                    >
+                      Test Validation API
+                    </Button>
+                    <Button
+                      variant="outline-warning"
+                      onClick={() =>
+                        window.open("/test-redemption-api.html", "_blank")
+                      }
+                    >
+                      Test Redemption API
+                    </Button>
+                  </div>
                 </Card.Body>
               </Card>
             </Col>
@@ -172,6 +190,24 @@ export default function AdminDashboard() {
                   onClick={() => router.push("/admin/test-cookies")}
                 >
                   🍪 Cookie Tests
+                </Button>
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  onClick={() =>
+                    window.open("/test-validation-api.html", "_blank")
+                  }
+                >
+                  ✅ Validation API
+                </Button>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={() =>
+                    window.open("/test-redemption-api.html", "_blank")
+                  }
+                >
+                  🎯 Redemption API
                 </Button>
                 <Button
                   variant="outline-warning"

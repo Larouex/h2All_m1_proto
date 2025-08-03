@@ -12,16 +12,26 @@ H2All M1 is a comprehensive platform that provides:
 - **Real-time database operations** with Azure Data Tables
 - **Interactive testing tools** for development and QA
 
-## ⚡ TL;DR
+## ⚡ Quick Start
 
-**Quick Start for Project Managers**: Read the [H2All M1 Capabilities and Features Guide](./H2All-M1-Capabilities-and-Features.md) for a comprehensive, non-technical overview of all platform capabilities, testing procedures, and admin interfaces.
+**For Project Managers**:
 
-**Quick Start for Developers**:
+- 📋 **[Complete PM Guide](./PROJECT_MANAGER_GUIDE.md)** - Comprehensive project management documentation
+- 🎛️ **[Admin Dashboard](http://localhost:3000/admin)** - Campaign creation and analytics
+- 📊 **[System Analytics](http://localhost:3000/admin/data)** - Performance metrics and reporting
 
-1. `npm install && npm run dev`
-2. Access admin dashboard at [/admin](http://localhost:3000/admin)
-3. View API docs at [/admin/api-docs](http://localhost:3000/admin/api-docs)
-4. Test APIs with the interactive admin tools
+**For Developers**:
+
+- 🛠️ **[Developer Guide](./DEVELOPER_GUIDE.md)** - Complete contribution and development guide
+- ⚡ **Quick Start**: `npm install && npm run dev`
+- 📚 **[API Documentation](http://localhost:3000/admin/api-docs)** - Interactive Swagger UI
+- 🧪 **[Test Suite](http://localhost:3000/test-redemption-api.html)** - Comprehensive API testing
+
+**For QA/Testing**:
+
+- 🧪 **[Testing Guide](./TESTING_GUIDE.md)** - Complete end-to-end testing procedures
+- ✅ **[Pre-Release Checklist](./TESTING_GUIDE.md#pre-release-testing-checklist)** - Critical validation steps
+- 🔍 **[System Health](http://localhost:3000/api/health)** - Real-time system status
 
 **Key Features**:
 
@@ -32,215 +42,84 @@ H2All M1 is a comprehensive platform that provides:
 - 🔒 **Secure**: Cryptographically secure code generation and validation
 - 📱 **Mobile-First**: Responsive design optimized for all devices
 
-## 📚 Documentation Library
+## 📖 Documentation Overview
 
-### 📋 Project Management & Business
+This repository includes comprehensive documentation for different roles:
 
-- **[H2All M1 Capabilities and Features](./H2All-M1-Capabilities-and-Features.md)** - _Complete guide for project managers, testing procedures, and business use cases_
-- **[UX Cleanup Summary](./UX_CLEANUP_SUMMARY.md)** - _User experience improvements and admin restructuring_
-
-### 🔧 Technical Documentation
-
-- **[Campaign System Architecture](./CAMPAIGN_SYSTEM.md)** - _Database schema, interfaces, and system design_
-- **[Code Generation Documentation](./CODE_GENERATION_DOCS.md)** - _Secure code generation utilities and performance specs_
-- **[URL Parser Documentation](./URL_PARSER_DOCS.md)** - _Campaign URL parsing and validation utilities_
-- **[API Documentation Setup](./API_DOCUMENTATION_SETUP.md)** - _Swagger integration and testing infrastructure_
-
-### 📊 Analytics & Tracking
-
-- **[UTM Parameters Guide](./docs/UTM-Parameters-Guide.md)** - _Comprehensive guide to marketing attribution and tracking_
-
-### 🚀 Development & Deployment
-
-- **[Git Commit Summary](./GIT_COMMIT_SUMMARY.md)** - _Development history and major updates_
+- **[📋 Project Manager Guide](./PROJECT_MANAGER_GUIDE.md)** - Business workflows, campaign management, analytics, and troubleshooting
+- **[🛠️ Developer Guide](./DEVELOPER_GUIDE.md)** - Architecture, API development, testing, and contribution guidelines
+- **[🧪 Testing Guide](./TESTING_GUIDE.md)** - End-to-end testing procedures, validation checklists, and quality assurance
 
 ## 📋 Table of Contents
 
+- [Role-Specific Documentation](#role-specific-documentation)
 - [Architecture](#architecture)
-- [User Experience Flow](#user-experience-flow)
 - [Admin Dashboard](#admin-dashboard)
 - [API Documentation](#api-documentation)
-- [Getting Started](#getting-started)
+- [Quick Start](#quick-start)
 - [Development](#development)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
+
+## 📚 Role-Specific Documentation
+
+### **For Project Managers**
+
+- **[📋 Project Manager Guide](./PROJECT_MANAGER_GUIDE.md)** - Complete PM documentation covering system overview, workflows, analytics, and troubleshooting
+
+### **For Developers**
+
+- **[🛠️ Developer Guide](./DEVELOPER_GUIDE.md)** - Comprehensive development guide including architecture, API patterns, testing, and contribution workflow
+
+### **For QA & Testing**
+
+- **[🧪 Testing Guide](./TESTING_GUIDE.md)** - End-to-end testing procedures, automated test suites, and pre-release validation
 
 ## 🏗️ Architecture
 
 ### Tech Stack
 
 - **Frontend**: Next.js 15.4.5 with React 19
-- **Styling**: React Bootstrap 5 with custom CSS
+- **Styling**: React Bootstrap 5
 - **Database**: Azure Data Tables
 - **API**: RESTful endpoints with OpenAPI 3.0 documentation
-- **Documentation**: Swagger UI integration
 - **TypeScript**: Full type safety throughout
 
-### Project Structure
+### Core Features
 
-```
-src/
-├── app/                        # Next.js App Router
-│   ├── page.tsx               # Clean home page
-│   ├── track/page.tsx         # Email collection
-│   ├── impact/page.tsx        # Impact confirmation
-│   ├── login/page.tsx         # User authentication
-│   ├── register/page.tsx      # User registration
-│   ├── funded/page.tsx        # Project funding confirmation
-│   ├── api/                   # API endpoints
-│   │   ├── campaigns/         # Campaign CRUD operations
-│   │   ├── redemption-codes/  # Code generation (POST only)
-│   │   ├── redeem/            # Code redemption (POST only)
-│   │   ├── projects/          # Project data
-│   │   ├── users/             # User management
-│   │   └── swagger/           # API documentation
-│   └── admin/                 # Administrative interface
-│       ├── page.tsx           # Admin dashboard
-│       ├── api-docs/page.tsx  # API documentation
-│       ├── campaigns/page.tsx # Campaign management
-│       ├── codes/page.tsx     # Code management
-│       ├── data/page.tsx      # Data management
-│       └── users/page.tsx     # User management
-├── types/                     # TypeScript definitions
-│   ├── campaign.ts           # Campaign interfaces
-│   ├── redemption.ts         # Redemption code interfaces
-│   └── user.ts               # User interfaces
-├── lib/                      # Utility libraries
-    ├── utils/                # Utility functions
-    │   └── urlParser.ts      # Campaign URL parsing and validation
-    ├── database.ts           # Azure Data Tables integration
-    └── swagger.ts            # API documentation config
-```
-
-## 👥 User Experience Flow
-
-### Clean Redemption Journey
-
-1. **Home (`/`)** - Value proposition and "Track Purchase" CTA
-2. **Track (`/track`)** - Email collection for impact tracking
-3. **Impact (`/impact`)** - Confirmation and impact messaging
-4. **Funded (`/funded`)** - Project funding success page
-
-### Authentication Flow
-
-- **Login (`/login`)** - User authentication with error handling
-- **Register (`/register`)** - New user registration
-
-### Key Features
-
-- ✅ Mobile-responsive Bootstrap design
-- ✅ Clean, distraction-free user interface
-- ✅ No developer tools or API references in user flow
-- ✅ Consistent branding and messaging
+- **Campaign Management**: Create and manage promotional campaigns
+- **Code Generation**: Cryptographically secure redemption codes (1M+ codes/second)
+- **User Authentication**: Login/register with balance tracking
+- **Real-time Analytics**: Dashboard with system metrics
+- **Mobile-First Design**: Responsive across all devices
 
 ## 🔧 Admin Dashboard
 
 Access the comprehensive admin interface at `/admin`
 
-### Dashboard Features
+### Key Admin Features
 
-- **System Overview** - Real-time statistics and metrics
-- **Quick Actions** - Common administrative tasks
-- **Navigation Hub** - Organized access to all admin tools
-
-### Campaign Management (`/admin/campaigns`)
-
-- ✅ Create, read, update, delete campaigns
-- ✅ Campaign status management (active/inactive)
-- ✅ Date range configuration
-- ✅ Redemption tracking and analytics
-- ✅ Search and filtering capabilities
-
-### Redemption Code Management (`/admin/codes`)
-
-- ✅ Bulk code generation with configurable parameters
-- ✅ Code status tracking (available/redeemed)
-- ✅ Search by code or campaign
-- ✅ Export/import functionality
-- ✅ Deletion controls (non-redeemed codes only)
-
-### Data Management (`/admin/data`)
-
-- ✅ System statistics dashboard
-- ✅ Export/import tools for all data types
-- ✅ Recent activity monitoring
-- ✅ Tabbed interface for different data categories
-- ✅ Privacy compliance features
-
-### User Management (`/admin/users`)
-
-- ✅ User account overview and management
-- ✅ Activity tracking and analytics
-- ✅ User status control (activate/deactivate)
-- ✅ Search and filtering capabilities
-- ✅ Detailed user profiles and statistics
+- **Campaign Manager** (`/admin/campaigns`) - CRUD operations for campaigns
+- **Code Manager** (`/admin/codes`) - Bulk code generation and tracking
+- **User Management** (`/admin/users`) - User accounts and activity
+- **Data Management** (`/admin/data`) - System analytics and export tools
+- **API Documentation** (`/admin/api-docs`) - Interactive Swagger UI
 
 ## 📚 API Documentation
 
-### Interactive Documentation (`/admin/api-docs`)
+### Core Endpoints
 
-- **Swagger UI Integration** - Full OpenAPI 3.0 specification
-- **Try-it-out Functionality** - Test APIs directly in browser
-- **Request/Response Examples** - Comprehensive examples for all endpoints
-- **Schema Documentation** - Detailed data models and validation
+- **Campaigns API** (`/api/campaigns`) - Campaign CRUD operations
+- **Redemption Codes API** (`/api/redemption-codes`) - Code generation and listing
+- **Validation API** (`/api/campaigns/validate`) - Pre-redemption validation
+- **Redemption API** (`/api/campaigns/redeem`) - Secure code redemption with authentication
+- **User Management** (`/api/users`, `/api/login`, `/api/register`) - User operations
 
-### Available Endpoints
+### Interactive Testing
 
-#### Campaigns API (`/api/campaigns`)
+- **Swagger UI** (`/admin/api-docs`) - Try APIs directly in browser
+- **Test Interfaces** - HTML-based testing tools for validation and redemption
+- **Database Health** - Automated testing and validation endpoints
 
-- `GET /api/campaigns` - List all campaigns
-- `POST /api/campaigns` - Create new campaign
-- `GET /api/campaigns/{id}` - Get campaign details
-- `PUT /api/campaigns/{id}` - Update campaign
-- `DELETE /api/campaigns/{id}` - Delete campaign
-
-#### Redemption Codes API (`/api/redemption-codes`)
-
-- `GET /api/redemption-codes` - List redemption codes with filtering
-- `POST /api/redemption-codes` - Generate bulk redemption codes
-- Query parameters: `campaignId`, `code`, `isUsed`, `id`
-
-#### Code Redemption API (`/api/redeem`)
-
-- `POST /api/redeem` - Redeem a specific code for a user
-- Handles campaign validation, user balance updates, and tracking
-
-#### User Management API (`/api/users`)
-
-- `GET /api/users` - List users (admin only)
-- `POST /api/users` - Create user account
-- `GET /api/users/{id}` - Get user details
-- `PATCH /api/users/{id}` - Update user status
-
-#### Authentication API
-
-- `POST /api/login` - User authentication
-- `POST /api/register` - User registration
-- `POST /api/subscribe` - Email subscription
-
-### API Architecture Improvements
-
-- ✅ **Clean Separation**: Code generation and redemption now use separate endpoints
-- ✅ **Proper Error Handling**: Comprehensive validation and error responses
-- ✅ **TypeScript Integration**: Full type safety with Azure Table Storage PascalCase properties
-- ✅ **URL Parser Utility**: Campaign URL validation and parsing functionality
-- ✅ **Cryptographic Security**: nanoid for secure code generation (1M+ codes/second)
-
-### Recent Updates (August 2025)
-
-- **API Separation**: Split `/api/redemption-codes` (generation) and `/api/redeem` (redemption)
-- **Enhanced Admin Dashboard**: Advanced code generation interface with bulk operations
-- **URL Parser Utility**: Comprehensive campaign URL parsing and validation
-- **Azure Integration**: Proper PascalCase property mapping for Azure Table Storage
-- **Swagger Documentation**: Updated with real campaign IDs and working examples
-
-### Testing Tools
-
-- **Interactive Test Pages** - HTML-based API testing interfaces
-- **Database Health Checks** - Automated testing endpoints
-- **Development Utilities** - Debug and validation tools
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -250,40 +129,25 @@ Access the comprehensive admin interface at `/admin`
 
 ### Installation
 
-1. **Clone the repository**
-
 ```bash
+# Clone and setup
 git clone https://github.com/Larouex/h2All_m1_proto.git
 cd h2All_m1_proto/h2all-m1
-```
 
-2. **Install dependencies**
-
-```bash
+# Install dependencies
 npm install
-# or
-yarn install
-```
 
-3. **Set up environment variables**
-
-```bash
+# Set up environment
 cp .env.example .env.local
-```
+# Add your Azure Storage connection string
 
-Add your Azure Data Tables connection string and other required variables.
-
-4. **Run the development server**
-
-```bash
+# Start development server
 npm run dev
-# or
-yarn dev
 ```
 
-5. **Access the application**
+**Access Points:**
 
-- **User Interface**: [http://localhost:3000](http://localhost:3000)
+- **Application**: [http://localhost:3000](http://localhost:3000)
 - **Admin Dashboard**: [http://localhost:3000/admin](http://localhost:3000/admin)
 - **API Documentation**: [http://localhost:3000/admin/api-docs](http://localhost:3000/admin/api-docs)
 
@@ -500,11 +364,10 @@ interface User {
 
 ### 📖 Documentation Quick Links
 
-- **[📋 PM Guide](./H2All-M1-Capabilities-and-Features.md)** - Complete project manager guide
-- **[🔧 Campaign System](./CAMPAIGN_SYSTEM.md)** - Technical architecture
-- **[⚡ Code Generation](./CODE_GENERATION_DOCS.md)** - Performance and security specs
-- **[📊 UTM Tracking](./docs/UTM-Parameters-Guide.md)** - Marketing analytics guide
-- **[🔗 URL Parser](./URL_PARSER_DOCS.md)** - URL validation utilities
+- **[📋 Project Manager Guide](./PROJECT_MANAGER_GUIDE.md)** - Complete PM documentation and workflows
+- **[�️ Developer Guide](./DEVELOPER_GUIDE.md)** - Development setup, patterns, and contribution guidelines
+- **[🧪 Testing Guide](./TESTING_GUIDE.md)** - End-to-end testing procedures and validation
+- **[📊 UTM Tracking](./docs/UTM-Parameters-Guide.md)** - Marketing analytics guide (if available)
 
 ### 🧪 Testing & Development
 
@@ -514,27 +377,22 @@ interface User {
 
 ## 🤝 Contributing
 
-### Development Workflow
+### Quick Start for Contributors
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and type checking
-5. Submit a pull request
+See the **[🛠️ Developer Guide](./DEVELOPER_GUIDE.md)** for comprehensive contribution guidelines including:
 
-### Code Standards
+- Development environment setup
+- Code standards and best practices
+- Git workflow and commit conventions
+- Testing procedures and quality assurance
+- API development patterns and security
 
-- **TypeScript** - Full type safety required
-- **ESLint** - Code quality and consistency
-- **Prettier** - Code formatting standards
-- **Conventional Commits** - Clear commit messaging
+### Essential Steps
 
-### File Organization
-
-- **Components** - Reusable UI components
-- **Types** - Centralized TypeScript definitions
-- **API** - RESTful endpoint implementations
-- **Documentation** - Comprehensive inline and external docs
+1. Fork the repository and create feature branch
+2. Follow TypeScript and ESLint standards
+3. Add tests for new functionality
+4. Submit pull request with clear description
 
 ## 📝 License
 
@@ -542,10 +400,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For questions, issues, or contributions:
+### **Documentation Resources**
+
+- **[📋 Project Manager Guide](./PROJECT_MANAGER_GUIDE.md)** - Campaign management and business workflows
+- **[🛠️ Developer Guide](./DEVELOPER_GUIDE.md)** - Development setup and contribution guidelines
+- **[🧪 Testing Guide](./TESTING_GUIDE.md)** - Testing procedures and validation checklists
+
+### **Technical Support**
 
 - **Issues**: [GitHub Issues](https://github.com/Larouex/h2All_m1_proto/issues)
-- **Documentation**: [API Documentation](/admin/api-docs)
+- **API Documentation**: [Interactive Swagger UI](/admin/api-docs)
+- **System Health**: [Real-time Status Check](/api/health)
 - **Admin Access**: [Admin Dashboard](/admin)
 
 ---

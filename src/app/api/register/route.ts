@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+import type { UserEntity } from "@/types/user";
 
 // Configuration constants
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
@@ -12,19 +13,6 @@ const tableEndpoint = `https://${accountName}.table.core.windows.net`;
 // Create credentials and table client
 const credential = new AzureNamedKeyCredential(accountName, accountKey);
 const tableClient = new TableClient(tableEndpoint, tableName, credential);
-
-// TypeScript interface for user entity data model
-interface UserEntity {
-  partitionKey: string;
-  rowKey: string;
-  Email: string;
-  FirstName: string;
-  LastName: string;
-  Country: string;
-  PasswordHash: string;
-  CreatedDateTime: Date;
-  IsActive: boolean;
-}
 
 // Helper function to encode email to row key
 function encodeEmailToRowKey(email: string): string {
@@ -109,8 +97,12 @@ export async function POST(request: NextRequest) {
       LastName: lastName,
       Country: country,
       PasswordHash: hashPassword(password),
+      Balance: 0,
+      TotalRedemptions: 0,
+      TotalRedemptionValue: 0,
       CreatedDateTime: new Date(),
       IsActive: true,
+      UpdatedAt: new Date().toISOString(),
     };
 
     // Create the new user in Azure Table Storage
