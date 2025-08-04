@@ -243,7 +243,7 @@ export async function GET(request: NextRequest) {
     if (campaignId) {
       // Get specific campaign
       try {
-        const entity = await campaignTableClient.getEntity<CampaignEntity>(
+        const entity = await campaignTableClient!.getEntity<CampaignEntity>(
           "campaign",
           campaignId
         );
@@ -268,7 +268,7 @@ export async function GET(request: NextRequest) {
         filter += ` and ${activeFilter}`;
       }
 
-      const entities = campaignTableClient.listEntities<CampaignEntity>({
+      const entities = campaignTableClient!.listEntities<CampaignEntity>({
         queryOptions: { filter },
       });
 
@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
     };
 
     const entity = campaignToEntity(campaign);
-    await campaignTableClient.createEntity(entity);
+    await campaignTableClient!.createEntity(entity);
 
     return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
@@ -373,7 +373,7 @@ export async function PUT(request: NextRequest) {
     // Get existing campaign
     let existingEntity: CampaignEntity;
     try {
-      existingEntity = await campaignTableClient.getEntity<CampaignEntity>(
+      existingEntity = await campaignTableClient!.getEntity<CampaignEntity>(
         "campaign",
         campaignId
       );
@@ -411,7 +411,7 @@ export async function PUT(request: NextRequest) {
       throw new ValidationError("Expiration date must be in the future");
     }
 
-    await campaignTableClient.updateEntity(updatedEntity, "Replace");
+    await campaignTableClient!.updateEntity(updatedEntity, "Replace");
 
     const updatedCampaign = entityToCampaign(updatedEntity);
     return NextResponse.json(updatedCampaign);
@@ -445,7 +445,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     try {
-      await campaignTableClient.deleteEntity("campaign", campaignId);
+      await campaignTableClient!.deleteEntity("campaign", campaignId);
       return NextResponse.json({ message: "Campaign deleted successfully" });
     } catch (error) {
       const azureError = error as { statusCode?: number };

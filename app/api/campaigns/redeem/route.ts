@@ -175,7 +175,7 @@ async function authenticateUser(
 ): Promise<UserEntity | null> {
   try {
     const userRowKey = encodeEmailToRowKey(email);
-    const userEntity = await userTableClient.getEntity<UserEntity>(
+    const userEntity = await userTableClient!.getEntity<UserEntity>(
       "users",
       userRowKey
     );
@@ -202,7 +202,7 @@ async function validateCampaignAndCode(campaignId: string, uniqueCode: string) {
   // Get campaign
   let campaignEntity: CampaignEntity;
   try {
-    campaignEntity = await campaignTableClient.getEntity<CampaignEntity>(
+    campaignEntity = await campaignTableClient!.getEntity<CampaignEntity>(
       "campaign",
       campaignId
     );
@@ -237,7 +237,7 @@ async function validateCampaignAndCode(campaignId: string, uniqueCode: string) {
   let codeEntity: RedemptionCodeEntity;
   try {
     // Query for the code by campaign and unique code
-    const entities = redemptionCodeTableClient.listEntities({
+    const entities = redemptionCodeTableClient!.listEntities({
       queryOptions: {
         filter: `PartitionKey eq '${campaignId}' and UniqueCode eq '${uniqueCode}'`,
       },
@@ -296,6 +296,29 @@ async function validateCampaignAndCode(campaignId: string, uniqueCode: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if environment variables are available
+    if (
+      !process.env.AZURE_STORAGE_ACCOUNT_NAME ||
+      !process.env.AZURE_STORAGE_ACCOUNT_KEY
+    ) {
+      return NextResponse.json(
+        { error: "Service temporarily unavailable - configuration missing" },
+        { status: 503 }
+      );
+    }
+
+    // Ensure table clients are available
+    if (
+      !userTableClient ||
+      !campaignTableClient ||
+      !redemptionCodeTableClient
+    ) {
+      return NextResponse.json(
+        { error: "Database service not available" },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const {
       campaign_id,
@@ -366,7 +389,7 @@ export async function POST(request: NextRequest) {
       };
 
       // Use ETag for optimistic concurrency control
-      await redemptionCodeTableClient.updateEntity(updatedCode, "Replace", {
+      await redemptionCodeTableClient!.updateEntity(updatedCode, "Replace", {
         etag: (code as { etag?: string }).etag,
       });
 
@@ -380,7 +403,7 @@ export async function POST(request: NextRequest) {
         UpdatedAt: now.toISOString(),
       };
 
-      await userTableClient.updateEntity(updatedUser, "Replace");
+      await userTableClient!.updateEntity(updatedUser, "Replace");
 
       // Success response
       return NextResponse.json({
@@ -401,7 +424,7 @@ export async function POST(request: NextRequest) {
         // Re-check if code was used by another request
         try {
           // Query for the code by campaign and unique code
-          const entities = redemptionCodeTableClient.listEntities({
+          const entities = redemptionCodeTableClient!.listEntities({
             queryOptions: {
               filter: `PartitionKey eq '${campaign_id}' and UniqueCode eq '${unique_code}'`,
             },

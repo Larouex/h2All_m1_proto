@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
 
     // Find the redemption code by UniqueCode field
     const codeEntities =
-      redemptionCodeTableClient.listEntities<RedemptionCodeEntity>({
+      redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
         queryOptions: {
           filter: `UniqueCode eq '${code}' and PartitionKey eq '${campaignId}'`,
         },
@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
     // Get campaign details to check status and get redemption value
     let campaignEntity: CampaignEntity;
     try {
-      campaignEntity = await campaignTableClient.getEntity<CampaignEntity>(
+      campaignEntity = await campaignTableClient!.getEntity<CampaignEntity>(
         "campaign",
         campaignId
       );
@@ -307,7 +307,7 @@ export async function POST(request: NextRequest) {
     const userRowKey = encodeEmailToRowKey(userEmail);
     let userEntity: UserEntity;
     try {
-      userEntity = await userTableClient.getEntity<UserEntity>(
+      userEntity = await userTableClient!.getEntity<UserEntity>(
         "user",
         userRowKey
       );
@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
         CreatedDateTime: now,
         UpdatedAt: now.toISOString(),
       };
-      await userTableClient.createEntity(userEntity);
+      await userTableClient!.createEntity(userEntity);
     }
 
     // Mark code as redeemed
@@ -349,7 +349,7 @@ export async function POST(request: NextRequest) {
       RedemptionUrl: redemptionUrl,
     };
 
-    await redemptionCodeTableClient.updateEntity(redeemedCodeEntity, "Merge");
+    await redemptionCodeTableClient!.updateEntity(redeemedCodeEntity, "Merge");
 
     // Update user stats
     const updatedUserEntity: UserEntity = {
@@ -361,7 +361,7 @@ export async function POST(request: NextRequest) {
       UpdatedAt: now.toISOString(),
     };
 
-    await userTableClient.updateEntity(updatedUserEntity, "Merge");
+    await userTableClient!.updateEntity(updatedUserEntity, "Merge");
 
     // Update campaign stats (optional - track total redemptions)
     const updatedCampaignEntity: CampaignEntity = {
@@ -373,7 +373,7 @@ export async function POST(request: NextRequest) {
       UpdatedAt: now.toISOString(),
     };
 
-    await campaignTableClient.updateEntity(updatedCampaignEntity, "Merge");
+    await campaignTableClient!.updateEntity(updatedCampaignEntity, "Merge");
 
     // Return success response with redemption details
     return NextResponse.json({

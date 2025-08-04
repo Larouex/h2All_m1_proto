@@ -112,7 +112,26 @@ function entityToRedemptionCode(entity: RedemptionCodeEntity): RedemptionCode {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if we're in build mode (no environment variables available)
+    if (
+      !process.env.AZURE_STORAGE_ACCOUNT_NAME ||
+      !process.env.AZURE_STORAGE_ACCOUNT_KEY
+    ) {
+      return NextResponse.json(
+        { error: "Service temporarily unavailable - configuration missing" },
+        { status: 503 }
+      );
+    }
+
     await ensureTablesExist();
+
+    // Ensure table clients are available
+    if (!campaignTableClient || !redemptionCodeTableClient) {
+      return NextResponse.json(
+        { error: "Database service not available" },
+        { status: 503 }
+      );
+    }
 
     const body = await request.json();
     const {
@@ -256,7 +275,26 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if we're in build mode (no environment variables available)
+    if (
+      !process.env.AZURE_STORAGE_ACCOUNT_NAME ||
+      !process.env.AZURE_STORAGE_ACCOUNT_KEY
+    ) {
+      return NextResponse.json(
+        { error: "Service temporarily unavailable - configuration missing" },
+        { status: 503 }
+      );
+    }
+
     await ensureTablesExist();
+
+    // Ensure table clients are available
+    if (!campaignTableClient || !redemptionCodeTableClient) {
+      return NextResponse.json(
+        { error: "Database service not available" },
+        { status: 503 }
+      );
+    }
 
     const { searchParams } = new URL(request.url);
     const campaignId = searchParams.get("campaignId");

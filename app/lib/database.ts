@@ -1,10 +1,36 @@
 // Azure Data Tables configuration and utilities
 
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
+import { NextResponse } from "next/server";
 
 // Configuration constants
-const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
+const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
+const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
+
+// Check if environment variables are available
+const isConfigured = accountName && accountKey;
+
+// Helper function to check if database is available during build
+export function isDatabaseAvailable(): boolean {
+  return !!(
+    process.env.AZURE_STORAGE_ACCOUNT_NAME &&
+    process.env.AZURE_STORAGE_ACCOUNT_KEY
+  );
+}
+
+// Helper function for API routes to check environment and return early response if not available
+export function checkDatabaseAvailability() {
+  if (!isDatabaseAvailable()) {
+    return {
+      available: false,
+      response: NextResponse.json(
+        { error: "Service temporarily unavailable - configuration missing" },
+        { status: 503 }
+      ),
+    };
+  }
+  return { available: true };
+}
 
 // Table names
 export const TABLE_NAMES = {
@@ -13,26 +39,52 @@ export const TABLE_NAMES = {
   REDEMPTION_CODES: "redemptionCodes",
 } as const;
 
-// Table endpoint URL
-const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+// Create credentials and table endpoint only if configured
+let credential: AzureNamedKeyCredential | null = null;
+let tableEndpoint: string | null = null;
 
-// Create credentials
-const credential = new AzureNamedKeyCredential(accountName, accountKey);
+if (isConfigured) {
+  tableEndpoint = `https://${accountName}.table.core.windows.net`;
+  credential = new AzureNamedKeyCredential(accountName!, accountKey!);
+}
 
 // Table client factory
 export function createTableClient(tableName: string): TableClient {
+  if (!credential || !tableEndpoint) {
+    throw new Error(
+      "Azure Storage not configured. Please set AZURE_STORAGE_ACCOUNT_NAME and AZURE_STORAGE_ACCOUNT_KEY environment variables."
+    );
+  }
   return new TableClient(tableEndpoint, tableName, credential);
 }
 
-// Pre-configured table clients
-export const userTableClient = createTableClient(TABLE_NAMES.USERS);
-export const campaignTableClient = createTableClient(TABLE_NAMES.CAMPAIGNS);
-export const redemptionCodeTableClient = createTableClient(
-  TABLE_NAMES.REDEMPTION_CODES
-);
+// Pre-configured table clients (only create if environment is configured)
+export const userTableClient = isConfigured
+  ? createTableClient(TABLE_NAMES.USERS)
+  : null;
+export const campaignTableClient = isConfigured
+  ? createTableClient(TABLE_NAMES.CAMPAIGNS)
+  : null;
+export const redemptionCodeTableClient = isConfigured
+  ? createTableClient(TABLE_NAMES.REDEMPTION_CODES)
+  : null;
 
 // Utility function to ensure tables exist
 export async function ensureTablesExist(): Promise<void> {
+  if (!isConfigured) {
+    console.warn(
+      "Azure Storage not configured - skipping table initialization"
+    );
+    return;
+  }
+
+  if (!userTableClient || !campaignTableClient || !redemptionCodeTableClient) {
+    console.warn(
+      "Table clients not properly initialized - skipping table creation"
+    );
+    return;
+  }
+
   try {
     // Create tables if they don't exist
     await userTableClient.createTable();
@@ -57,7 +109,7 @@ export async function ensureTablesExist(): Promise<void> {
 
   try {
     await redemptionCodeTableClient.createTable();
-    console.log("RedemptionCodes table created or already exists");
+    console.log("Redemption codes table created or already exists");
   } catch (error) {
     const azureError = error as { statusCode?: number };
     if (azureError.statusCode !== 409) {
@@ -66,55 +118,34 @@ export async function ensureTablesExist(): Promise<void> {
   }
 }
 
-// Helper function to generate unique IDs
+// Generate a unique ID for entities
 export function generateUniqueId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// Helper function to generate unique redemption codes
-export function generateUniqueCode(length: number = 8): string {
+// Generate a unique code for redemption codes
+export function generateUniqueCode(): string {
+  // Generate an 8-character alphanumeric code
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < 8; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
 }
 
-// Helper function to encode email to row key (consistent with existing code)
+// Encode email to a valid Azure Table row key
 export function encodeEmailToRowKey(email: string): string {
-  const lowercaseEmail = email.toLowerCase();
-  return Buffer.from(lowercaseEmail).toString("base64");
+  // Replace characters that are not allowed in row keys
+  return email.replace(/[\\\/\#\?]/g, "_").replace(/@/g, "_AT_");
 }
 
-// Helper function to decode row key back to email
+// Decode row key back to email
 export function decodeRowKeyToEmail(rowKey: string): string {
-  return Buffer.from(rowKey, "base64").toString("utf-8");
+  return rowKey.replace(/_AT_/g, "@").replace(/_/g, ".");
 }
 
-// Simple password hashing (consistent with existing code)
-export function hashPassword(password: string): string {
-  // In production, use bcrypt or another proper hashing library
-  return Buffer.from(password + "salt").toString("base64");
-}
-
-// Date utility functions
-export function isExpired(expiresAt: Date): boolean {
-  return new Date() > new Date(expiresAt);
-}
-
-export function formatDate(date: Date): string {
-  return date.toISOString();
-}
-
-// Error handling utilities
-export class DatabaseError extends Error {
-  constructor(message: string, public statusCode: number = 500) {
-    super(message);
-    this.name = "DatabaseError";
-  }
-}
-
+// Custom validation error class
 export class ValidationError extends Error {
   constructor(message: string) {
     super(message);

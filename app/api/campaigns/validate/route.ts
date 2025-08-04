@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
     // Step 1: Get campaign details
     let campaign;
     try {
-      const campaignEntity = await campaignTableClient
+      const campaignEntity = await campaignTableClient!
         .getEntity("campaign", campaignId)
         .catch(() => null);
 
@@ -229,7 +229,7 @@ export async function GET(request: NextRequest) {
     let code;
     try {
       // Query for the code by campaign and unique code
-      const entities = redemptionCodeTableClient.listEntities({
+      const entities = redemptionCodeTableClient!.listEntities({
         queryOptions: {
           filter: `PartitionKey eq '${campaignId}' and UniqueCode eq '${uniqueCode}'`,
         },

@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
       // Get specific redemption code
       try {
         const entity =
-          await redemptionCodeTableClient.getEntity<RedemptionCodeEntity>(
+          await redemptionCodeTableClient!.getEntity<RedemptionCodeEntity>(
             campaignId,
             codeId
           );
@@ -215,7 +215,7 @@ export async function GET(request: NextRequest) {
     } else if (uniqueCode) {
       // Find code by unique code (requires scanning all campaigns)
       const entities =
-        redemptionCodeTableClient.listEntities<RedemptionCodeEntity>({
+        redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
           queryOptions: { filter: `UniqueCode eq '${uniqueCode}'` },
         });
 
@@ -248,7 +248,7 @@ export async function GET(request: NextRequest) {
       }
 
       const entities =
-        redemptionCodeTableClient.listEntities<RedemptionCodeEntity>({
+        redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
           queryOptions: filter ? { filter } : undefined,
         });
 
@@ -289,7 +289,7 @@ export async function POST(request: NextRequest) {
     // Verify campaign exists and is active
     let campaignEntity: CampaignEntity;
     try {
-      campaignEntity = await campaignTableClient.getEntity<CampaignEntity>(
+      campaignEntity = await campaignTableClient!.getEntity<CampaignEntity>(
         "campaign",
         campaignId
       );
@@ -325,7 +325,7 @@ export async function POST(request: NextRequest) {
 
           // Check if code already exists
           const existingCodes =
-            redemptionCodeTableClient.listEntities<RedemptionCodeEntity>({
+            redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
               queryOptions: { filter: `UniqueCode eq '${uniqueCode}'` },
             });
 
@@ -352,7 +352,7 @@ export async function POST(request: NextRequest) {
             };
 
             const entity = redemptionCodeToEntity(redemptionCode);
-            await redemptionCodeTableClient.createEntity(entity);
+            await redemptionCodeTableClient!.createEntity(entity);
           }
 
           attempts++;

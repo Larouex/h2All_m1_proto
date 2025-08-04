@@ -47,11 +47,11 @@ export async function POST(request: NextRequest) {
           CurrentRedemptions: 0,
         };
 
-        await campaignTableClient.createEntity(testCampaign);
+        await campaignTableClient!.createEntity(testCampaign);
 
         // Read back the campaign
         const retrievedCampaign =
-          await campaignTableClient.getEntity<CampaignEntity>(
+          await campaignTableClient!.getEntity<CampaignEntity>(
             "campaign",
             campaignId
           );
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       try {
         // First, get an existing campaign or create one
         let campaignId = "";
-        const campaigns = campaignTableClient.listEntities<CampaignEntity>({
+        const campaigns = campaignTableClient!.listEntities<CampaignEntity>({
           queryOptions: { filter: "PartitionKey eq 'campaign'" },
         });
 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
             MaxRedemptions: 50,
             CurrentRedemptions: 0,
           };
-          await campaignTableClient.createEntity(testCampaign);
+          await campaignTableClient!.createEntity(testCampaign);
         }
 
         // Create 3 test redemption codes
@@ -116,14 +116,14 @@ export async function POST(request: NextRequest) {
             CreatedDateTime: new Date(),
           };
 
-          await redemptionCodeTableClient.createEntity(testCode);
+          await redemptionCodeTableClient!.createEntity(testCode);
           codes.push(uniqueCode);
         }
 
         // Retrieve the codes
         const retrievedCodes: RedemptionCodeEntity[] = [];
         const codeEntities =
-          redemptionCodeTableClient.listEntities<RedemptionCodeEntity>({
+          redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
             queryOptions: { filter: `PartitionKey eq '${campaignId}'` },
           });
 
@@ -167,12 +167,12 @@ export async function POST(request: NextRequest) {
         };
 
         try {
-          await userTableClient.createEntity(testUser);
+          await userTableClient!.createEntity(testUser);
         } catch (error) {
           // User might already exist, try to get existing
           const azureError = error as { statusCode?: number };
           if (azureError.statusCode === 409) {
-            const existingUser = await userTableClient.getEntity<UserEntity>(
+            const existingUser = await userTableClient!.getEntity<UserEntity>(
               "user",
               userRowKey
             );
@@ -191,10 +191,10 @@ export async function POST(request: NextRequest) {
           TotalRedemptionValue: (testUser.TotalRedemptionValue || 0) + 50,
         };
 
-        await userTableClient.updateEntity(updatedUser, "Replace");
+        await userTableClient!.updateEntity(updatedUser, "Replace");
 
         // Retrieve updated user
-        const retrievedUser = await userTableClient.getEntity<UserEntity>(
+        const retrievedUser = await userTableClient!.getEntity<UserEntity>(
           "user",
           userRowKey
         );
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
       try {
         // Get an unused redemption code
         const codeEntities =
-          redemptionCodeTableClient.listEntities<RedemptionCodeEntity>({
+          redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
             queryOptions: { filter: "IsUsed eq false" },
           });
 
@@ -239,11 +239,14 @@ export async function POST(request: NextRequest) {
             UserEmail: testEmail,
           };
 
-          await redemptionCodeTableClient.updateEntity(redeemedCode, "Replace");
+          await redemptionCodeTableClient!.updateEntity(
+            redeemedCode,
+            "Replace"
+          );
 
           // Verify the update
           const verifiedCode =
-            await redemptionCodeTableClient.getEntity<RedemptionCodeEntity>(
+            await redemptionCodeTableClient!.getEntity<RedemptionCodeEntity>(
               testCode.partitionKey,
               testCode.rowKey
             );
@@ -290,9 +293,9 @@ export async function GET() {
     await ensureTablesExist();
 
     // Count entities in each table
-    const userCount = await countEntities(userTableClient, "user");
-    const campaignCount = await countEntities(campaignTableClient, "campaign");
-    const codeCount = await countEntities(redemptionCodeTableClient);
+    const userCount = await countEntities(userTableClient!, "user");
+    const campaignCount = await countEntities(campaignTableClient!, "campaign");
+    const codeCount = await countEntities(redemptionCodeTableClient!);
 
     return NextResponse.json({
       message: "Database status check",
