@@ -17,6 +17,39 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "",
   },
 
+  // Optimize build output
+  experimental: {
+    // Enable modern JavaScript output
+    esmExternals: true,
+  },
+
+  // Minimize build output
+  compiler: {
+    // Remove console.logs in production
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+
+  // Configure webpack for smaller bundles
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      // Minimize client bundle size
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: "all",
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: "vendors",
+              chunks: "all",
+            },
+          },
+        },
+      };
+    }
+    return config;
+  },
+
   // Configure for Azure SWA
   async rewrites() {
     return [

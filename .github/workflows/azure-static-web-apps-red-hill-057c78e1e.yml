@@ -34,6 +34,22 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Optimize build output
+        run: |
+          echo "Original .next size:"
+          du -sh .next/
+          # Remove unnecessary files to reduce upload size
+          find .next -name "*.map" -type f -delete || true
+          find .next -name "*.md" -type f -delete || true
+          find .next -path "*/.git/*" -type f -delete || true
+          # Remove cache files that aren't needed for deployment
+          rm -rf .next/cache || true
+          # Compress static assets
+          find .next/static -name "*.js" -type f -exec gzip -9 -k {} \; || true
+          find .next/static -name "*.css" -type f -exec gzip -9 -k {} \; || true
+          echo "Optimized .next size:"
+          du -sh .next/
+
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -45,12 +61,25 @@ jobs:
           app_location: "/" # App source code path
           api_location: "" # Empty for Next.js - API routes are handled by Next.js
           output_location: ".next" # Built app content directory for Next.js build
+          deployment_environment: "Production"
           ###### End of Repository/Build Configurations ######
         env:
           # Azure Static Web Apps environment variables
           AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
           AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        timeout-minutes: 45
+        continue-on-error: false
+
+      - name: Deployment Status Check
+        if: failure()
+        run: |
+          echo "Deployment failed or timed out. This could be due to:"
+          echo "1. Large build size (current: ~400MB)"
+          echo "2. Network connectivity issues"
+          echo "3. Azure service temporary issues"
+          echo "Check Azure portal for deployment status and logs"
+          exit 1
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
