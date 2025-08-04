@@ -2,6 +2,10 @@
 
 A Next.js application for managing campaigns, redemption codes, and user engagement with a clean separation between user experience and administrative functionality.
 
+**Current Version**: v1.0.2 (August 3, 2025)  
+**Repository**: [H2All M1 Proto](https://github.com/Larouex/h2All_m1_proto)  
+**Production Deploy**: [Jackalope Productions](https://github.com/Jackalope-Productions/h2All_m1_proto)
+
 ## 🚀 Overview
 
 H2All M1 is a comprehensive platform that provides:
@@ -11,6 +15,8 @@ H2All M1 is a comprehensive platform that provides:
 - **Full API documentation** with Swagger integration
 - **Real-time database operations** with Azure Data Tables
 - **Interactive testing tools** for development and QA
+- **Professional delivery system** for client handoffs
+- **Sophisticated project automation** with manifest-driven deployments
 
 ## ⚡ Quick Start
 
@@ -19,6 +25,7 @@ H2All M1 is a comprehensive platform that provides:
 - 📋 **[Complete PM Guide](./PROJECT_MANAGER_GUIDE.md)** - Comprehensive project management documentation
 - 🎛️ **[Admin Dashboard](http://localhost:3000/admin)** - Campaign creation and analytics
 - 📊 **[System Analytics](http://localhost:3000/admin/data)** - Performance metrics and reporting
+- 🚀 **[Delivery System](./DELIVERY_README.md)** - Professional client handoff automation
 
 **For Developers**:
 
@@ -26,6 +33,7 @@ H2All M1 is a comprehensive platform that provides:
 - ⚡ **Quick Start**: `npm install && npm run dev`
 - 📚 **[API Documentation](http://localhost:3000/admin/api-docs)** - Interactive Swagger UI
 - 🧪 **[Test Suite](http://localhost:3000/test-redemption-api.html)** - Comprehensive API testing
+- 🔧 **[Delivery Script](./deliver.sh)** - Automated milestone delivery tool
 
 **For QA/Testing**:
 

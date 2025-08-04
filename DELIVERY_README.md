@@ -12,20 +12,34 @@ The `deliver.sh` script automates the process of delivering project code to clie
 ## Usage
 
 ```bash
-./deliver.sh <client-repo-url> <commit-message>
+./deliver.sh [--whatif]
 ```
 
-### Arguments
+### Parameters
 
-1. **client-repo-url**: The target Git repository URL where the project will be delivered
+- **--whatif** (Optional): Shows what files would be delivered without performing the actual delivery
 
-   - Supports both HTTPS and SSH formats
-   - Example: `https://github.com/client/project.git`
-   - Example: `git@github.com:client/project.git`
+### Configuration
 
-2. **commit-message**: Multi-line commit message describing the delivery
-   - Wrap in quotes for multi-line messages
-   - Should describe the milestone or changes being delivered
+The script reads all configuration from files:
+
+- **TARGET_REPO**: The target Git repository URL (configured in `.delivery-manifest` or `.delivery-config`)
+- **COMMIT_MESSAGE**: The commit message for the delivery (configured in `.delivery-manifest` or `.delivery-config`)
+
+Example configuration in `.delivery-manifest`:
+
+```ini
+# Repository configuration
+TARGET_REPO=https://github.com/Jackalope-Productions/h2All_m1_proto.git
+
+# Commit message configuration
+COMMIT_MESSAGE=init - Initial documentation delivery: H2All M1 comprehensive project documentation
+
+# File list
+.copilot-instructions.md
+h2all-m1/README.md
+h2all-m1/DEVELOPER_GUIDE.md
+```
 
 ## Delivery Modes
 
@@ -73,24 +87,32 @@ The script automatically excludes these items in both modes:
 
 ### Milestone Delivery
 
-```bash
-./deliver.sh "https://github.com/client/h2all-project.git" "v1.0.1 - User Journey Implementation
+````bash
+### Milestone Delivery (with manifest)
 
-- Added complete 5-step user flow
-- Implemented progress tracking
-- Added footer with social sharing
-- Updated navigation system"
-```
+```bash
+# Test what would be delivered
+./deliver.sh --whatif
+
+# Perform actual delivery
+./deliver.sh
+````
+
+````
 
 ### Full Project Delivery
 
 ```bash
-# First, remove or rename .delivery-manifest
+# First, remove or rename .delivery-manifest to disable milestone mode
 mv .delivery-manifest .delivery-manifest.backup
 
+# Configure target repository in .delivery-config
+echo "TARGET_REPO=git@github.com:client/project.git" > .delivery-config
+echo "COMMIT_MESSAGE=Complete project handover - v1.0.0" >> .delivery-config
+
 # Then deliver the full project
-./deliver.sh "git@github.com:client/project.git" "Complete project handover - v1.0.0"
-```
+./deliver.sh
+````
 
 ## Features
 

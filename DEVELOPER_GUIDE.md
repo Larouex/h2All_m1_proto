@@ -1,5 +1,8 @@
 # H2All M1 - Developer Contribution Guide
 
+**Version**: 1.0.2 (August 3, 2025)  
+**Last Updated**: Professional delivery system integration
+
 ## 🚀 TL;DR
 
 **Quick Dev Setup:**
@@ -9,6 +12,7 @@
 3. **API Testing**: [Swagger UI](http://localhost:3000/admin/api-docs) + [Test Suite](http://localhost:3000/test-redemption-api.html)
 4. **Key Files**: `src/app/api/` (endpoints), `src/types/` (interfaces), `src/lib/` (utilities)
 5. **Before PR**: Run `npm run lint`, `npm run type-check`, test critical flows
+6. **Delivery**: Use `./deliver.sh --whatif` to test milestone deliveries
 
 ---
 
@@ -24,6 +28,7 @@ H2All M1 is a Next.js 15.4.5 application built with React 19, TypeScript, and Az
 - **Authentication**: Custom email/password system with session management
 - **Testing**: Interactive HTML test suites and automated validation
 - **Documentation**: OpenAPI 3.0 with Swagger UI integration
+- **Delivery**: Professional bash-based delivery system with manifest support
 
 ---
 
@@ -580,6 +585,74 @@ npm run type-check        # TypeScript validation
 npm run build            # Production build test
 npm run test             # Run test suite (when available)
 ```
+
+---
+
+## 🚀 Professional Delivery System
+
+### **Overview**
+
+The project includes a sophisticated bash-based delivery system (`deliver.sh`) for professional client handoffs. The system supports manifest-driven file selection, repository-specific exclusions, and automated Git operations.
+
+### **Key Features**
+
+- **Manifest-Driven Delivery**: Use `.delivery-manifest` to specify exactly which files to deliver
+- **Repository-Specific Exclusions**: Different exclusion patterns per target repository
+- **What-If Analysis**: Test deliveries without making changes (`--whatif`)
+- **Automated Git Operations**: Clone, commit, and push to client repositories
+- **Configuration-Based**: Repository URL and commit messages stored in config files
+
+### **Quick Usage**
+
+```bash
+# Test what would be delivered (safe)
+./deliver.sh --whatif
+
+# Perform actual delivery
+./deliver.sh
+```
+
+### **Configuration Files**
+
+**`.delivery-manifest`** - Defines what to deliver:
+
+```ini
+# Repository configuration
+TARGET_REPO=https://github.com/Jackalope-Productions/h2All_m1_proto.git
+
+# Commit message
+COMMIT_MESSAGE=init - Initial documentation delivery
+
+# Files to include
+.copilot-instructions.md
+README.md
+h2all-m1/DEVELOPER_GUIDE.md
+h2all-m1/PROJECT_MANAGER_GUIDE.md
+h2all-m1/TESTING_GUIDE.md
+h2all-m1/AUTHENTICATION_IMPLEMENTATION.md
+```
+
+**`.delivery-config`** - Repository-specific settings:
+
+```ini
+# Exclusions for specific repositories
+EXCLUDE_FOR_Jackalope_Productions_h2All_m1_proto=*.private
+EXCLUDE_FOR_Jackalope_Productions_h2All_m1_proto=development-notes/
+```
+
+### **Delivery Modes**
+
+1. **Milestone Mode**: Uses `.delivery-manifest` for precise file selection
+2. **Full Project Mode**: Delivers entire project (when no manifest exists)
+
+### **Best Practices**
+
+- Always test with `--whatif` before actual delivery
+- Update commit messages to describe what's being delivered
+- Use repository-specific exclusions for sensitive files
+- Review delivery manifest before major releases
+
+For complete documentation, see **[DELIVERY_README.md](./DELIVERY_README.md)**
 
 ---
 

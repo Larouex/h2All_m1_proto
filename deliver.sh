@@ -45,13 +45,10 @@ usage() {
 ${BLUE}Professional Project Delivery Script${NC}
 
 ${YELLOW}USAGE:${NC}
-    $SCRIPT_NAME [--whatif] [client-repo-url] <commit-message>
+    $SCRIPT_NAME [--whatif]
 
-${YELLOW}ARGUMENTS:${NC}
+${YELLOW}PARAMETERS:${NC}
     --whatif           Optional: Show what files would be delivered without performing delivery
-    client-repo-url    Optional: The target Git repository URL for delivery
-                       If not provided, uses TARGET_REPO from .delivery-config
-    commit-message     Multi-line commit message (wrap in quotes)
 
 ${YELLOW}DELIVERY MODES:${NC}
     ${GREEN}Milestone Mode:${NC}     Uses .delivery-manifest file (if exists)
@@ -66,20 +63,18 @@ ${YELLOW}REPOSITORY-SPECIFIC EXCLUSIONS:${NC}
     
     Patterns support wildcards: *.log, temp/, etc.
 
+${YELLOW}CONFIGURATION:${NC}
+    TARGET_REPO=<repository-url>           # Default target repository
+    COMMIT_MESSAGE=<message>              # Default commit message
+    
+    These must be configured in .delivery-manifest or .delivery-config
+
 ${YELLOW}EXAMPLES:${NC}
     # Show what would be delivered without actually delivering
-    $SCRIPT_NAME --whatif "v1.0.0 - Initial delivery"
+    $SCRIPT_NAME --whatif
     
-    # Use configured repository from config
-    $SCRIPT_NAME "v1.0.0 - Initial delivery"
-    
-    # Override repository URL
-    $SCRIPT_NAME "https://github.com/client/project.git" "v1.0.0 - Initial delivery"
-    
-    $SCRIPT_NAME "git@github.com:client/project.git" "Milestone 2 - Core features
-    - Implemented user authentication
-    - Added payment processing
-    - Updated documentation"
+    # Deliver using configured repository and commit message
+    $SCRIPT_NAME
 
 EOF
 }
@@ -103,6 +98,28 @@ read_target_repo_from_config() {
     done
     
     print_status "$YELLOW" "No TARGET_REPO configuration found in .delivery-config or .delivery-manifest" >&2
+    return 1
+}
+
+# Function: Read commit message from configuration
+read_commit_message_from_config() {
+    local config_files=("$CONFIG_FILE" "$MANIFEST_FILE")
+    
+    for config_file in "${config_files[@]}"; do
+        if [[ -f "$config_file" ]]; then
+            # Look for COMMIT_MESSAGE= line in config file
+            local commit_msg
+            commit_msg=$(grep "^COMMIT_MESSAGE=" "$config_file" 2>/dev/null | head -1 | cut -d'=' -f2- | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            
+            if [[ -n "$commit_msg" ]]; then
+                print_status "$GREEN" "Found commit message in $config_file" >&2
+                echo "$commit_msg"
+                return 0
+            fi
+        fi
+    done
+    
+    print_status "$YELLOW" "No COMMIT_MESSAGE configuration found in .delivery-config or .delivery-manifest" >&2
     return 1
 }
 
@@ -181,32 +198,36 @@ validate_arguments() {
         esac
     done
     
-    # Validate remaining arguments
-    if [[ ${#args[@]} -lt 1 || ${#args[@]} -gt 2 ]]; then
-        print_status "$RED" "Invalid number of arguments"
+    # Only --whatif parameter is allowed, all other parameters are invalid
+    if [[ ${#args[@]} -gt 0 ]]; then
+        print_status "$RED" "Invalid arguments: ${args[*]}"
+        print_status "$YELLOW" "Only --whatif parameter is supported"
         usage
         exit 1
     fi
     
-    # Handle different argument patterns
-    if [[ ${#args[@]} -eq 2 ]]; then
-        # Two arguments: repo-url and commit-message
-        CLIENT_REPO_URL="${args[0]}"
-        COMMIT_MESSAGE="${args[1]}"
-        print_status "$BLUE" "Using provided repository URL"
+    # Get repository URL from configuration
+    local config_repo
+    if config_repo=$(read_target_repo_from_config); then
+        CLIENT_REPO_URL="$config_repo"
+        print_status "$BLUE" "Using repository URL from configuration"
     else
-        # One argument: commit-message only, try to get repo from config
-        local config_repo
-        if config_repo=$(read_target_repo_from_config); then
-            CLIENT_REPO_URL="$config_repo"
-            COMMIT_MESSAGE="${args[0]}"
-            print_status "$BLUE" "Using repository URL from configuration"
-        else
-            print_status "$RED" "No repository URL provided and none found in configuration"
-            print_status "$YELLOW" "Either provide repository URL as first argument or configure TARGET_REPO in .delivery-config"
-            usage
-            exit 1
-        fi
+        print_status "$RED" "No repository URL found in configuration"
+        print_status "$YELLOW" "Please configure TARGET_REPO in .delivery-manifest or .delivery-config"
+        usage
+        exit 1
+    fi
+    
+    # Get commit message from configuration
+    local config_commit_msg
+    if config_commit_msg=$(read_commit_message_from_config); then
+        COMMIT_MESSAGE="$config_commit_msg"
+        print_status "$BLUE" "Using commit message from configuration"
+    else
+        print_status "$RED" "No commit message found in configuration"
+        print_status "$YELLOW" "Please configure COMMIT_MESSAGE in .delivery-manifest or .delivery-config"
+        usage
+        exit 1
     fi
     
     # Validate repository URL format
@@ -264,7 +285,7 @@ create_temp_directory() {
 
 # Function: Clone client repository
 clone_client_repository() {
-    print_status "$BLUE" "Cloning client repository..."
+    print_status "$BLUE" "Cloning client repository..." >&2
     
     local repo_dir="$TEMP_DIR/client-repo"
     
@@ -272,7 +293,7 @@ clone_client_repository() {
         error_exit "Failed to clone repository: $CLIENT_REPO_URL"
     fi
     
-    print_status "$GREEN" "Successfully cloned repository to: $repo_dir"
+    print_status "$GREEN" "Successfully cloned repository to: $repo_dir" >&2
     echo "$repo_dir"
 }
 
@@ -317,7 +338,7 @@ perform_whatif_analysis() {
         
         # Create temporary file list for analysis
         local temp_file_list="/tmp/whatif-files-$$"
-        grep -v "^TARGET_REPO=" "$MANIFEST_FILE" | grep -v "^EXCLUDE_FOR_" | grep -v "^#" | grep -v "^[[:space:]]*$" > "$temp_file_list"
+        grep -v "^TARGET_REPO=" "$MANIFEST_FILE" | grep -v "^COMMIT_MESSAGE=" | grep -v "^EXCLUDE_FOR_" | grep -v "^#" | grep -v "^[[:space:]]*$" > "$temp_file_list"
         
         local file_count=0
         local total_size=0
@@ -452,7 +473,7 @@ perform_rsync() {
         # Milestone mode: use files from manifest (excluding config lines)
         # Create a temporary file list excluding TARGET_REPO and comment lines
         local temp_file_list="/tmp/delivery-files-$$"
-        grep -v "^TARGET_REPO=" "$MANIFEST_FILE" | grep -v "^EXCLUDE_FOR_" | grep -v "^#" | grep -v "^[[:space:]]*$" > "$temp_file_list"
+        grep -v "^TARGET_REPO=" "$MANIFEST_FILE" | grep -v "^COMMIT_MESSAGE=" | grep -v "^EXCLUDE_FOR_" | grep -v "^#" | grep -v "^[[:space:]]*$" > "$temp_file_list"
         
         rsync_cmd+=("--files-from=$temp_file_list")
         rsync_cmd+=("." "$target_dir/")

@@ -6,7 +6,12 @@
 # TARGET REPOSITORY CONFIGURATION
 # Set the default target repository for deliveries
 # Format: TARGET_REPO=<repository-url>
-TARGET_REPO=https://github.com/Jackalope-Productions/h2All_m1_proto.git
+TARGET_REPO=https://github.com/Jackalope-Productions/h2All_proto.git
+
+# COMMIT MESSAGE CONFIGURATION
+# Default commit message for deliveries (can be overridden with command line parameter)
+# Format: COMMIT_MESSAGE=<message>
+COMMIT_MESSAGE=init - Initial documentation delivery: H2All M1 comprehensive project documentation including Copilot instructions, system README, developer guide, project manager guide, testing guide, and authentication implementation details
 
 # REPOSITORY-SPECIFIC EXCLUSIONS
 # Format: EXCLUDE_FOR_<owner>_<repo>=<pattern>
@@ -16,10 +21,11 @@ EXCLUDE_FOR_Jackalope_Productions_h2All_m1_proto=development-notes/
 
 
 # Documentation
+README.md
+DEVELOPER_GUIDE.md
+PROJECT_MANAGER_GUIDE.md
+TESTING_GUIDE.md
+AUTHENTICATION_IMPLEMENTATION.md
+DELIVERY_README.md
 .copilot-instructions.md
-h2all-m1/README.md
-h2all-m1/DEVELOPER_GUIDE.md
-h2all-m1/PROJECT_MANAGER_GUIDE.md
-h2all-m1/TESTING_GUIDE.md
-h2all-m1/AUTHENTICATION_IMPLEMENTATION.md
 
