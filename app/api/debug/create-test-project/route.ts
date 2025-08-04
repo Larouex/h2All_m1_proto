@@ -2,24 +2,44 @@ import { NextResponse } from "next/server";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 
 // Configuration constants
-const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
+const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
+const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
 const tableName = "projects";
 
-// Table endpoint URL
-const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+// Only create client if environment is configured
+let tableClient: TableClient | null = null;
 
-// Create credentials and table client
-const credential = new AzureNamedKeyCredential(accountName, accountKey);
-const tableClient = new TableClient(tableEndpoint, tableName, credential);
+if (accountName && accountKey) {
+  const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+  const credential = new AzureNamedKeyCredential(accountName, accountKey);
+  tableClient = new TableClient(tableEndpoint, tableName, credential);
+}
 
 export async function POST() {
   try {
+    // Check if environment variables are available
+    if (
+      !process.env.AZURE_STORAGE_ACCOUNT_NAME ||
+      !process.env.AZURE_STORAGE_ACCOUNT_KEY
+    ) {
+      return NextResponse.json(
+        { error: "Service temporarily unavailable - configuration missing" },
+        { status: 503 }
+      );
+    }
+
+    if (!tableClient) {
+      return NextResponse.json(
+        { error: "Database service not available" },
+        { status: 503 }
+      );
+    }
+
     console.log("Creating test project: Water Well in Africa");
 
     // Ensure the table exists (create if it doesn't)
     try {
-      await tableClient.createTable();
+      await tableClient!.createTable();
       console.log("Projects table created or already exists");
     } catch (createTableError: unknown) {
       // Table might already exist, which is fine
@@ -54,7 +74,7 @@ export async function POST() {
     console.log("Inserting test project:", testProject);
 
     // Insert the test project
-    await tableClient.createEntity(testProject);
+    await tableClient!.createEntity(testProject);
 
     console.log("Test project created successfully!");
 
@@ -79,7 +99,7 @@ export async function GET() {
     const projectId = "water-well-africa-001";
     console.log("Checking if test project exists:", projectId);
 
-    const projectEntity = await tableClient.getEntity("projects", projectId);
+    const projectEntity = await tableClient!.getEntity("projects", projectId);
 
     return NextResponse.json({
       exists: true,
