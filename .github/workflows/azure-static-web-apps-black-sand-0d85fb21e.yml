@@ -22,6 +22,13 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       - name: Get Id Token
@@ -32,6 +39,40 @@ jobs:
             const coredemo = require('@actions/core')
             return await coredemo.getIDToken()
           result-encoding: string
+      - name: Clean .next build artifacts
+        run: |
+          echo "Original .next size:"
+          du -sh .next/
+          echo "Cache breakdown:"
+          du -sh .next/cache/* || echo "No cache found"
+          rm -rf .next/cache
+          find .next -name "*.map" -type f -delete || true
+          find .next -name "*.md" -type f -delete || true
+          rm -rf .next/trace || true
+          rm -f .next/next-server.js.nft.json || true
+          rm -f .next/next-minimal-server.js.nft.json || true
+          echo "Optimized .next size:"
+          du -sh .next/
+          du -sh .next/* | sort -hr
+      - name: Aggressive .next cleanup
+        run: |
+          # Remove additional file types
+          find .next -name "*.txt" -type f -delete || true
+          find .next -name "*.log" -type f -delete || true
+          find .next -name "*.json" -type f -delete || true
+          find .next -name "*.xml" -type f -delete || true
+          find .next -name "*.csv" -type f -delete || true
+          find .next -name "*.ts" -type f -delete || true
+          find .next -name "*.tsx" -type f -delete || true
+          find .next -name "*.js" -type f -delete || true
+          find .next -name "*.jsx" -type f -delete || true
+          find .next -name "*.test.*" -type f -delete || true
+          find .next -name "*.spec.*" -type f -delete || true
+          find .next -name "*__tests__*" -type f -delete || true
+          find .next -name "*__mocks__*" -type f -delete || true
+          echo "Final .next size:"
+          du -sh .next/
+          du -sh .next/* | sort -hr
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
