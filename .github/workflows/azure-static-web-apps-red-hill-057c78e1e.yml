@@ -43,7 +43,7 @@ jobs:
           action: "upload"
           ###### Repository/Build Configurations ######
           app_location: "/" # App source code path
-          api_location: "app/api" # Api source code path for Next.js API routes
+          api_location: "" # Empty for Next.js - API routes are handled by Next.js
           output_location: ".next" # Built app content directory for Next.js build
           ###### End of Repository/Build Configurations ######
         env:
