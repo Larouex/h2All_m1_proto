@@ -33,7 +33,7 @@ jobs:
 
       - name: Create deployment package
         run: |
-          # Create a clean deployment package without node_modules
+          # Create a clean deployment package for Linux App Service
           mkdir deploy
           cp -r .next deploy/
           cp -r public deploy/
@@ -51,79 +51,13 @@ jobs:
             cp -r src deploy/
           fi
 
-          # Create web.config for Next.js on Azure App Service
-          cat > deploy/web.config << 'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <configuration>
-            <system.webServer>
-              <handlers>
-                <add name="iisnode" path="app.js" verb="*" modules="iisnode"/>
-              </handlers>
-              <rewrite>
-                <rules>
-                  <rule name="NodeInspector" patternSyntax="ECMAScript" stopProcessing="true">
-                    <match url="^app.js\/debug[\/]?" />
-                  </rule>
-                  <rule name="StaticContent">
-                    <action type="Rewrite" url="public{REQUEST_URI}"/>
-                  </rule>
-                  <rule name="DynamicContent">
-                    <conditions>
-                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="True"/>
-                    </conditions>
-                    <action type="Rewrite" url="app.js"/>
-                  </rule>
-                </rules>
-              </rewrite>
-              <iisnode watchedFiles="web.config;*.js"/>
-              <security>
-                <requestFiltering removeServerHeader="true"/>
-              </security>
-            </system.webServer>
-          </configuration>
-          EOF
-
-          # Create app.js entry point for Azure
-          cat > deploy/app.js << 'EOF'
-          const { createServer } = require('http')
-          const { parse } = require('url')
-          const next = require('next')
-
-          const dev = process.env.NODE_ENV !== 'production'
-          const hostname = 'localhost'
-          const port = process.env.PORT || 3000
-
-          const app = next({ dev, hostname, port })
-          const handle = app.getRequestHandler()
-
-          app.prepare().then(() => {
-            createServer(async (req, res) => {
-              try {
-                const parsedUrl = parse(req.url, true)
-                await handle(req, res, parsedUrl)
-              } catch (err) {
-                console.error('Error occurred handling', req.url, err)
-                res.statusCode = 500
-                res.end('internal server error')
-              }
-            })
-            .once('error', (err) => {
-              console.error(err)
-              process.exit(1)
-            })
-            .listen(port, () => {
-              console.log(`> Ready on http://${hostname}:${port}`)
-            })
-          })
-          EOF
-
           echo "Deployment package contents:"
           ls -la deploy/
           echo "Package size:"
           du -sh deploy/
 
       - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v1
         with:
           app-name: "h2all-m1-proto" # Your App Service name
           slot-name: "production"
