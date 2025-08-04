@@ -1,17 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 
-// Configuration constants
-const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
+// Configuration constants - will be validated at runtime
 const tableName = "subscriptions";
 
-// Table endpoint URL
-const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+// Helper function to check if database configuration is available
+function isDatabaseAvailable(): boolean {
+  return !!(
+    process.env.AZURE_STORAGE_ACCOUNT_NAME &&
+    process.env.AZURE_STORAGE_ACCOUNT_KEY
+  );
+}
 
-// Create credentials and table client
-const credential = new AzureNamedKeyCredential(accountName, accountKey);
-const tableClient = new TableClient(tableEndpoint, tableName, credential);
+// Helper function to create table client
+function createTableClient(): TableClient {
+  const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
+  const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
+  const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+  const credential = new AzureNamedKeyCredential(accountName, accountKey);
+  return new TableClient(tableEndpoint, tableName, credential);
+}
 
 // TypeScript interface for subscriber entity data model
 interface SubscriberEntity {
@@ -31,6 +39,18 @@ function encodeEmailToRowKey(email: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if database is available (environment variables present)
+    if (!isDatabaseAvailable()) {
+      console.log("Database configuration not available");
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable" },
+        { status: 503 }
+      );
+    }
+
+    // Create table client with validated environment variables
+    const tableClient = createTableClient();
+
     // Parse the incoming JSON body to get the email
     const body = await request.json();
     const { email } = body;
@@ -49,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     // Ensure the table exists (create if it doesn't)
     try {
-      await tableClient.createTable();
+      await tableClient!.createTable();
     } catch (createTableError: unknown) {
       // Table might already exist, which is fine
       if ((createTableError as { statusCode?: number }).statusCode !== 409) {
@@ -60,7 +80,7 @@ export async function POST(request: NextRequest) {
     // Azure Table Storage logic
     try {
       // Try to find an existing subscriber
-      const existingEntity = await tableClient.getEntity(partitionKey, rowKey);
+      const existingEntity = await tableClient!.getEntity(partitionKey, rowKey);
 
       // If found, create an updated entity by incrementing the SubmittedCounter
       const updatedEntity = {
@@ -71,7 +91,7 @@ export async function POST(request: NextRequest) {
       };
 
       // Update the entity in Azure Table Storage
-      await tableClient.updateEntity(updatedEntity);
+      await tableClient!.updateEntity(updatedEntity);
 
       // Return success response indicating submission was incremented
       return NextResponse.json(
@@ -99,7 +119,7 @@ export async function POST(request: NextRequest) {
         };
 
         // Create the new entity in Azure Table Storage
-        await tableClient.createEntity(newEntity);
+        await tableClient!.createEntity(newEntity);
 
         // Return success response with 201 status code
         return NextResponse.json(
