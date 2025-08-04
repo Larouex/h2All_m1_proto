@@ -137,7 +137,8 @@ export async function POST(request: NextRequest) {
         queryOptions: { select: ["RowKey"] },
       });
       let userCount = 0;
-      for await (const user of existingUsers) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _user of existingUsers) {
         userCount++;
         if (userCount > 0) break; // We only need to know if there are any users
       }
