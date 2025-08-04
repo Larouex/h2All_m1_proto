@@ -6,20 +6,40 @@ import type { UserEntity } from "@/types/user";
 // Specify runtime for Node.js compatibility
 export const runtime = "nodejs";
 
-// Configuration constants
-const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
+// Configuration constants - will be validated at runtime
 const tableName = "users";
 
-// Table endpoint URL
-const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+// Helper function to check if database configuration is available
+function isDatabaseAvailable(): boolean {
+  return !!(
+    process.env.AZURE_STORAGE_ACCOUNT_NAME &&
+    process.env.AZURE_STORAGE_ACCOUNT_KEY
+  );
+}
 
-// Create credentials and table client
-const credential = new AzureNamedKeyCredential(accountName, accountKey);
-const tableClient = new TableClient(tableEndpoint, tableName, credential);
+// Helper function to create table client
+function createTableClient(): TableClient {
+  const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
+  const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
+  const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+  const credential = new AzureNamedKeyCredential(accountName, accountKey);
+  return new TableClient(tableEndpoint, tableName, credential);
+}
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if database is available (environment variables present)
+    if (!isDatabaseAvailable()) {
+      console.log("Database configuration not available");
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable" },
+        { status: 503 }
+      );
+    }
+
+    // Create table client with validated environment variables
+    const tableClient = createTableClient();
+
     // Get JWT token from cookie
     const authToken = request.cookies.get("auth-token")?.value;
 
@@ -48,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     // Get updated user data from database
     try {
-      const userEntity = await tableClient.getEntity<UserEntity>(
+      const userEntity = await tableClient!.getEntity<UserEntity>(
         "users",
         payload.userId
       );
