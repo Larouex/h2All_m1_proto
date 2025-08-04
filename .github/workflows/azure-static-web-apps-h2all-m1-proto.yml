@@ -1,0 +1,106 @@
+name: Azure Static Web Apps CI/CD - H2All M1 Proto
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Optimize build output
+        run: |
+          echo "Original .next size:"
+          du -sh .next/
+          echo "Cache breakdown:"
+          du -sh .next/cache/* || echo "No cache found"
+
+          # CRITICAL: Remove the entire cache directory (this is the main culprit - 480MB+)
+          rm -rf .next/cache
+
+          # Remove other unnecessary files
+          find .next -name "*.map" -type f -delete || true
+          find .next -name "*.md" -type f -delete || true
+          find .next -path "*/.git/*" -type f -delete || true
+
+          # Remove trace files (not needed for deployment)
+          rm -rf .next/trace || true
+
+          # Remove build-time artifacts
+          rm -f .next/next-server.js.nft.json || true
+          rm -f .next/next-minimal-server.js.nft.json || true
+
+          echo "Optimized .next size:"
+          du -sh .next/
+          echo "Size breakdown after optimization:"
+          du -sh .next/* | sort -hr
+
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_H2ALL_M1_PROTO }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          ###### Repository/Build Configurations ######
+          app_location: "/" # App source code path
+          api_location: "" # Empty for Next.js - API routes are handled by Next.js
+          output_location: ".next" # Built app content directory for Next.js build
+          deployment_environment: "Production"
+          ###### End of Repository/Build Configurations ######
+        env:
+          # Azure Static Web Apps environment variables
+          AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+          AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        timeout-minutes: 45
+        continue-on-error: false
+
+      - name: Deployment Status Check
+        if: failure()
+        run: |
+          echo "Deployment failed or timed out. This could be due to:"
+          echo "1. Large build size (optimized to ~10MB)"
+          echo "2. Network connectivity issues"
+          echo "3. Azure service temporary issues"
+          echo "4. Missing secrets or incorrect configuration"
+          echo "Check Azure portal for deployment status and logs"
+          exit 1
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_H2ALL_M1_PROTO }}
+          action: "close"
