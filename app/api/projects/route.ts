@@ -1,17 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 
-// Configuration constants
-const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
+// Configuration constants - will be validated at runtime
 const tableName = "projects";
 
-// Table endpoint URL
-const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+// Helper function to check if database configuration is available
+function isDatabaseAvailable(): boolean {
+  return !!(
+    process.env.AZURE_STORAGE_ACCOUNT_NAME &&
+    process.env.AZURE_STORAGE_ACCOUNT_KEY
+  );
+}
 
-// Create credentials and table client
-const credential = new AzureNamedKeyCredential(accountName, accountKey);
-const tableClient = new TableClient(tableEndpoint, tableName, credential);
+// Helper function to create table client
+function createTableClient(): TableClient {
+  const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
+  const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
+  const tableEndpoint = `https://${accountName}.table.core.windows.net`;
+  const credential = new AzureNamedKeyCredential(accountName, accountKey);
+  return new TableClient(tableEndpoint, tableName, credential);
+}
 
 // TypeScript interface for project entity data model (for reference)
 // interface ProjectEntity {
@@ -31,6 +39,18 @@ const tableClient = new TableClient(tableEndpoint, tableName, credential);
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if database is available (environment variables present)
+    if (!isDatabaseAvailable()) {
+      console.log("Database configuration not available");
+      return NextResponse.json(
+        { error: "Database service temporarily unavailable" },
+        { status: 503 }
+      );
+    }
+
+    // Create table client with validated environment variables
+    const tableClient = createTableClient();
+
     const { projectId } = await request.json();
 
     // Validate required fields
@@ -49,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     // Ensure the table exists (create if it doesn't)
     try {
-      await tableClient.createTable();
+      await tableClient!.createTable();
     } catch (createTableError: unknown) {
       // Table might already exist, which is fine
       const error = createTableError as { statusCode?: number };
@@ -60,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     // Try to find the project
     try {
-      const projectEntity = await tableClient.getEntity(partitionKey, rowKey);
+      const projectEntity = await tableClient!.getEntity(partitionKey, rowKey);
       console.log(`Project found: ${projectEntity.Name}`);
 
       // Return project data
