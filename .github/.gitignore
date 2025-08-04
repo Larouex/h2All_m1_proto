@@ -1,0 +1,5 @@
+# GitHub Actions should never include these in deployments
+.next/cache/
+.next/trace/
+*.log
+node_modules/

@@ -38,17 +38,28 @@ jobs:
         run: |
           echo "Original .next size:"
           du -sh .next/
-          # Remove unnecessary files to reduce upload size
+          echo "Cache breakdown:"
+          du -sh .next/cache/* || echo "No cache found"
+
+          # CRITICAL: Remove the entire cache directory (this is the main culprit - 480MB+)
+          rm -rf .next/cache
+
+          # Remove other unnecessary files
           find .next -name "*.map" -type f -delete || true
           find .next -name "*.md" -type f -delete || true
           find .next -path "*/.git/*" -type f -delete || true
-          # Remove cache files that aren't needed for deployment
-          rm -rf .next/cache || true
-          # Compress static assets
-          find .next/static -name "*.js" -type f -exec gzip -9 -k {} \; || true
-          find .next/static -name "*.css" -type f -exec gzip -9 -k {} \; || true
+
+          # Remove trace files (not needed for deployment)
+          rm -rf .next/trace || true
+
+          # Remove build-time artifacts
+          rm -f .next/next-server.js.nft.json || true
+          rm -f .next/next-minimal-server.js.nft.json || true
+
           echo "Optimized .next size:"
           du -sh .next/
+          echo "Size breakdown after optimization:"
+          du -sh .next/* | sort -hr
 
       - name: Build And Deploy
         id: builddeploy

@@ -21,7 +21,17 @@ const nextConfig: NextConfig = {
   experimental: {
     // Enable modern JavaScript output
     esmExternals: true,
+    // Disable webpack cache in CI to prevent large cache directories
+    webpackBuildWorker: process.env.CI ? false : true,
   },
+
+  // Disable caching in CI environments to reduce build size
+  cacheHandler: process.env.CI
+    ? undefined
+    : require.resolve(
+        "next/dist/server/lib/incremental-cache/file-system-cache.js"
+      ),
+  cacheMaxMemorySize: process.env.CI ? 0 : 50 * 1024 * 1024, // 50MB limit, 0 in CI
 
   // Minimize build output
   compiler: {
