@@ -29,6 +29,7 @@ export default function NavBar({
   };
 
   const handleLogin = () => {
+    console.log("handleLogin called - navigating to /auth");
     router.push("/auth");
     handleNavClick();
   };
@@ -217,15 +218,21 @@ export default function NavBar({
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
-              <Button
-                variant={
-                  navVariant === "dark" ? "outline-light" : "outline-primary"
-                }
-                onClick={handleLogin}
-                size="sm"
+              <a
+                href="/auth"
+                className={`btn btn-sm ${
+                  navVariant === "dark"
+                    ? "btn-outline-light"
+                    : "btn-outline-primary"
+                }`}
+                onClick={(e) => {
+                  console.log("Sign In button clicked");
+                  e.preventDefault();
+                  handleLogin();
+                }}
               >
                 Sign In
-              </Button>
+              </a>
             )}
           </Nav>
         </Navbar.Collapse>

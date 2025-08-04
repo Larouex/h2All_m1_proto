@@ -130,6 +130,26 @@ export async function POST(request: NextRequest) {
     // Hash password securely
     const passwordHash = await hashPassword(password);
 
+    // Check if this is the first user in the system (make them admin)
+    let isFirstUser = false;
+    try {
+      const existingUsers = tableClient.listEntities({
+        queryOptions: { select: ["RowKey"] },
+      });
+      let userCount = 0;
+      for await (const user of existingUsers) {
+        userCount++;
+        if (userCount > 0) break; // We only need to know if there are any users
+      }
+      isFirstUser = userCount === 0;
+    } catch (error) {
+      console.log(
+        "Could not check existing users, assuming not first user:",
+        error
+      );
+      isFirstUser = false;
+    }
+
     // Create user entity
     const newUser: UserEntity = {
       partitionKey,
@@ -142,7 +162,7 @@ export async function POST(request: NextRequest) {
       Balance: 0,
       CreatedDateTime: new Date(),
       IsActive: true,
-      IsAdmin: false, // Default to false for new users
+      IsAdmin: isFirstUser, // First user becomes admin automatically
       TotalRedemptions: 0,
       TotalRedemptionValue: 0,
       UpdatedAt: new Date(),
@@ -157,6 +177,7 @@ export async function POST(request: NextRequest) {
     const token = generateToken({
       userId: rowKey,
       email: email.toLowerCase(),
+      isAdmin: isFirstUser, // Match the database record
     });
 
     // Generate session ID
@@ -172,7 +193,7 @@ export async function POST(request: NextRequest) {
         country: country.trim(),
         balance: 0,
         isActive: true,
-        isAdmin: false,
+        isAdmin: isFirstUser, // Match the database record
         totalRedemptions: 0,
         totalRedemptionValue: 0,
       },

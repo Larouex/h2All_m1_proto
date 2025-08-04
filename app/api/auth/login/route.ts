@@ -23,8 +23,9 @@ export async function POST(request: NextRequest) {
     }
 
     const token = await createJWT({
-      userId: user.Email,
+      userId: user.rowKey,
       email: user.Email,
+      isAdmin: user.IsAdmin || false,
     });
 
     const response = NextResponse.json(

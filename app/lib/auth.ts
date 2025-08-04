@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 import crypto from "crypto";
 import type { UserEntity } from "@/types/user";
 
@@ -11,6 +12,7 @@ const BCRYPT_ROUNDS = 12;
 export interface AuthTokenPayload {
   userId: string;
   email: string;
+  isAdmin: boolean;
   iat?: number;
   exp?: number;
 }
@@ -23,6 +25,7 @@ export interface SessionData {
     lastName: string;
     balance: number;
     isActive: boolean;
+    isAdmin: boolean;
   };
   token: string;
 }
@@ -74,7 +77,7 @@ export function generateToken(
 }
 
 /**
- * Verify and decode JWT token
+ * Verify and decode JWT token (Node.js runtime)
  */
 export function verifyToken(token: string): AuthTokenPayload | null {
   try {
@@ -83,6 +86,32 @@ export function verifyToken(token: string): AuthTokenPayload | null {
       audience: "h2all-users",
     } as jwt.VerifyOptions) as AuthTokenPayload;
     return decoded;
+  } catch (error) {
+    console.error("Token verification failed:", error);
+    return null;
+  }
+}
+
+/**
+ * Verify and decode JWT token (Edge runtime compatible)
+ */
+export async function verifyTokenEdge(
+  token: string
+): Promise<AuthTokenPayload | null> {
+  try {
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret, {
+      issuer: "h2all-m1",
+      audience: "h2all-users",
+    });
+
+    return {
+      userId: payload.userId as string,
+      email: payload.email as string,
+      isAdmin: payload.isAdmin as boolean,
+      iat: payload.iat,
+      exp: payload.exp,
+    };
   } catch (error) {
     console.error("Token verification failed:", error);
     return null;
@@ -271,7 +300,44 @@ export async function authenticate(
  * Create JWT token
  */
 export async function createJWT(payload: AuthTokenPayload): Promise<string> {
-  return generateToken({ userId: payload.userId, email: payload.email });
+  return generateToken({
+    userId: payload.userId,
+    email: payload.email,
+    isAdmin: payload.isAdmin,
+  });
+}
+
+/**
+ * Get user info from request cookies
+ */
+export function getUserFromRequest(request: Request): AuthTokenPayload | null {
+  try {
+    const cookieHeader = request.headers.get("cookie");
+    if (!cookieHeader) return null;
+
+    const cookies = Object.fromEntries(
+      cookieHeader.split("; ").map((cookie) => {
+        const [name, value] = cookie.split("=");
+        return [name, decodeURIComponent(value)];
+      })
+    );
+
+    const token = cookies["auth-token"];
+    if (!token) return null;
+
+    return verifyToken(token);
+  } catch (error) {
+    console.error("Error getting user from request:", error);
+    return null;
+  }
+}
+
+/**
+ * Check if user is admin from request
+ */
+export function isAdminUser(request: Request): boolean {
+  const user = getUserFromRequest(request);
+  return user?.isAdmin || false;
 }
 
 /**

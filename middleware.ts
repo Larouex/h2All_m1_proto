@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { verifyTokenEdge } from "./app/lib/auth-edge";
 
 // Define which routes require authentication
 const protectedRoutes = ["/admin", "/dashboard", "/profile"];
-const authRoutes = ["/auth", "/login", "/register"];
+const authRoutes = ["/auth", "/register"];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get the JWT token from cookies
@@ -19,6 +19,18 @@ export function middleware(request: NextRequest) {
   // Check if the current path is an auth route
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
+  // Handle auth routes first - these should always be accessible
+  if (isAuthRoute) {
+    console.log(
+      "Auth route accessed:",
+      pathname,
+      "Token present:",
+      !!authToken
+    );
+    // Always allow access to auth routes - let the auth page handle authentication logic
+    return NextResponse.next();
+  }
+
   // If it's a protected route
   if (isProtectedRoute) {
     // No token present
@@ -29,9 +41,9 @@ export function middleware(request: NextRequest) {
     }
 
     // Verify the token
-    const payload = verifyToken(authToken);
+    const payload = await verifyTokenEdge(authToken);
     if (!payload) {
-      // Invalid or expired token
+      // Invalid or expired token - redirect to auth and clear cookies
       const response = NextResponse.redirect(new URL("/auth", request.url));
 
       // Clear invalid cookies
@@ -53,20 +65,17 @@ export function middleware(request: NextRequest) {
 
       return response;
     }
-  }
 
-  // If it's an auth route and user is already authenticated
-  if (isAuthRoute && authToken) {
-    const payload = verifyToken(authToken);
-    if (payload) {
-      // Redirect to admin dashboard if already authenticated
-      const redirectTo =
-        request.nextUrl.searchParams.get("redirect") || "/admin";
-      return NextResponse.redirect(new URL(redirectTo, request.url));
+    // Check admin access for /admin routes specifically
+    if (pathname.startsWith("/admin") && !payload.isAdmin) {
+      // Redirect non-admin users to home page with error message
+      const homeUrl = new URL("/", request.url);
+      homeUrl.searchParams.set("error", "admin-required");
+      return NextResponse.redirect(homeUrl);
     }
   }
 
-  // Allow the request to proceed
+  // Allow the request to proceed for all other routes
   return NextResponse.next();
 }
 

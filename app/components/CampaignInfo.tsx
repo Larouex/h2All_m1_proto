@@ -287,7 +287,7 @@ export default function CampaignInfo({
             state === "valid" && (
               <div className="row g-2">
                 <div className="col-md-6">
-                  <Link href="/login" className="btn btn-primary w-100">
+                  <Link href="/auth" className="btn btn-primary w-100">
                     <i className="bi bi-box-arrow-in-right me-2"></i>
                     Sign In
                   </Link>

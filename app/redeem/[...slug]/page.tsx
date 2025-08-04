@@ -190,13 +190,13 @@ export default function RedemptionHandler() {
   const handleLogin = () => {
     // Save current URL to return after login
     const returnUrl = encodeURIComponent(window.location.href);
-    router.push(`/login?returnUrl=${returnUrl}`);
+    router.push(`/auth?returnUrl=${returnUrl}`);
   };
 
   const handleRegister = () => {
     // Save current URL to return after registration
     const returnUrl = encodeURIComponent(window.location.href);
-    router.push(`/register?returnUrl=${returnUrl}`);
+    router.push(`/auth?returnUrl=${returnUrl}`);
   };
 
   if (loading) {

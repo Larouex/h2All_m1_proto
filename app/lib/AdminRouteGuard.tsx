@@ -19,8 +19,8 @@ export function AdminRouteGuard({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      // Not authenticated, redirect to login
-      router.push("/login");
+      // Not authenticated, redirect to auth page
+      router.push("/auth");
     } else if (!isLoading && isAuthenticated && user && !user.isAdmin) {
       // Authenticated but not admin, redirect to fallback
       router.push(fallbackPath);

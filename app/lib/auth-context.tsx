@@ -200,7 +200,7 @@ export function useAuth(): AuthContextType {
 // Higher-order component for protecting routes
 export function withAuth<P extends object>(
   WrappedComponent: React.ComponentType<P>,
-  redirectTo: string = "/login"
+  redirectTo: string = "/auth"
 ) {
   return function ProtectedComponent(props: P) {
     const { isAuthenticated, isLoading } = useAuth();
