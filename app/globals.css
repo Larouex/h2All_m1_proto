@@ -28,6 +28,22 @@
   z-index: 1030;
 }
 
+/* Home page icon circles */
+.hero-logo-circle {
+  width: 300px;
+  height: 300px;
+}
+
+.icon-circle {
+  width: 60px;
+  height: 60px;
+}
+
+/* Utility classes for home page */
+.min-vh-75 {
+  min-height: 75vh;
+}
+
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .main-content {
