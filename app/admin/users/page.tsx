@@ -40,47 +40,29 @@ export default function UserManager() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [searchTerm, filterStatus]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // This would be a real API call
-      const mockUsers: User[] = [
-        {
-          id: "1",
-          email: "john.doe@example.com",
-          firstName: "John",
-          lastName: "Doe",
-          isActive: true,
-          lastLogin: new Date(Date.now() - 86400000).toISOString(),
-          registrationDate: new Date(Date.now() - 7 * 86400000).toISOString(),
-          totalRedemptions: 3,
-        },
-        {
-          id: "2",
-          email: "jane.smith@example.com",
-          firstName: "Jane",
-          lastName: "Smith",
-          isActive: true,
-          lastLogin: new Date(Date.now() - 3600000).toISOString(),
-          registrationDate: new Date(Date.now() - 14 * 86400000).toISOString(),
-          totalRedemptions: 1,
-        },
-        {
-          id: "3",
-          email: "inactive@example.com",
-          firstName: "Inactive",
-          lastName: "User",
-          isActive: false,
-          registrationDate: new Date(Date.now() - 30 * 86400000).toISOString(),
-          totalRedemptions: 0,
-        },
-      ];
-      setUsers(mockUsers);
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (searchTerm) params.append("search", searchTerm);
+      if (filterStatus !== "all") params.append("status", filterStatus);
+      params.append("limit", "100"); // Get more users for admin view
+
+      // Call real API endpoint
+      const response = await fetch(`/api/admin/users?${params}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setUsers(data.users || []);
     } catch (err) {
       console.error("Error fetching users:", err);
-      setError("Error fetching users");
+      setError(err instanceof Error ? err.message : "Error fetching users");
     } finally {
       setLoading(false);
     }
@@ -98,19 +80,23 @@ export default function UserManager() {
       )
     ) {
       try {
-        // This would be a real API call
-        const response = await fetch(`/api/users/${userId}`, {
-          method: "PATCH",
+        // Call real API endpoint
+        const response = await fetch(`/api/admin/users`, {
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ isActive: !currentStatus }),
+          body: JSON.stringify({
+            userId,
+            updates: { isActive: !currentStatus },
+          }),
         });
 
         if (response.ok) {
           fetchUsers();
         } else {
-          setError("Failed to update user status");
+          const errorData = await response.json();
+          setError(errorData.error || "Failed to update user status");
         }
       } catch (err) {
         console.error("Error updating user:", err);
@@ -129,20 +115,8 @@ export default function UserManager() {
     alert("Exporting user data... (This would download a CSV file)");
   };
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      `${user.firstName} ${user.lastName}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-    const matchesStatus =
-      filterStatus === "all" ||
-      (filterStatus === "active" && user.isActive) ||
-      (filterStatus === "inactive" && !user.isActive);
-
-    return matchesSearch && matchesStatus;
-  });
+  // Users are already filtered by the API
+  const filteredUsers = users;
 
   if (loading) {
     return (

@@ -27,6 +27,28 @@ export default function SimpleSwaggerUI({ url, spec }: SwaggerUIProps) {
       link.href = "https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css";
       document.head.appendChild(link);
     }
+
+    // Add CSS to fix span width issues
+    if (!document.querySelector("#swagger-fix-css")) {
+      const style = document.createElement("style");
+      style.id = "swagger-fix-css";
+      style.textContent = `
+        .swagger-ui .opblock-summary-path,
+        .swagger-ui .opblock-summary-description,
+        .swagger-ui .opblock-summary span {
+          width: auto !important;
+          min-width: none !important;
+          max-width: none !important;
+          white-space: nowrap !important;
+          overflow: visible !important;
+          text-overflow: clip !important;
+        }
+        .swagger-ui .opblock-summary {
+          flex-wrap: nowrap !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }, []);
 
   if (!mounted) {
@@ -42,9 +64,32 @@ export default function SimpleSwaggerUI({ url, spec }: SwaggerUIProps) {
         deepLinking={true}
         tryItOutEnabled={true}
       />
-      <style jsx>{`
+      <style jsx global>{`
         .swagger-container {
           width: 100%;
+        }
+
+        /* Fix for vertical text in API names */
+        .swagger-ui .opblock-summary-path,
+        .swagger-ui .opblock-summary-description,
+        .swagger-ui .opblock-summary span {
+          width: auto !important;
+          min-width: auto !important;
+          max-width: none !important;
+          white-space: nowrap !important;
+          overflow: visible !important;
+          text-overflow: clip !important;
+          display: inline !important;
+        }
+
+        .swagger-ui .opblock-summary {
+          flex-wrap: nowrap !important;
+          align-items: center !important;
+        }
+
+        .swagger-ui .opblock-summary-path {
+          font-family: monospace !important;
+          font-weight: 600 !important;
         }
       `}</style>
     </div>

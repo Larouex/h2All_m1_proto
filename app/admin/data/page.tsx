@@ -46,38 +46,20 @@ export default function DataManager() {
   const fetchSystemStats = async () => {
     try {
       setLoading(true);
-      // This would be a real API call to get system statistics
-      const mockStats: SystemStats = {
-        totalCampaigns: 5,
-        activeCampaigns: 3,
-        totalCodes: 1250,
-        redeemedCodes: 340,
-        totalUsers: 89,
-        recentActivity: [
-          {
-            id: "1",
-            type: "redemption",
-            description: "Code ABC123 redeemed by user@example.com",
-            timestamp: new Date().toISOString(),
-          },
-          {
-            id: "2",
-            type: "campaign",
-            description: "New campaign 'Summer 2024' created",
-            timestamp: new Date(Date.now() - 3600000).toISOString(),
-          },
-          {
-            id: "3",
-            type: "user",
-            description: "New user registration: newuser@example.com",
-            timestamp: new Date(Date.now() - 7200000).toISOString(),
-          },
-        ],
-      };
-      setStats(mockStats);
+
+      // Call real API endpoint for system statistics
+      const response = await fetch("/api/admin/stats");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stats: ${response.statusText}`);
+      }
+
+      const stats = await response.json();
+      setStats(stats);
     } catch (err) {
       console.error("Error fetching stats:", err);
-      setError("Error fetching system statistics");
+      setError(
+        err instanceof Error ? err.message : "Error fetching system statistics"
+      );
     } finally {
       setLoading(false);
     }

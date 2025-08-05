@@ -2,6 +2,7 @@
 
 import { AuthProvider } from "../lib/auth-context";
 import AdminRouteGuard from "../lib/AdminRouteGuard";
+import AdminNavBar from "../components/AdminNavBar";
 
 export default function AdminLayout({
   children,
@@ -10,7 +11,15 @@ export default function AdminLayout({
 }) {
   return (
     <AuthProvider>
-      <AdminRouteGuard>{children}</AdminRouteGuard>
+      <AdminRouteGuard>
+        <AdminNavBar />
+        <div className="admin-content">{children}</div>
+        <style jsx>{`
+          .admin-content {
+            padding-top: 76px;
+          }
+        `}</style>
+      </AdminRouteGuard>
     </AuthProvider>
   );
 }
