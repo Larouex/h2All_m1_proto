@@ -18,8 +18,8 @@ export default function Terms() {
               <section className="mb-4">
                 <h3>Acceptance of Terms</h3>
                 <p>
-                  By using H2All's impact tracking platform, you agree to be
-                  bound by these Terms and Conditions. If you do not agree to
+                  By using H2All&apos;s impact tracking platform, you agree to
+                  be bound by these Terms and Conditions. If you do not agree to
                   these terms, please do not use our services.
                 </p>
               </section>
@@ -66,9 +66,9 @@ export default function Terms() {
               <section className="mb-4">
                 <h3>Limitation of Liability</h3>
                 <p>
-                  H2All provides services "as is" without warranties. We are not
-                  liable for any indirect, incidental, or consequential damages
-                  arising from your use of our services.
+                  H2All provides services &quot;as is&quot; without warranties.
+                  We are not liable for any indirect, incidental, or
+                  consequential damages arising from your use of our services.
                 </p>
               </section>
 
