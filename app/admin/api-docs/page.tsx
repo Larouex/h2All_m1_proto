@@ -12,6 +12,7 @@ import {
 } from "react-bootstrap";
 import { useRouter } from "next/navigation";
 import SwaggerUI from "@/app/components/SwaggerUI";
+import "@/app/styles/swagger-ui.css";
 
 interface SwaggerSpec {
   openapi: string;

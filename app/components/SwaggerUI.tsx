@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 const SwaggerUIComponent = dynamic(() => import("swagger-ui-react"), {
   ssr: false,
   loading: () => (
-    <div className="d-flex justify-content-center align-items-center loading-swagger">
+    <div className="swagger-loading">
       <div className="spinner-border text-primary" role="status">
         <span className="visually-hidden">Loading Swagger UI...</span>
       </div>
@@ -26,73 +26,25 @@ export default function SwaggerUI({ url, spec }: SwaggerUIProps) {
   useEffect(() => {
     setMounted(true);
 
-    // More comprehensive warning suppression for swagger-ui-react
-    if (process.env.NODE_ENV === "development") {
-      // Store original console methods
-      const originalWarn = console.warn;
-      const originalError = console.error;
+    // Load swagger-ui CSS
+    const loadSwaggerCSS = () => {
+      const existingLink = document.querySelector('link[href*="swagger-ui"]');
+      if (!existingLink) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.type = "text/css";
+        link.href = "https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css";
+        link.onload = () => console.log("Swagger UI CSS loaded");
+        document.head.appendChild(link);
+      }
+    };
 
-      // Override console.warn
-      console.warn = (...args) => {
-        const message = String(args[0] || "");
-        if (
-          message.includes("UNSAFE_componentWillReceiveProps") ||
-          message.includes("UNSAFE_componentWillMount") ||
-          message.includes("UNSAFE_componentWillUpdate") ||
-          message.includes("ModelCollapse") ||
-          message.includes("OperationContainer") ||
-          message.includes("componentWillReceiveProps") ||
-          message.includes("react-dev-tools") ||
-          message.includes("strict mode")
-        ) {
-          // Suppress these warnings
-          return;
-        }
-        originalWarn.apply(console, args);
-      };
-
-      // Override console.error for React warnings
-      console.error = (...args) => {
-        const message = String(args[0] || "");
-        if (
-          message.includes("UNSAFE_componentWillReceiveProps") ||
-          message.includes("componentWillReceiveProps") ||
-          message.includes("ModelCollapse") ||
-          message.includes("OperationContainer")
-        ) {
-          // Suppress these errors
-          return;
-        }
-        originalError.apply(console, args);
-      };
-
-      // Also suppress React warnings at the window level
-      const originalWindowError = window.onerror;
-      window.onerror = (message, source, lineno, colno, error) => {
-        if (
-          typeof message === "string" &&
-          (message.includes("UNSAFE_componentWillReceiveProps") ||
-            message.includes("ModelCollapse") ||
-            message.includes("OperationContainer"))
-        ) {
-          return true; // Prevent default error handling
-        }
-        return originalWindowError
-          ? originalWindowError(message, source, lineno, colno, error)
-          : false;
-      };
-
-      return () => {
-        console.warn = originalWarn;
-        console.error = originalError;
-        window.onerror = originalWindowError;
-      };
-    }
+    loadSwaggerCSS();
   }, []);
 
   if (!mounted) {
     return (
-      <div className="d-flex justify-content-center align-items-center loading-swagger">
+      <div className="swagger-loading">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading Swagger UI...</span>
         </div>
@@ -101,7 +53,7 @@ export default function SwaggerUI({ url, spec }: SwaggerUIProps) {
   }
 
   return (
-    <div className="swagger-ui-container">
+    <div className="swagger-ui-wrapper">
       <SwaggerUIComponent
         url={url}
         spec={spec}
@@ -117,105 +69,144 @@ export default function SwaggerUI({ url, spec }: SwaggerUIProps) {
         showCommonExtensions={false}
         tryItOutEnabled={true}
         onComplete={() => {
-          // Swagger UI has loaded
           console.log("📚 Swagger UI loaded successfully");
         }}
       />
       <style jsx global>{`
-        .loading-swagger {
+        /* Loading state */
+        .swagger-loading {
+          display: flex;
+          justify-content: center;
+          align-items: center;
           min-height: 400px;
         }
 
-        .swagger-ui-container {
+        /* Ensure swagger-ui has proper container */
+        .swagger-ui-wrapper {
+          width: 100%;
           background: white;
           border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
         }
 
+        /* Override any conflicting Bootstrap styles */
+        .swagger-ui-wrapper .swagger-ui {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            "Helvetica Neue", Arial, sans-serif !important;
+          line-height: 1.5 !important;
+        }
+
+        /* Hide swagger-ui topbar */
         .swagger-ui .topbar {
-          display: none;
+          display: none !important;
         }
 
+        /* Improve spacing */
         .swagger-ui .info {
-          margin: 20px 0;
+          margin: 20px !important;
         }
 
-        .swagger-ui .scheme-container {
-          background: #f8f9fa;
-          border: 1px solid #dee2e6;
-          border-radius: 4px;
-          padding: 10px;
-          margin: 10px 0;
+        /* Style the operations */
+        .swagger-ui .opblock {
+          margin: 0 0 15px 0 !important;
+          border-radius: 4px !important;
+        }
+
+        /* Button styling */
+        .swagger-ui .btn {
+          border-radius: 4px !important;
+          font-size: 14px !important;
+          padding: 8px 16px !important;
         }
 
         .swagger-ui .btn.authorize {
-          background: #0d6efd;
-          border-color: #0d6efd;
-        }
-
-        .swagger-ui .btn.authorize:hover {
-          background: #0b5ed7;
-          border-color: #0a58ca;
-        }
-
-        .swagger-ui .opblock.opblock-post {
-          border-color: #198754;
-          background: rgba(25, 135, 84, 0.1);
-        }
-
-        .swagger-ui .opblock.opblock-get {
-          border-color: #0d6efd;
-          background: rgba(13, 110, 253, 0.1);
-        }
-
-        .swagger-ui .opblock.opblock-put {
-          border-color: #fd7e14;
-          background: rgba(253, 126, 20, 0.1);
-        }
-
-        .swagger-ui .opblock.opblock-delete {
-          border-color: #dc3545;
-          background: rgba(220, 53, 69, 0.1);
-        }
-
-        .swagger-ui .execute-wrapper {
-          padding: 20px;
-          background: #f8f9fa;
-          border-radius: 4px;
-          margin: 10px 0;
-        }
-
-        .swagger-ui .responses-wrapper {
-          margin-top: 20px;
-        }
-
-        .swagger-ui .response .response-col_status {
-          font-weight: bold;
-        }
-
-        .swagger-ui .response .response-col_description {
-          padding-left: 10px;
+          background-color: #0d6efd !important;
+          border-color: #0d6efd !important;
+          color: white !important;
         }
 
         .swagger-ui .btn.try-out__btn {
-          background: #198754;
-          border-color: #198754;
-          color: white;
-        }
-
-        .swagger-ui .btn.try-out__btn:hover {
-          background: #157347;
-          border-color: #146c43;
+          background-color: #198754 !important;
+          border-color: #198754 !important;
+          color: white !important;
         }
 
         .swagger-ui .btn.execute {
-          background: #0d6efd;
-          border-color: #0d6efd;
+          background-color: #0d6efd !important;
+          border-color: #0d6efd !important;
+          color: white !important;
         }
 
-        .swagger-ui .btn.execute:hover {
-          background: #0b5ed7;
-          border-color: #0a58ca;
+        /* Method color coding */
+        .swagger-ui .opblock.opblock-get {
+          border-color: #0d6efd !important;
+          background: rgba(13, 110, 253, 0.1) !important;
+        }
+
+        .swagger-ui .opblock.opblock-post {
+          border-color: #198754 !important;
+          background: rgba(25, 135, 84, 0.1) !important;
+        }
+
+        .swagger-ui .opblock.opblock-put {
+          border-color: #fd7e14 !important;
+          background: rgba(253, 126, 20, 0.1) !important;
+        }
+
+        .swagger-ui .opblock.opblock-delete {
+          border-color: #dc3545 !important;
+          background: rgba(220, 53, 69, 0.1) !important;
+        }
+
+        /* Response section styling */
+        .swagger-ui .responses-wrapper {
+          margin-top: 20px !important;
+        }
+
+        .swagger-ui .response {
+          margin-bottom: 10px !important;
+        }
+
+        /* Parameter input styling */
+        .swagger-ui .parameters-col_description input,
+        .swagger-ui .parameters-col_description textarea,
+        .swagger-ui .parameters-col_description select {
+          border: 1px solid #ced4da !important;
+          border-radius: 4px !important;
+          padding: 8px 12px !important;
+          font-size: 14px !important;
+        }
+
+        /* Execute section styling */
+        .swagger-ui .execute-wrapper {
+          padding: 20px !important;
+          background: #f8f9fa !important;
+          border-radius: 4px !important;
+          margin: 10px 0 !important;
+        }
+
+        /* Schema section */
+        .swagger-ui .model-box {
+          background: #f8f9fa !important;
+          border: 1px solid #dee2e6 !important;
+          border-radius: 4px !important;
+          padding: 15px !important;
+        }
+
+        /* Fix any text readability issues */
+        .swagger-ui .opblock-summary {
+          color: #333 !important;
+        }
+
+        .swagger-ui .opblock-description-wrapper p {
+          color: #666 !important;
+          margin: 0 !important;
+        }
+
+        /* Ensure proper scrolling */
+        .swagger-ui-wrapper {
+          max-height: none !important;
+          overflow: visible !important;
         }
       `}</style>
     </div>
