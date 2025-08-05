@@ -1,4 +1,4 @@
-// Updated User TypeScript interfaces for Azure Data Tables
+// Updated User TypeScript interfaces for PostgreSQL database
 
 // Base User interface with balance field
 export interface User {
@@ -16,7 +16,7 @@ export interface User {
   totalRedemptionValue: number; // Track total value redeemed
 }
 
-// Azure Data Tables entity for User (updated)
+// PostgreSQL database entity for User (updated)
 export interface UserEntity {
   partitionKey: string; // "user" for all users
   rowKey: string; // encoded email (base64)

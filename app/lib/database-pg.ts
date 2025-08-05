@@ -27,9 +27,9 @@ export const TABLE_NAMES = {
   SUBSCRIPTIONS: "subscriptions",
 } as const;
 
-// Helper function to get table client (for compatibility with Azure code)
+// Helper function to get table client (for compatibility with existing code)
 export function getTableClient(tableName: string) {
-  // This is a compatibility layer - we'll replace Azure table calls with direct Drizzle queries
+  // This is a compatibility layer - we use direct Drizzle queries
   return {
     tableName,
     // We'll implement specific methods as needed during migration

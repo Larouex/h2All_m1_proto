@@ -115,7 +115,7 @@ export async function GET() {
     },
     firstAdminSetup: {
       note: "To create the first admin user, manually update the database:",
-      instruction: "Set IsAdmin=true for a user in the Azure Storage table",
+      instruction: "Set IsAdmin=true for a user in the PostgreSQL database",
     },
   });
 }

@@ -1,4 +1,4 @@
-// Redemption Code TypeScript interfaces for Azure Data Tables
+// Redemption Code TypeScript interfaces for PostgreSQL database
 
 // Base RedemptionCode interface
 export interface RedemptionCode {
@@ -12,7 +12,7 @@ export interface RedemptionCode {
   userEmail?: string; // For easier lookup and display
 }
 
-// Azure Data Tables entity for RedemptionCode
+// PostgreSQL database entity for RedemptionCode
 export interface RedemptionCodeEntity {
   partitionKey: string; // campaign ID for efficient querying by campaign
   rowKey: string; // redemption code ID

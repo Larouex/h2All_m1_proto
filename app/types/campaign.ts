@@ -1,4 +1,4 @@
-// Campaign TypeScript interfaces for Azure Data Tables
+// Campaign TypeScript interfaces for PostgreSQL database
 
 // Base Campaign interface
 export interface Campaign {
@@ -13,7 +13,7 @@ export interface Campaign {
   currentRedemptions: number;
 }
 
-// Azure Data Tables entity for Campaign
+// PostgreSQL database entity for Campaign
 export interface CampaignEntity {
   partitionKey: string; // "campaign" for all campaigns
   rowKey: string; // campaign ID

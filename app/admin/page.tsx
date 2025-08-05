@@ -67,8 +67,8 @@ export default function AdminDashboard() {
                 <Card.Body>
                   <Card.Title>⚡ Database Operations</Card.Title>
                   <Card.Text>
-                    Automated database testing and validation. Test Azure Data
-                    Tables operations and data integrity checks.
+                    Automated database testing and validation. Test PostgreSQL
+                    Data Tables operations and data integrity checks.
                   </Card.Text>
                   <div className="d-flex gap-2 flex-wrap">
                     <Button
@@ -259,7 +259,7 @@ export default function AdminDashboard() {
                   <strong>API Version:</strong> 1.0.0
                 </li>
                 <li>
-                  <strong>Database:</strong> Azure Data Tables
+                  <strong>Database:</strong> PostgreSQL with Drizzle ORM
                 </li>
                 <li>
                   <strong>Documentation:</strong> OpenAPI 3.0 / Swagger
