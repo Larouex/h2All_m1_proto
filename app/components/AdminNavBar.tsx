@@ -18,8 +18,11 @@ export default function AdminNavBar() {
   const handleLogout = async () => {
     try {
       await logout();
-      router.push("/");
-      handleNavClick();
+      // Small delay to ensure state is cleared before redirect
+      setTimeout(() => {
+        router.push("/");
+        handleNavClick();
+      }, 100);
     } catch (error) {
       console.error("Logout error:", error);
     }

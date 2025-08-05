@@ -33,7 +33,7 @@ export default function AuthPage() {
     setMounted(true);
   }, []);
 
-  const { login, register, isAuthenticated } = useAuth();
+  const { login, register, isAuthenticated, user } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -41,6 +41,20 @@ export default function AuthPage() {
       router.push("/");
     }
   }, [mounted, isAuthenticated, router]);
+
+  // Clear form data when user logs out
+  useEffect(() => {
+    if (mounted && !user) {
+      setFormData({
+        email: "",
+        password: "",
+        firstName: "",
+        lastName: "",
+        country: "",
+      });
+      setError("");
+    }
+  }, [mounted, user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
