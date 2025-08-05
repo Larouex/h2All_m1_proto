@@ -24,6 +24,15 @@ interface Campaign {
   expiresAt: string;
 }
 
+interface RedemptionCode {
+  id: string;
+  uniqueCode: string;
+  campaignId: string;
+  isUsed: boolean;
+  redemptionValue: string;
+  campaignName?: string;
+}
+
 interface GeneratedUrl {
   url: string;
   campaignId: string;
@@ -35,25 +44,49 @@ interface GeneratedUrl {
 export default function RedemptionUrlTester() {
   const router = useRouter();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [availableCodes, setAvailableCodes] = useState<RedemptionCode[]>([]);
   const [selectedCampaign, setSelectedCampaign] = useState<string>("");
+  const [selectedCode, setSelectedCode] = useState<string>("");
   const [customCode, setCustomCode] = useState<string>("");
   const [generatedUrls, setGeneratedUrls] = useState<GeneratedUrl[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingCodes, setLoadingCodes] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCampaigns();
+    fetchAvailableCodes();
   }, []);
 
   const fetchCampaigns = async () => {
     try {
-      const response = await fetch("/api/campaigns");
+      // Create a simple admin API call that returns JSON instead of CSV
+      const response = await fetch("/api/admin/campaigns-list");
       if (response.ok) {
         const data = await response.json();
         setCampaigns(data.campaigns || []);
+      } else {
+        console.error("Failed to fetch campaigns:", response.statusText);
       }
     } catch (err) {
       console.error("Failed to fetch campaigns:", err);
+    }
+  };
+
+  const fetchAvailableCodes = async () => {
+    try {
+      setLoadingCodes(true);
+      const response = await fetch("/api/admin/unused-codes");
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableCodes(data.codes || []);
+      } else {
+        console.error("Failed to fetch available codes:", response.statusText);
+      }
+    } catch (err) {
+      console.error("Failed to fetch available codes:", err);
+    } finally {
+      setLoadingCodes(false);
     }
   };
 
@@ -81,48 +114,56 @@ export default function RedemptionUrlTester() {
         throw new Error("Campaign not found");
       }
 
-      // Generate or use custom code
-      const code = customCode.trim() || generateRedemptionCode();
-
-      // Create redemption code in database (optional - for testing we'll just generate URL)
-      const response = await fetch("/api/redemption-codes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          campaignId: selectedCampaign,
-          quantity: 1,
-        }),
-      });
-
-      let actualCode = code;
-      if (response.ok) {
-        const data = await response.json();
-        actualCode = data.codes?.[0] || code;
+      // Use selected code from dropdown, custom code, or generate new one
+      let code = "";
+      if (selectedCode) {
+        const codeData = availableCodes.find((c) => c.id === selectedCode);
+        code = codeData?.uniqueCode || "";
+      } else if (customCode.trim()) {
+        code = customCode.trim();
+      } else {
+        code = generateRedemptionCode();
       }
 
-      // Generate URL with query parameters
+      if (!code) {
+        throw new Error("No valid code available");
+      }
+
+      // Create redemption URL
       const baseUrl = window.location.origin;
-      const redemptionUrl = `${baseUrl}/redeem/campaign?campaign_id=${selectedCampaign}&code=${actualCode}&utm_source=test&utm_medium=url&utm_campaign=${encodeURIComponent(
-        campaign.name
-      )}`;
+      const redemptionUrl = `${baseUrl}/redeem?campaign=${selectedCampaign}&code=${code}`;
 
       const newUrl: GeneratedUrl = {
         url: redemptionUrl,
         campaignId: selectedCampaign,
-        code: actualCode,
+        code: code,
         campaignName: campaign.name,
         timestamp: new Date().toLocaleString(),
       };
 
       setGeneratedUrls((prev) => [newUrl, ...prev]);
+
+      // Clear form
+      setSelectedCode("");
       setCustomCode("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate URL");
+    } catch (error) {
+      console.error("Error generating URL:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to generate URL"
+      );
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter codes by selected campaign
+  const filteredCodes = selectedCampaign
+    ? availableCodes.filter((code) => code.campaignId === selectedCampaign)
+    : availableCodes;
+
+  const handleCampaignChange = (campaignId: string) => {
+    setSelectedCampaign(campaignId);
+    setSelectedCode(""); // Clear selected code when campaign changes
   };
 
   const testUrl = (url: string) => {
@@ -186,12 +227,12 @@ export default function RedemptionUrlTester() {
               )}
 
               <Row>
-                <Col md={6}>
+                <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Select Campaign</Form.Label>
                     <Form.Select
                       value={selectedCampaign}
-                      onChange={(e) => setSelectedCampaign(e.target.value)}
+                      onChange={(e) => handleCampaignChange(e.target.value)}
                       aria-label="Select campaign for redemption URL generation"
                     >
                       <option value="">Choose a campaign...</option>
@@ -203,7 +244,41 @@ export default function RedemptionUrlTester() {
                     </Form.Select>
                   </Form.Group>
                 </Col>
-                <Col md={6}>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Existing Code (Optional)
+                      {loadingCodes && (
+                        <span
+                          className="ms-2 spinner-border spinner-border-sm"
+                          role="status"
+                        >
+                          <span className="visually-hidden">Loading...</span>
+                        </span>
+                      )}
+                    </Form.Label>
+                    <Form.Select
+                      value={selectedCode}
+                      onChange={(e) => setSelectedCode(e.target.value)}
+                      disabled={!selectedCampaign || loadingCodes}
+                      aria-label="Select existing unused code"
+                    >
+                      <option value="">Choose existing code...</option>
+                      {filteredCodes.map((code) => (
+                        <option key={code.id} value={code.id}>
+                          {code.uniqueCode} ({code.campaignName}) - $
+                          {code.redemptionValue}
+                        </option>
+                      ))}
+                    </Form.Select>
+                    <Form.Text className="text-muted">
+                      {selectedCampaign
+                        ? `${filteredCodes.length} unused codes available for this campaign`
+                        : "Select a campaign to see available codes"}
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Custom Code (Optional)</Form.Label>
                     <Form.Control
@@ -214,9 +289,12 @@ export default function RedemptionUrlTester() {
                         setCustomCode(e.target.value.toUpperCase())
                       }
                       maxLength={12}
+                      disabled={!!selectedCode}
                     />
                     <Form.Text className="text-muted">
-                      Leave empty to generate a random code
+                      {selectedCode
+                        ? "Clear the selected code to use custom code"
+                        : "Leave empty to generate a random code"}
                     </Form.Text>
                   </Form.Group>
                 </Col>
