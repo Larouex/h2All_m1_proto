@@ -40,10 +40,14 @@ export async function GET(request: NextRequest) {
       email: user.email,
       firstName: user.firstName || "",
       lastName: user.lastName || "",
+      country: user.country || "",
+      balance: user.balance || "0.00",
       isActive: user.isActive,
+      isAdmin: user.isAdmin,
       lastLogin: user.lastLoginAt?.toISOString(),
       registrationDate: user.createdAt.toISOString(),
       totalRedemptions: user.totalRedemptions || 0,
+      totalRedemptionValue: user.totalRedemptionValue || "0.00",
     }));
 
     return NextResponse.json({
@@ -90,10 +94,14 @@ export async function PUT(request: NextRequest) {
       email: updatedUser.email,
       firstName: updatedUser.firstName || "",
       lastName: updatedUser.lastName || "",
+      country: updatedUser.country || "",
+      balance: updatedUser.balance || "0.00",
       isActive: updatedUser.isActive,
+      isAdmin: updatedUser.isAdmin,
       lastLogin: updatedUser.lastLoginAt?.toISOString(),
       registrationDate: updatedUser.createdAt.toISOString(),
       totalRedemptions: updatedUser.totalRedemptions || 0,
+      totalRedemptionValue: updatedUser.totalRedemptionValue || "0.00",
     };
 
     return NextResponse.json({

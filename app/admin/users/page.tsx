@@ -22,10 +22,14 @@ interface User {
   email: string;
   firstName: string;
   lastName: string;
+  country: string;
+  balance: string;
   isActive: boolean;
+  isAdmin: boolean;
   lastLogin?: string;
   registrationDate: string;
   totalRedemptions: number;
+  totalRedemptionValue: string;
 }
 
 export default function UserManager() {
@@ -101,6 +105,45 @@ export default function UserManager() {
       } catch (err) {
         console.error("Error updating user:", err);
         setError("Error updating user status");
+      }
+    }
+  };
+
+  const handleToggleAdminStatus = async (
+    userId: string,
+    currentAdminStatus: boolean
+  ) => {
+    if (
+      confirm(
+        `Are you sure you want to ${
+          currentAdminStatus
+            ? "remove admin privileges from"
+            : "grant admin privileges to"
+        } this user?`
+      )
+    ) {
+      try {
+        // Call real API endpoint
+        const response = await fetch(`/api/admin/users`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            updates: { isAdmin: !currentAdminStatus },
+          }),
+        });
+
+        if (response.ok) {
+          fetchUsers();
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || "Failed to update admin status");
+        }
+      } catch (err) {
+        console.error("Error updating admin status:", err);
+        setError("Error updating admin status");
       }
     }
   };
@@ -206,9 +249,13 @@ export default function UserManager() {
                   <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Country</th>
+                    <th>Balance</th>
                     <th>Status</th>
+                    <th>Admin</th>
                     <th>Last Login</th>
                     <th>Redemptions</th>
+                    <th>Redemption Value</th>
                     <th>Registration</th>
                     <th>Actions</th>
                   </tr>
@@ -222,9 +269,16 @@ export default function UserManager() {
                         </strong>
                       </td>
                       <td>{user.email}</td>
+                      <td>{user.country}</td>
+                      <td>${user.balance}</td>
                       <td>
                         <Badge bg={user.isActive ? "success" : "secondary"}>
                           {user.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </td>
+                      <td>
+                        <Badge bg={user.isAdmin ? "warning" : "secondary"}>
+                          {user.isAdmin ? "Admin" : "User"}
                         </Badge>
                       </td>
                       <td>
@@ -233,6 +287,7 @@ export default function UserManager() {
                           : "Never"}
                       </td>
                       <td>{user.totalRedemptions}</td>
+                      <td>${user.totalRedemptionValue}</td>
                       <td>
                         {new Date(user.registrationDate).toLocaleDateString()}
                       </td>
@@ -255,8 +310,20 @@ export default function UserManager() {
                           onClick={() =>
                             handleToggleUserStatus(user.id, user.isActive)
                           }
+                          className="me-1"
                         >
                           {user.isActive ? "Deactivate" : "Activate"}
+                        </Button>
+                        <Button
+                          variant={
+                            user.isAdmin ? "outline-danger" : "outline-primary"
+                          }
+                          size="sm"
+                          onClick={() =>
+                            handleToggleAdminStatus(user.id, user.isAdmin)
+                          }
+                        >
+                          {user.isAdmin ? "Remove Admin" : "Make Admin"}
                         </Button>
                       </td>
                     </tr>
@@ -295,12 +362,21 @@ export default function UserManager() {
                   <strong>Email:</strong> {selectedUser.email}
                 </p>
                 <p>
+                  <strong>Country:</strong> {selectedUser.country}
+                </p>
+                <p>
                   <strong>User ID:</strong> {selectedUser.id}
                 </p>
                 <p>
                   <strong>Status:</strong>{" "}
                   <Badge bg={selectedUser.isActive ? "success" : "secondary"}>
                     {selectedUser.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </p>
+                <p>
+                  <strong>Admin:</strong>{" "}
+                  <Badge bg={selectedUser.isAdmin ? "warning" : "secondary"}>
+                    {selectedUser.isAdmin ? "Admin" : "User"}
                   </Badge>
                 </p>
               </Col>
@@ -317,8 +393,15 @@ export default function UserManager() {
                     : "Never"}
                 </p>
                 <p>
+                  <strong>Balance:</strong> ${selectedUser.balance}
+                </p>
+                <p>
                   <strong>Total Redemptions:</strong>{" "}
                   {selectedUser.totalRedemptions}
+                </p>
+                <p>
+                  <strong>Total Redemption Value:</strong> $
+                  {selectedUser.totalRedemptionValue}
                 </p>
               </Col>
             </Row>
