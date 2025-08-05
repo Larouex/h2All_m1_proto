@@ -38,11 +38,19 @@ pool.on("error", (err) => {
 pool
   .connect()
   .then((client) => {
-    console.log("Database connected successfully");
+    console.log("✅ Database connected successfully");
+    console.log("📊 Connection check passed");
     client.release();
   })
   .catch((err) => {
-    console.error("Database connection failed:", err);
+    console.error("❌ Database connection failed:", err.message);
+    console.error("🔧 Connection config check:", {
+      hasUrl: !!process.env.DATABASE_URL,
+      nodeEnv: process.env.NODE_ENV,
+      urlPrefix: process.env.DATABASE_URL
+        ? process.env.DATABASE_URL.substring(0, 20) + "..."
+        : "none",
+    });
   });
 
 // Create Drizzle instance
