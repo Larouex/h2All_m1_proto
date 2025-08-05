@@ -4,10 +4,7 @@ const nextConfig: NextConfig = {
   // Ensure Next.js looks in the src directory
   pageExtensions: ["tsx", "ts", "jsx", "js"],
 
-  // For Azure Static Web Apps, use standard build (not static export)
-  // Azure SWA can handle Next.js API routes as Azure Functions
-
-  // Disable image optimization for Azure SWA compatibility
+  // Disable image optimization for better compatibility
   images: {
     unoptimized: true,
   },
@@ -58,17 +55,6 @@ const nextConfig: NextConfig = {
       };
     }
     return config;
-  },
-
-  // Configure for Azure SWA
-  async rewrites() {
-    return [
-      // Keep API routes as-is
-      {
-        source: "/api/:path*",
-        destination: "/api/:path*",
-      },
-    ];
   },
 };
 
