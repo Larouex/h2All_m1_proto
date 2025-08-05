@@ -1,7 +1,7 @@
 version: "2"
 
 services:
-  # Web UX Service (Next.js Frontend)
+  # Full-Stack Next.js App (Web UX + API combined)
   web:
     source: .
     build:
@@ -21,22 +21,6 @@ services:
       - h2all-web.up.railway.app
     regions:
       - us-west1
-
-  # API Service (if needed separately)
-  # api:
-  #   source: .
-  #   build:
-  #     commands:
-  #       - npm ci
-  #   start:
-  #     command: node server/api.js
-  #   env:
-  #     NODE_ENV: production
-  #     PORT: ${{ PORT }}
-  #     DATABASE_URL: ${{ Postgres.DATABASE_URL }}
-  #     JWT_SECRET: ${{ JWT_SECRET }}
-  #   regions:
-  #     - us-west1
 
   # PostgreSQL Database Service
   postgres:
