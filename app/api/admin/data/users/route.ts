@@ -76,7 +76,7 @@ export async function GET() {
 }
 
 // Note: User import is intentionally restricted for security and privacy reasons
-export async function POST(request: NextRequest) {
+export async function POST() {
   return NextResponse.json(
     {
       error:

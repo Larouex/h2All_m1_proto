@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Row,
@@ -42,11 +42,7 @@ export default function UserManager() {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [searchTerm, filterStatus]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -70,7 +66,11 @@ export default function UserManager() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, filterStatus]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleToggleUserStatus = async (
     userId: string,

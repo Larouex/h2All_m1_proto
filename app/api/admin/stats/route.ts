@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, campaigns, redemptionCodes } from "@/db/schema";
-import { sql, eq, desc, and } from "drizzle-orm";
+import { sql, eq, desc } from "drizzle-orm";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get total campaigns
     const totalCampaignsResult = await db

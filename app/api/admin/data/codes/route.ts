@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { redemptionCodes } from "@/db/schema";
+import { redemptionCodes, type NewRedemptionCode } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET() {
@@ -115,8 +115,7 @@ export async function POST(request: NextRequest) {
     const dataLines = lines.slice(1);
 
     let imported = 0;
-    let errors = [];
-
+    const errors = [];
     for (let i = 0; i < dataLines.length; i++) {
       try {
         const values = parseCSVLine(dataLines[i]);
@@ -206,16 +205,21 @@ export async function POST(request: NextRequest) {
             // Update existing code
             await db
               .update(redemptionCodes)
-              .set(codeData as any)
+              .set(codeData as Partial<NewRedemptionCode>)
               .where(eq(redemptionCodes.id, codeData.id as string));
           } else {
             // Insert new code
-            await db.insert(redemptionCodes).values(codeData as any);
+            delete (codeData as Record<string, unknown>).id;
+            await db
+              .insert(redemptionCodes)
+              .values(codeData as NewRedemptionCode);
           }
         } else {
           // Insert new code without ID (will be auto-generated)
-          delete codeData.id;
-          await db.insert(redemptionCodes).values(codeData as any);
+          delete (codeData as Record<string, unknown>).id;
+          await db
+            .insert(redemptionCodes)
+            .values(codeData as NewRedemptionCode);
         }
 
         imported++;
