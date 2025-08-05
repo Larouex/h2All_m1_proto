@@ -1,64 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Ensure Next.js looks in the src directory
-  pageExtensions: ["tsx", "ts", "jsx", "js"],
-
-  // Disable image optimization for better compatibility
+  // Basic configuration for Railway compatibility
   images: {
     unoptimized: true,
   },
 
-  // Environment variables
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "",
-  },
+  // Simple output configuration
+  output: "standalone",
 
-  // Railway-specific optimizations
-  // Use default output mode for Railway Nixpacks
-  output: undefined,
-
-  // Optimize build output
+  // Disable experimental features that can cause build issues
   experimental: {
-    // Enable modern JavaScript output
-    esmExternals: true,
-    // Disable webpack cache in CI to prevent large cache directories
-    webpackBuildWorker: process.env.CI ? false : true,
-  },
-
-  // Disable caching in CI environments to reduce build size
-  cacheHandler: process.env.CI
-    ? undefined
-    : require.resolve(
-        "next/dist/server/lib/incremental-cache/file-system-cache.js"
-      ),
-  cacheMaxMemorySize: process.env.CI ? 0 : 50 * 1024 * 1024, // 50MB limit, 0 in CI
-
-  // Minimize build output
-  compiler: {
-    // Remove console.logs in production
-    removeConsole: process.env.NODE_ENV === "production",
-  },
-
-  // Configure webpack for smaller bundles
-  webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
-      // Minimize client bundle size
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: "vendors",
-              chunks: "all",
-            },
-          },
-        },
-      };
-    }
-    return config;
+    webpackBuildWorker: false,
   },
 };
+
+module.exports = nextConfig;
 
 module.exports = nextConfig;
