@@ -60,7 +60,7 @@ export default function RedemptionConfirmation({
 
       console.log(`Loading campaign details for ID: ${campaignId}`);
 
-      const response = await fetch(`/api/campaigns/${campaignId}`, {
+      const response = await fetch(`/api/campaigns?id=${campaignId}`, {
         method: "GET",
         credentials: "include",
         headers: {
