@@ -14,8 +14,8 @@ const nextConfig = {
   },
 
   // Railway-specific optimizations
-  // Remove standalone output as it can cause API route issues
-  // output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
+  // Use default output mode for Railway Nixpacks
+  output: undefined,
 
   // Optimize build output
   experimental: {
