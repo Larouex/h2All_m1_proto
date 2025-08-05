@@ -117,8 +117,8 @@ export default function RedemptionConfirmation({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          campaignId,
-          redemptionCode,
+          campaign_id: campaignId,
+          unique_code: redemptionCode,
           userEmail: user.email,
         }),
       });
