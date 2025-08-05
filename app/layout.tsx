@@ -6,6 +6,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
@@ -37,8 +38,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthProvider>
-      {!isAdminPage && <NavBar />}
-      <main className="main-content">{children}</main>
+      <div className="d-flex flex-column min-vh-100">
+        {!isAdminPage && <NavBar />}
+        <main className="main-content flex-grow-1">{children}</main>
+        {!isAdminPage && <Footer />}
+      </div>
     </AuthProvider>
   );
 }
