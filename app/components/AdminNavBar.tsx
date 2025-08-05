@@ -101,13 +101,6 @@ export default function AdminNavBar() {
               API Docs
             </Nav.Link>
 
-            <Nav.Link
-              href="/admin/manage-users"
-              active={pathname === "/admin/manage-users"}
-            >
-              Manage Users
-            </Nav.Link>
-
             <NavDropdown title="User Flow" id="userflow-dropdown">
               <NavDropdown.Item href="/track">Track</NavDropdown.Item>
               <NavDropdown.Item href="/share">Share</NavDropdown.Item>

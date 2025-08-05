@@ -1,0 +1,16 @@
+id,campaign_id,unique_code,is_used,user_id,user_email,redemption_value,redemption_source,redemption_device,redemption_location,redemption_url,expires_at
+rc_h2o_001_v2,campaign_h2o_clean_2025,H2O-CLEAN-001-V2,false,,,25.00,email,mobile,San Francisco CA,,2025-12-31 23:59:59
+rc_h2o_002_v2,campaign_h2o_clean_2025,H2O-CLEAN-002-V2,false,,,25.00,social,desktop,Los Angeles CA,,2025-12-31 23:59:59
+rc_h2o_003_v2,campaign_h2o_clean_2025,H2O-CLEAN-003-V2,false,,,25.00,email,tablet,Seattle WA,,2025-12-31 23:59:59
+rc_h2o_004,campaign_h2o_clean_2025,H2O-CLEAN-004,false,,,25.00,social,mobile,Portland OR,,2025-12-31 23:59:59
+rc_h2o_005,campaign_h2o_clean_2025,H2O-CLEAN-005,false,,,25.00,direct,desktop,Denver CO,,2025-12-31 23:59:59
+rc_solar_001,campaign_hydro_solar_spring,SOLAR-HYDRO-001,false,,,50.00,email,mobile,Austin TX,,2025-09-30 23:59:59
+rc_solar_002,campaign_hydro_solar_spring,SOLAR-HYDRO-002,false,,,50.00,social,desktop,Phoenix AZ,,2025-09-30 23:59:59
+rc_solar_003,campaign_hydro_solar_spring,SOLAR-HYDRO-003,false,,,50.00,email,tablet,Miami FL,,2025-09-30 23:59:59
+rc_solar_004,campaign_hydro_solar_spring,SOLAR-HYDRO-004,false,,,50.00,social,mobile,Atlanta GA,,2025-09-30 23:59:59
+rc_solar_005,campaign_hydro_solar_spring,SOLAR-HYDRO-005,false,,,50.00,direct,desktop,Nashville TN,,2025-09-30 23:59:59
+rc_wells_001,campaign_water_wells_africa,WELLS-AFRICA-001,false,,,75.00,email,mobile,Chicago IL,,2025-11-15 23:59:59
+rc_wells_002,campaign_water_wells_africa,WELLS-AFRICA-002,false,,,75.00,social,desktop,Boston MA,,2025-11-15 23:59:59
+rc_wells_003,campaign_water_wells_africa,WELLS-AFRICA-003,false,,,75.00,email,tablet,New York NY,,2025-11-15 23:59:59
+rc_wells_004,campaign_water_wells_africa,WELLS-AFRICA-004,false,,,75.00,social,mobile,Philadelphia PA,,2025-11-15 23:59:59
+rc_wells_005,campaign_water_wells_africa,WELLS-AFRICA-005,false,,,75.00,direct,desktop,Washington DC,,2025-11-15 23:59:59

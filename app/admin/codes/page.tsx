@@ -14,6 +14,7 @@ import {
   Badge,
   InputGroup,
   Modal,
+  Pagination,
 } from "react-bootstrap";
 import { useRouter } from "next/navigation";
 import {
@@ -27,14 +28,21 @@ import {
 
 interface RedemptionCode {
   id: string;
-  uniqueCode: string; // Changed from 'code' to match API
+  uniqueCode: string;
   campaignId: string;
-  campaignName?: string; // Made optional since it might not come from API
-  isUsed: boolean; // Changed from 'isRedeemed' to match API
-  userId?: string | null; // Changed from 'redeemedBy'
+  campaignName?: string;
+  isUsed: boolean;
+  userId?: string | null;
+  userEmail?: string | null;
+  redemptionValue?: string | null;
+  redemptionSource?: string | null;
+  redemptionDevice?: string | null;
+  redemptionLocation?: string | null;
+  redemptionUrl?: string | null;
   redeemedAt?: Date | string | null;
+  expiresAt?: Date | string | null;
   createdAt: Date | string;
-  userEmail?: string;
+  updatedAt?: Date | string;
 }
 
 interface Campaign {
@@ -86,6 +94,11 @@ export default function RedemptionCodeManager() {
   const [availableCodes, setAvailableCodes] = useState<number>(0);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [showAllColumns, setShowAllColumns] = useState(false);
 
   useEffect(() => {
     fetchCodes();
@@ -357,6 +370,17 @@ export default function RedemptionCodeManager() {
 
     return matchesSearch && matchesStatus;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredCodes.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedCodes = filteredCodes.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
 
   if (loading) {
     return (
@@ -899,65 +923,162 @@ export default function RedemptionCodeManager() {
                     </Form.Select>
                   </Form.Group>
                 </Col>
-                <Col md={3} className="d-flex align-items-end">
-                  <div className="mb-0">
-                    <strong>Total:</strong> {filteredCodes.length} codes
-                  </div>
-                </Col>
               </Row>
             </Card.Body>
           </Card>
 
           {/* Codes Table */}
           <Card>
-            <Card.Body>
-              <Table responsive striped hover>
-                <thead>
-                  <tr>
-                    <th>Code</th>
-                    <th>Campaign</th>
-                    <th>Status</th>
-                    <th>User</th>
-                    <th>Redeemed At</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCodes.map((code) => (
-                    <tr key={code.id}>
-                      <td>
-                        <code className="bg-light p-1 rounded">
-                          {code.uniqueCode}
-                        </code>
-                      </td>
-                      <td>{code.campaignName || code.campaignId}</td>
-                      <td>
-                        <Badge bg={code.isUsed ? "success" : "primary"}>
-                          {code.isUsed ? "Redeemed" : "Available"}
-                        </Badge>
-                      </td>
-                      <td>{code.userEmail || code.userId || "-"}</td>
-                      <td>
-                        {code.redeemedAt
-                          ? new Date(code.redeemedAt).toLocaleString()
-                          : "-"}
-                      </td>
-                      <td>{new Date(code.createdAt).toLocaleDateString()}</td>
-                      <td>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleDeleteCode(code.id)}
-                          disabled={code.isUsed}
-                        >
-                          Delete
-                        </Button>
-                      </td>
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>Total:</strong> {filteredCodes.length} codes
+                {filteredCodes.length > itemsPerPage && (
+                  <span className="ms-2 text-muted">
+                    (showing {startIndex + 1}-
+                    {Math.min(endIndex, filteredCodes.length)})
+                  </span>
+                )}
+              </div>
+              <div className="d-flex align-items-center gap-3">
+                <Form.Check
+                  type="switch"
+                  id="show-all-columns"
+                  label="Show all columns"
+                  checked={showAllColumns}
+                  onChange={(e) => setShowAllColumns(e.target.checked)}
+                />
+                <Form.Select
+                  size="sm"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  style={{ width: "auto" }}
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                  <option value={100}>100 per page</option>
+                </Form.Select>
+              </div>
+            </Card.Header>
+            <Card.Body className="p-0">
+              <div className="table-responsive">
+                <Table striped hover className="mb-0">
+                  <thead className="table-dark">
+                    <tr>
+                      <th>Code</th>
+                      <th>Campaign</th>
+                      <th>Status</th>
+                      {showAllColumns && <th>Value</th>}
+                      {showAllColumns && <th>Source</th>}
+                      {showAllColumns && <th>Device</th>}
+                      {showAllColumns && <th>Location</th>}
+                      <th>User</th>
+                      <th>Redeemed At</th>
+                      {showAllColumns && <th>Expires At</th>}
+                      <th>Created</th>
+                      {showAllColumns && <th>Updated</th>}
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {paginatedCodes.map((code) => (
+                      <tr key={code.id}>
+                        <td>
+                          <code className="bg-light p-1 rounded">
+                            {code.uniqueCode}
+                          </code>
+                        </td>
+                        <td>
+                          <div>
+                            <div className="fw-bold">
+                              {code.campaignName || "Unknown"}
+                            </div>
+                            <small className="text-muted">
+                              {code.campaignId}
+                            </small>
+                          </div>
+                        </td>
+                        <td>
+                          <Badge bg={code.isUsed ? "success" : "primary"}>
+                            {code.isUsed ? "Redeemed" : "Available"}
+                          </Badge>
+                        </td>
+                        {showAllColumns && (
+                          <td>
+                            {code.redemptionValue
+                              ? `$${code.redemptionValue}`
+                              : "-"}
+                          </td>
+                        )}
+                        {showAllColumns && (
+                          <td>
+                            {code.redemptionSource ? (
+                              <Badge bg="secondary" className="text-capitalize">
+                                {code.redemptionSource}
+                              </Badge>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+                        )}
+                        {showAllColumns && (
+                          <td>{code.redemptionDevice || "-"}</td>
+                        )}
+                        {showAllColumns && (
+                          <td>{code.redemptionLocation || "-"}</td>
+                        )}
+                        <td>
+                          {code.userEmail ? (
+                            <div>
+                              <div>{code.userEmail}</div>
+                              {code.userId && (
+                                <small className="text-muted">
+                                  {code.userId}
+                                </small>
+                              )}
+                            </div>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td>
+                          {code.redeemedAt
+                            ? new Date(code.redeemedAt).toLocaleString()
+                            : "-"}
+                        </td>
+                        {showAllColumns && (
+                          <td>
+                            {code.expiresAt
+                              ? new Date(code.expiresAt).toLocaleDateString()
+                              : "-"}
+                          </td>
+                        )}
+                        <td>{new Date(code.createdAt).toLocaleDateString()}</td>
+                        {showAllColumns && (
+                          <td>
+                            {code.updatedAt
+                              ? new Date(code.updatedAt).toLocaleDateString()
+                              : "-"}
+                          </td>
+                        )}
+                        <td>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDeleteCode(code.id)}
+                            disabled={code.isUsed}
+                          >
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
 
               {filteredCodes.length === 0 && (
                 <div className="text-center py-5">
@@ -966,6 +1087,59 @@ export default function RedemptionCodeManager() {
                     Generate codes using the form above or adjust your search
                     criteria
                   </p>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="d-flex justify-content-center p-3 border-top">
+                  <Pagination>
+                    <Pagination.First
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                    />
+                    <Pagination.Prev
+                      onClick={() =>
+                        setCurrentPage(Math.max(1, currentPage - 1))
+                      }
+                      disabled={currentPage === 1}
+                    />
+
+                    {/* Page numbers */}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <Pagination.Item
+                          key={pageNum}
+                          active={pageNum === currentPage}
+                          onClick={() => setCurrentPage(pageNum)}
+                        >
+                          {pageNum}
+                        </Pagination.Item>
+                      );
+                    })}
+
+                    <Pagination.Next
+                      onClick={() =>
+                        setCurrentPage(Math.min(totalPages, currentPage + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                    />
+                    <Pagination.Last
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                    />
+                  </Pagination>
                 </div>
               )}
             </Card.Body>
