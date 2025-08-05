@@ -1,14 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import SwaggerUI from "swagger-ui-react";
-import "swagger-ui-react/swagger-ui.css";
-import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Alert,
+  Badge,
+} from "react-bootstrap";
 import { useRouter } from "next/navigation";
+
+interface SwaggerPath {
+  [method: string]: unknown;
+}
+
+interface SwaggerSpec {
+  paths?: {
+    [path: string]: SwaggerPath;
+  };
+  [key: string]: unknown;
+}
 
 export default function AdminApiDocs() {
   const router = useRouter();
-  const [swaggerSpec, setSwaggerSpec] = useState(null);
+  const [swaggerSpec, setSwaggerSpec] = useState<SwaggerSpec | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,10 +48,6 @@ export default function AdminApiDocs() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const openTestPage = () => {
-    window.open("/test-campaign-api.html", "_blank");
   };
 
   if (loading) {
@@ -94,8 +107,12 @@ export default function AdminApiDocs() {
                 </Button>
               </div>
               <div className="d-flex gap-2 flex-wrap">
-                <Button variant="primary" onClick={openTestPage} size="sm">
-                  🧪 Open Interactive Test Page
+                <Button
+                  variant="primary"
+                  onClick={() => window.open("/swagger.json", "_blank")}
+                  size="sm"
+                >
+                  🧪 View OpenAPI Spec
                 </Button>
                 <Button
                   variant="outline-secondary"
@@ -134,27 +151,105 @@ export default function AdminApiDocs() {
           </Card>
 
           {swaggerSpec && (
-            <div className="swagger-container">
-              <SwaggerUI
-                spec={swaggerSpec}
-                deepLinking={true}
-                displayOperationId={false}
-                defaultModelsExpandDepth={1}
-                defaultModelExpandDepth={1}
-                docExpansion="none"
-                persistAuthorization={true}
-                tryItOutEnabled={true}
-              />
-            </div>
+            <Card>
+              <Card.Header>
+                <h5>API Documentation</h5>
+              </Card.Header>
+              <Card.Body>
+                <p className="text-muted mb-3">
+                  The API specification has been loaded successfully. You can:
+                </p>
+                <div className="d-flex gap-2 flex-wrap mb-3">
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      const blob = new Blob(
+                        [JSON.stringify(swaggerSpec, null, 2)],
+                        {
+                          type: "application/json",
+                        }
+                      );
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "h2all-api-spec.json";
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    size="sm"
+                  >
+                    📥 Download API Spec
+                  </Button>
+                  <Button
+                    variant="outline-primary"
+                    onClick={() => {
+                      const swaggerUrl = `https://editor.swagger.io/?url=${encodeURIComponent(
+                        window.location.origin + "/swagger.json"
+                      )}`;
+                      window.open(swaggerUrl, "_blank");
+                    }}
+                    size="sm"
+                  >
+                    🔗 Open in Swagger Editor
+                  </Button>
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => window.open("/swagger.json", "_blank")}
+                    size="sm"
+                  >
+                    📄 View Raw JSON
+                  </Button>
+                </div>
+
+                <Alert variant="info">
+                  <Alert.Heading>Using the API Documentation</Alert.Heading>
+                  <ul className="mb-0">
+                    <li>
+                      Click &quot;Open in Swagger Editor&quot; to use the
+                      interactive API explorer
+                    </li>
+                    <li>
+                      Use the test buttons above to run pre-built API tests
+                    </li>
+                    <li>
+                      Download the API spec to import into tools like Postman or
+                      Insomnia
+                    </li>
+                  </ul>
+                </Alert>
+
+                <details className="mt-3">
+                  <summary className="fw-bold">API Endpoints Summary</summary>
+                  <div className="mt-2">
+                    {swaggerSpec.paths &&
+                      Object.keys(swaggerSpec.paths).map((path) => (
+                        <div key={path} className="mb-2">
+                          <code className="text-primary">{path}</code>
+                          <div className="ms-3 small text-muted">
+                            {swaggerSpec.paths &&
+                              Object.keys(swaggerSpec.paths[path] || {}).map(
+                                (method) => (
+                                  <Badge
+                                    key={method}
+                                    bg="secondary"
+                                    className="me-1"
+                                  >
+                                    {method.toUpperCase()}
+                                  </Badge>
+                                )
+                              )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </details>
+              </Card.Body>
+            </Card>
           )}
         </Col>
       </Row>
-
-      <style jsx>{`
-        .swagger-container {
-          min-height: 600px;
-        }
-      `}</style>
     </Container>
   );
 }
