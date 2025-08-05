@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  redemptionCodeTableClient,
-  campaignTableClient,
-  ensureTablesExist,
-  ValidationError,
-} from "@/lib/database";
-import type { RedemptionCodeEntity, RedemptionCode } from "@/types/redemption";
-import type { CampaignEntity } from "@/types/campaign";
+import { verifyToken } from "@/app/lib/auth";
+import { redemptionCodeQueries, campaignQueries } from "@/app/lib/database-pg";
+
+// Specify runtime for Node.js compatibility
+export const runtime = "nodejs";
 
 /**
  * @swagger
@@ -28,56 +25,15 @@ import type { CampaignEntity } from "@/types/campaign";
  *               campaignId:
  *                 type: string
  *                 description: Campaign ID to get unused code from
- *                 example: "1754169423931-stp6rpgli"
  *               baseUrl:
  *                 type: string
  *                 description: Base URL for the redemption site (optional)
- *                 example: "https://mysite.com"
  *               utmParams:
  *                 type: object
  *                 description: Optional UTM parameters for tracking
- *                 properties:
- *                   source:
- *                     type: string
- *                     example: "email"
- *                   medium:
- *                     type: string
- *                     example: "newsletter"
- *                   campaign:
- *                     type: string
- *                     example: "summer2025"
  *     responses:
  *       200:
  *         description: Redemption URL generated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 redemptionUrl:
- *                   type: string
- *                   example: "https://mysite.com/redeem?campaign_id=1754169423931-stp6rpgli&code=ABC123XY&utm_source=email"
- *                 code:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     uniqueCode:
- *                       type: string
- *                     campaignId:
- *                       type: string
- *                 campaign:
- *                   type: object
- *                   properties:
- *                     name:
- *                       type: string
- *                     description:
- *                       type: string
- *                 availableCodes:
- *                   type: integer
- *                   description: Number of remaining unused codes
  *       404:
  *         description: No unused codes available or campaign not found
  *       400:
@@ -96,40 +52,22 @@ interface GenerateUrlRequest {
   };
 }
 
-// Helper function to convert RedemptionCodeEntity to RedemptionCode
-function entityToRedemptionCode(entity: RedemptionCodeEntity): RedemptionCode {
-  return {
-    id: entity.rowKey,
-    campaignId: entity.CampaignId,
-    uniqueCode: entity.UniqueCode,
-    isUsed: entity.IsUsed,
-    redeemedAt: entity.RedeemedAt,
-    userId: entity.UserId,
-    createdAt: entity.CreatedDateTime,
-    userEmail: entity.UserEmail,
-  };
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Check if we're in build mode (no environment variables available)
-    if (
-      !process.env.AZURE_STORAGE_ACCOUNT_NAME ||
-      !process.env.AZURE_STORAGE_ACCOUNT_KEY
-    ) {
+    // Verify admin authentication
+    const authToken = request.cookies.get("auth-token")?.value;
+    if (!authToken) {
       return NextResponse.json(
-        { error: "Service temporarily unavailable - configuration missing" },
-        { status: 503 }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
-    await ensureTablesExist();
-
-    // Ensure table clients are available
-    if (!campaignTableClient || !redemptionCodeTableClient) {
+    const tokenPayload = await verifyToken(authToken);
+    if (!tokenPayload || !tokenPayload.isAdmin) {
       return NextResponse.json(
-        { error: "Database service not available" },
-        { status: 503 }
+        { error: "Admin access required" },
+        { status: 403 }
       );
     }
 
@@ -148,74 +86,44 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify campaign exists and is active
-    let campaignEntity: CampaignEntity;
-    try {
-      campaignEntity = await campaignTableClient.getEntity<CampaignEntity>(
-        "campaign",
-        campaignId
+    const campaign = await campaignQueries.findById(campaignId);
+    if (!campaign) {
+      return NextResponse.json(
+        { error: "Campaign not found" },
+        { status: 404 }
       );
-    } catch (error) {
-      const azureError = error as { statusCode?: number };
-      if (azureError.statusCode === 404) {
-        return NextResponse.json(
-          { error: "Campaign not found" },
-          { status: 404 }
-        );
-      }
-      throw error;
     }
 
-    if (!campaignEntity.IsActive) {
+    if (!campaign.isActive) {
       return NextResponse.json(
         { error: "Campaign is not active" },
         { status: 400 }
       );
     }
 
-    // Find unused codes for this campaign, ordered by creation date
-    const entities =
-      redemptionCodeTableClient.listEntities<RedemptionCodeEntity>({
-        queryOptions: {
-          filter: `PartitionKey eq '${campaignId}' and IsUsed eq false`,
-          select: [
-            "rowKey",
-            "CampaignId",
-            "UniqueCode",
-            "IsUsed",
-            "CreatedDateTime",
-          ],
-        },
-      });
+    // Find unused codes for this campaign, ordered by creation date (oldest first)
+    const availableCodes = await redemptionCodeQueries.findByCampaign(
+      campaignId
+    );
+    const unusedCodes = availableCodes.filter((code) => !code.isUsed);
 
-    let nextAvailableCode: RedemptionCodeEntity | null = null;
-    let totalAvailableCodes = 0;
-
-    // Get the first available code (oldest first)
-    for await (const entity of entities) {
-      totalAvailableCodes++;
-      if (!nextAvailableCode) {
-        nextAvailableCode = entity;
-      }
-    }
-
-    if (!nextAvailableCode) {
+    if (unusedCodes.length === 0) {
       return NextResponse.json(
-        {
-          error: "No unused redemption codes available for this campaign",
-          details: {
-            campaignId,
-            campaignName: campaignEntity.Name,
-            availableCodes: 0,
-          },
-        },
+        { error: "No unused codes available for this campaign" },
         { status: 404 }
       );
     }
 
+    // Get the oldest unused code
+    const nextAvailableCode = unusedCodes.sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )[0];
+
     // Build the redemption URL
     const url = new URL(`${baseUrl}/redeem`);
     url.searchParams.set("campaign_id", campaignId);
-    url.searchParams.set("code", nextAvailableCode.UniqueCode);
+    url.searchParams.set("code", nextAvailableCode.uniqueCode);
 
     // Add UTM parameters if provided
     if (utmParams) {
@@ -230,44 +138,24 @@ export async function POST(request: NextRequest) {
       if (utmParams.term) url.searchParams.set("utm_term", utmParams.term);
     }
 
-    const redemptionUrl = url.toString();
-
-    // Convert entity to our interface
-    const codeData = entityToRedemptionCode(nextAvailableCode);
-
     return NextResponse.json({
       success: true,
-      redemptionUrl,
+      redemptionUrl: url.toString(),
       code: {
-        id: codeData.id,
-        uniqueCode: codeData.uniqueCode,
-        campaignId: codeData.campaignId,
-        createdAt: codeData.createdAt,
+        id: nextAvailableCode.id,
+        uniqueCode: nextAvailableCode.uniqueCode,
+        campaignId: nextAvailableCode.campaignId,
       },
       campaign: {
-        id: campaignEntity.rowKey,
-        name: campaignEntity.Name,
-        description: campaignEntity.Description,
-        redemptionValue: campaignEntity.RedemptionValue,
-        maxRedemptions: campaignEntity.MaxRedemptions,
-        currentRedemptions: campaignEntity.CurrentRedemptions,
+        name: campaign.name,
+        description: campaign.description,
       },
-      availableCodes: totalAvailableCodes,
-      urlComponents: {
-        baseUrl,
-        path: "/redeem",
-        queryParams: Object.fromEntries(url.searchParams.entries()),
-      },
+      availableCodes: unusedCodes.length,
     });
   } catch (error) {
     console.error("Error generating redemption URL:", error);
-
-    if (error instanceof ValidationError) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
     return NextResponse.json(
-      { error: "Failed to generate redemption URL" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -275,24 +163,20 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Check if we're in build mode (no environment variables available)
-    if (
-      !process.env.AZURE_STORAGE_ACCOUNT_NAME ||
-      !process.env.AZURE_STORAGE_ACCOUNT_KEY
-    ) {
+    // Verify admin authentication
+    const authToken = request.cookies.get("auth-token")?.value;
+    if (!authToken) {
       return NextResponse.json(
-        { error: "Service temporarily unavailable - configuration missing" },
-        { status: 503 }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
-    await ensureTablesExist();
-
-    // Ensure table clients are available
-    if (!campaignTableClient || !redemptionCodeTableClient) {
+    const tokenPayload = await verifyToken(authToken);
+    if (!tokenPayload || !tokenPayload.isAdmin) {
       return NextResponse.json(
-        { error: "Database service not available" },
-        { status: 503 }
+        { error: "Admin access required" },
+        { status: 403 }
       );
     }
 
@@ -306,51 +190,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get available codes count for the campaign
-    const entities =
-      redemptionCodeTableClient.listEntities<RedemptionCodeEntity>({
-        queryOptions: {
-          filter: `PartitionKey eq '${campaignId}' and IsUsed eq false`,
-          select: ["rowKey"],
-        },
-      });
-
-    let availableCount = 0;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for await (const _entity of entities) {
-      availableCount++;
-    }
-
     // Get campaign info
-    let campaignEntity: CampaignEntity;
-    try {
-      campaignEntity = await campaignTableClient.getEntity<CampaignEntity>(
-        "campaign",
-        campaignId
+    const campaign = await campaignQueries.findById(campaignId);
+    if (!campaign) {
+      return NextResponse.json(
+        { error: "Campaign not found" },
+        { status: 404 }
       );
-    } catch (error) {
-      const azureError = error as { statusCode?: number };
-      if (azureError.statusCode === 404) {
-        return NextResponse.json(
-          { error: "Campaign not found" },
-          { status: 404 }
-        );
-      }
-      throw error;
     }
+
+    // Get available codes count for the campaign
+    const availableCodes = await redemptionCodeQueries.findByCampaign(
+      campaignId
+    );
+    const unusedCodes = availableCodes.filter((code) => !code.isUsed);
 
     return NextResponse.json({
       campaignId,
-      campaignName: campaignEntity.Name,
-      availableCodes: availableCount,
-      canGenerateUrl: availableCount > 0 && campaignEntity.IsActive,
+      campaignName: campaign.name,
+      availableCodes: unusedCodes.length,
+      canGenerateUrl: unusedCodes.length > 0 && campaign.isActive,
       campaign: {
-        isActive: campaignEntity.IsActive,
-        maxRedemptions: campaignEntity.MaxRedemptions || 0,
-        currentRedemptions: campaignEntity.CurrentRedemptions || 0,
+        isActive: campaign.isActive,
+        maxRedemptions: campaign.maxRedemptions || 0,
+        currentRedemptions: campaign.currentRedemptions || 0,
         remainingRedemptions:
-          (campaignEntity.MaxRedemptions || 0) -
-          (campaignEntity.CurrentRedemptions || 0),
+          (campaign.maxRedemptions || 0) - (campaign.currentRedemptions || 0),
       },
     });
   } catch (error) {

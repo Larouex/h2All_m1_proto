@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  redemptionCodeTableClient,
-  campaignTableClient,
-  generateUniqueId,
-  generateUniqueCode,
-  ensureTablesExist,
-  ValidationError,
-} from "@/lib/database";
+import { redemptionCodeQueries, campaignQueries } from "@/app/lib/database-pg";
+import { verifyToken } from "@/app/lib/auth";
 import type {
-  RedemptionCodeEntity,
   CreateRedemptionCodeDto,
-  RedemptionCode,
-  BatchCodeGenerationResult,
+  RedeemCodeDto,
 } from "@/types/redemption";
-import type { CampaignEntity } from "@/types/campaign";
 
 /**
  * @swagger
@@ -28,236 +19,144 @@ import type { CampaignEntity } from "@/types/campaign";
  *         name: id
  *         schema:
  *           type: string
- *         description: Specific redemption code ID (requires campaignId)
- *         example: "1704067200000-xyz789abc"
+ *         description: Specific redemption code ID
  *       - in: query
  *         name: campaignId
  *         schema:
  *           type: string
  *         description: Filter codes by campaign ID
- *         example: "1754169423931-stp6rpgli"
  *       - in: query
  *         name: code
  *         schema:
  *           type: string
  *         description: Find code by unique code string
- *         example: "ABC123XY"
  *       - in: query
  *         name: isUsed
  *         schema:
  *           type: boolean
  *         description: Filter codes by usage status
- *         example: false
  *     responses:
  *       200:
  *         description: Redemption code(s) retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               oneOf:
- *                 - $ref: '#/components/schemas/RedemptionCode'
- *                 - type: array
- *                   items:
- *                     $ref: '#/components/schemas/RedemptionCode'
  *       404:
  *         description: Redemption code not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *   post:
- *     summary: Generate redemption codes
- *     description: Create new redemption codes for a campaign
- *     tags:
- *       - Redemption Codes
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CreateRedemptionCodesRequest'
- *           examples:
- *             generateCodes:
- *               summary: Generate new codes
- *               value:
- *                 campaignId: "1754169423931-stp6rpgli"
- *                 quantity: 10
- *     responses:
- *       201:
- *         description: Redemption codes generated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 campaignId:
- *                   type: string
- *                   example: "1754169423931-stp6rpgli"
- *                 codesGenerated:
- *                   type: integer
- *                   example: 10
- *                 codes:
- *                   type: array
- *                   items:
- *                     type: string
- *                   example: ["ABC123XY", "DEF456ZA", "GHI789BC"]
- *                 success:
- *                   type: boolean
- *                   example: true
- *       207:
- *         description: Partial success in code generation
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 campaignId:
- *                   type: string
- *                 codesGenerated:
- *                   type: integer
- *                 codes:
- *                   type: array
- *                   items:
- *                     type: string
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 errors:
- *                   type: array
- *                   items:
- *                     type: string
- *       400:
- *         description: Validation error or code already used
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       404:
- *         description: Campaign or code not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
  */
-
-// Helper function to convert RedemptionCodeEntity to RedemptionCode
-function entityToRedemptionCode(entity: RedemptionCodeEntity): RedemptionCode {
-  return {
-    id: entity.rowKey,
-    campaignId: entity.CampaignId,
-    uniqueCode: entity.UniqueCode,
-    isUsed: entity.IsUsed,
-    redeemedAt: entity.RedeemedAt,
-    userId: entity.UserId,
-    createdAt: entity.CreatedDateTime,
-    userEmail: entity.UserEmail,
-  };
-}
-
-// Helper function to convert RedemptionCode to RedemptionCodeEntity
-function redemptionCodeToEntity(code: RedemptionCode): RedemptionCodeEntity {
-  return {
-    partitionKey: code.campaignId, // Partition by campaign for efficient querying
-    rowKey: code.id,
-    CampaignId: code.campaignId,
-    UniqueCode: code.uniqueCode,
-    IsUsed: code.isUsed,
-    RedeemedAt: code.redeemedAt,
-    UserId: code.userId,
-    CreatedDateTime: code.createdAt,
-    UserEmail: code.userEmail,
-  };
-}
-
-// GET - List redemption codes or get specific code
 export async function GET(request: NextRequest) {
   try {
-    await ensureTablesExist();
-
     const { searchParams } = new URL(request.url);
-    const codeId = searchParams.get("id");
+    const id = searchParams.get("id");
     const campaignId = searchParams.get("campaignId");
-    const uniqueCode = searchParams.get("code");
+    const code = searchParams.get("code");
     const isUsed = searchParams.get("isUsed");
 
-    if (codeId && campaignId) {
+    if (id) {
       // Get specific redemption code
-      try {
-        const entity =
-          await redemptionCodeTableClient!.getEntity<RedemptionCodeEntity>(
-            campaignId,
-            codeId
-          );
-        const code = entityToRedemptionCode(entity);
-        return NextResponse.json(code);
-      } catch (error) {
-        const azureError = error as { statusCode?: number };
-        if (azureError.statusCode === 404) {
-          return NextResponse.json(
-            { error: "Redemption code not found" },
-            { status: 404 }
-          );
-        }
-        throw error;
-      }
-    } else if (uniqueCode) {
-      // Find code by unique code (requires scanning all campaigns)
-      const entities =
-        redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
-          queryOptions: { filter: `UniqueCode eq '${uniqueCode}'` },
-        });
+      const redemptionCode = await redemptionCodeQueries.findById(id);
 
-      for await (const entity of entities) {
-        const code = entityToRedemptionCode(entity);
-        return NextResponse.json(code);
+      if (!redemptionCode) {
+        return NextResponse.json(
+          { error: "Redemption code not found" },
+          { status: 404 }
+        );
       }
+
+      return NextResponse.json({
+        id: redemptionCode.id,
+        campaignId: redemptionCode.campaignId,
+        uniqueCode: redemptionCode.uniqueCode,
+        isUsed: redemptionCode.isUsed,
+        redeemedAt: redemptionCode.redeemedAt,
+        userId: redemptionCode.userId,
+        userEmail: redemptionCode.userEmail,
+        expiresAt: redemptionCode.expiresAt,
+        redemptionValue: Number(redemptionCode.redemptionValue || 0),
+        createdAt: redemptionCode.createdAt,
+      });
+    } else if (code) {
+      // Find by unique code
+      const redemptionCode = await redemptionCodeQueries.findByCode(code);
+
+      if (!redemptionCode) {
+        return NextResponse.json(
+          { error: "Redemption code not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        id: redemptionCode.id,
+        campaignId: redemptionCode.campaignId,
+        uniqueCode: redemptionCode.uniqueCode,
+        isUsed: redemptionCode.isUsed,
+        redeemedAt: redemptionCode.redeemedAt,
+        userId: redemptionCode.userId,
+        userEmail: redemptionCode.userEmail,
+        expiresAt: redemptionCode.expiresAt,
+        redemptionValue: Number(redemptionCode.redemptionValue || 0),
+        createdAt: redemptionCode.createdAt,
+      });
+    } else if (campaignId) {
+      // List codes for specific campaign
+      const codes = await redemptionCodeQueries.findByCampaign(
+        campaignId,
+        100,
+        0
+      );
+
+      // Filter by isUsed if specified
+      const filteredCodes =
+        isUsed !== null
+          ? codes.filter((c) => (isUsed === "true" ? c.isUsed : !c.isUsed))
+          : codes;
 
       return NextResponse.json(
-        { error: "Redemption code not found" },
-        { status: 404 }
+        filteredCodes.map((code) => ({
+          id: code.id,
+          campaignId: code.campaignId,
+          uniqueCode: code.uniqueCode,
+          isUsed: code.isUsed,
+          redeemedAt: code.redeemedAt,
+          userId: code.userId,
+          userEmail: code.userEmail,
+          expiresAt: code.expiresAt,
+          redemptionValue: Number(code.redemptionValue || 0),
+          createdAt: code.createdAt,
+        }))
       );
     } else {
-      // List codes with optional filtering
-      let filter = "";
-      const filters: string[] = [];
-
-      if (campaignId) {
-        filters.push(`PartitionKey eq '${campaignId}'`);
+      // List all codes (admin only)
+      const authToken = request.cookies.get("auth-token")?.value;
+      if (!authToken) {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 }
+        );
       }
 
-      if (isUsed !== null) {
-        const usedFilter =
-          isUsed === "true" ? "IsUsed eq true" : "IsUsed eq false";
-        filters.push(usedFilter);
+      const tokenPayload = await verifyToken(authToken);
+      if (!tokenPayload || !tokenPayload.isAdmin) {
+        return NextResponse.json(
+          { error: "Admin access required" },
+          { status: 403 }
+        );
       }
 
-      if (filters.length > 0) {
-        filter = filters.join(" and ");
-      }
+      const allCodes = await redemptionCodeQueries.list(100, 0);
 
-      const entities =
-        redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
-          queryOptions: filter ? { filter } : undefined,
-        });
-
-      const codes: RedemptionCode[] = [];
-      for await (const entity of entities) {
-        codes.push(entityToRedemptionCode(entity));
-      }
-
-      return NextResponse.json(codes);
+      return NextResponse.json(
+        allCodes.map((code) => ({
+          id: code.id,
+          campaignId: code.campaignId,
+          uniqueCode: code.uniqueCode,
+          isUsed: code.isUsed,
+          redeemedAt: code.redeemedAt,
+          userId: code.userId,
+          userEmail: code.userEmail,
+          expiresAt: code.expiresAt,
+          redemptionValue: Number(code.redemptionValue || 0),
+          createdAt: code.createdAt,
+        }))
+      );
     }
   } catch (error) {
     console.error("Error in GET /api/redemption-codes:", error);
@@ -268,128 +167,188 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create redemption codes
+/**
+ * @swagger
+ * /api/redemption-codes:
+ *   post:
+ *     summary: Create redemption codes or redeem a code
+ *     description: Create new redemption codes for a campaign (admin only) or redeem a code (authenticated user)
+ *     tags:
+ *       - Redemption Codes
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - $ref: '#/components/schemas/CreateRedemptionCodeDto'
+ *               - $ref: '#/components/schemas/RedeemCodeDto'
+ *     responses:
+ *       201:
+ *         description: Redemption codes created successfully
+ *       200:
+ *         description: Code redeemed successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Campaign or code not found
+ */
 export async function POST(request: NextRequest) {
   try {
-    await ensureTablesExist();
+    // Verify authentication
+    const authToken = request.cookies.get("auth-token")?.value;
+    if (!authToken) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const tokenPayload = await verifyToken(authToken);
+    if (!tokenPayload) {
+      return NextResponse.json(
+        { error: "Invalid authentication token" },
+        { status: 401 }
+      );
+    }
 
     const body = await request.json();
-    const { campaignId, quantity }: CreateRedemptionCodeDto = body;
 
-    if (!campaignId || !quantity || quantity <= 0) {
-      throw new ValidationError(
-        "Campaign ID and positive quantity are required"
-      );
-    }
+    // Check if this is a code creation request (admin only) or redemption request
+    if ("quantity" in body) {
+      // Code creation - admin only
+      if (!tokenPayload.isAdmin) {
+        return NextResponse.json(
+          { error: "Admin access required to create codes" },
+          { status: 403 }
+        );
+      }
 
-    if (quantity > 100) {
-      throw new ValidationError("Cannot generate more than 100 codes at once");
-    }
+      const { campaignId, quantity }: CreateRedemptionCodeDto = body;
 
-    // Verify campaign exists and is active
-    let campaignEntity: CampaignEntity;
-    try {
-      campaignEntity = await campaignTableClient!.getEntity<CampaignEntity>(
-        "campaign",
-        campaignId
-      );
-    } catch (error) {
-      const azureError = error as { statusCode?: number };
-      if (azureError.statusCode === 404) {
+      if (!campaignId || !quantity || quantity <= 0 || quantity > 1000) {
+        return NextResponse.json(
+          { error: "Valid campaign ID and quantity (1-1000) are required" },
+          { status: 400 }
+        );
+      }
+
+      // Verify campaign exists
+      const campaign = await campaignQueries.findById(campaignId);
+      if (!campaign) {
         return NextResponse.json(
           { error: "Campaign not found" },
           { status: 404 }
         );
       }
-      throw error;
-    }
 
-    if (!campaignEntity.IsActive) {
-      throw new ValidationError("Cannot create codes for inactive campaign");
-    }
-
-    // Generate unique codes
-    const codes: string[] = [];
-    const errors: string[] = [];
-    const now = new Date();
-
-    for (let i = 0; i < quantity; i++) {
-      try {
-        let uniqueCode: string;
-        let isUnique = false;
-        let attempts = 0;
-
-        // Ensure uniqueness
-        while (!isUnique && attempts < 10) {
-          uniqueCode = generateUniqueCode();
-
-          // Check if code already exists
-          const existingCodes =
-            redemptionCodeTableClient!.listEntities<RedemptionCodeEntity>({
-              queryOptions: { filter: `UniqueCode eq '${uniqueCode}'` },
-            });
-
-          let exists = false;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          for await (const _entity of existingCodes) {
-            exists = true;
-            break;
-          }
-
-          if (!exists) {
-            isUnique = true;
-            codes.push(uniqueCode);
-
-            const codeId = generateUniqueId();
-            const redemptionCode: RedemptionCode = {
-              id: codeId,
-              campaignId,
-              uniqueCode: uniqueCode!,
-              isUsed: false,
-              redeemedAt: null,
-              userId: null,
-              createdAt: now,
-            };
-
-            const entity = redemptionCodeToEntity(redemptionCode);
-            await redemptionCodeTableClient!.createEntity(entity);
-          }
-
-          attempts++;
-        }
-
-        if (!isUnique) {
-          errors.push(
-            `Failed to generate unique code after 10 attempts (attempt ${
-              i + 1
-            })`
-          );
-        }
-      } catch (error) {
-        errors.push(`Error creating code ${i + 1}: ${error}`);
+      // Generate codes
+      const codes = [];
+      for (let i = 0; i < quantity; i++) {
+        const uniqueCode = generateUniqueCode();
+        const newCode = await redemptionCodeQueries.create({
+          campaignId,
+          uniqueCode,
+          isUsed: false,
+          redeemedAt: null,
+          userId: null,
+          userEmail: null,
+          expiresAt: campaign.expiresAt,
+          redemptionValue: campaign.redemptionValue,
+        });
+        codes.push(newCode);
       }
+
+      return NextResponse.json(
+        {
+          message: `${quantity} redemption codes created successfully`,
+          campaignId,
+          codesCreated: quantity,
+          codes: codes.map((code) => ({
+            id: code.id,
+            uniqueCode: code.uniqueCode,
+          })),
+        },
+        { status: 201 }
+      );
+    } else if ("code" in body) {
+      // Code redemption
+      const { campaignId, code, userEmail, redemptionUrl }: RedeemCodeDto =
+        body;
+
+      if (!campaignId || !code || !userEmail) {
+        return NextResponse.json(
+          { error: "Campaign ID, code, and user email are required" },
+          { status: 400 }
+        );
+      }
+
+      // Find the redemption code
+      const redemptionCode = await redemptionCodeQueries.findByCode(code);
+      if (!redemptionCode || redemptionCode.campaignId !== campaignId) {
+        return NextResponse.json(
+          { error: "Invalid redemption code for this campaign" },
+          { status: 404 }
+        );
+      }
+
+      if (redemptionCode.isUsed) {
+        return NextResponse.json(
+          { error: "Redemption code has already been used" },
+          { status: 400 }
+        );
+      }
+
+      // Check if code is expired
+      if (redemptionCode.expiresAt && redemptionCode.expiresAt < new Date()) {
+        return NextResponse.json(
+          { error: "Redemption code has expired" },
+          { status: 400 }
+        );
+      }
+
+      // Redeem the code
+      const updatedCode = await redemptionCodeQueries.redeem(
+        redemptionCode.id,
+        tokenPayload.userId,
+        userEmail,
+        redemptionUrl
+      );
+
+      return NextResponse.json({
+        message: "Code redeemed successfully",
+        redemptionCode: {
+          id: updatedCode.id,
+          uniqueCode: updatedCode.uniqueCode,
+          redemptionValue: Number(updatedCode.redemptionValue || 0),
+          redeemedAt: updatedCode.redeemedAt,
+        },
+      });
+    } else {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      );
     }
-
-    const result: BatchCodeGenerationResult = {
-      campaignId,
-      codesGenerated: codes.length,
-      codes,
-      success: codes.length === quantity,
-      errors: errors.length > 0 ? errors : undefined,
-    };
-
-    const status = result.success ? 201 : 207; // 207 = Multi-Status (partial success)
-    return NextResponse.json(result, { status });
   } catch (error) {
     console.error("Error in POST /api/redemption-codes:", error);
-
-    if (error instanceof ValidationError) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
     return NextResponse.json(
       { error: "Failed to process redemption code request" },
       { status: 500 }
     );
   }
+}
+
+// Helper function to generate unique codes
+function generateUniqueCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
 }

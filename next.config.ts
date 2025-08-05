@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "",
   },
 
+  // Railway-specific optimizations
+  output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
+
   // Optimize build output
   experimental: {
     // Enable modern JavaScript output

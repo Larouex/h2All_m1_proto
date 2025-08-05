@@ -1,45 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
-import { verifyToken } from "@/lib/auth";
-import type { UserEntity } from "@/types/user";
+import { verifyToken } from "@/app/lib/auth";
+import { userQueries } from "@/app/lib/database-pg";
 
 // Specify runtime for Node.js compatibility
 export const runtime = "nodejs";
 
-// Configuration constants - will be validated at runtime
-const tableName = "users";
-
-// Helper function to check if database configuration is available
-function isDatabaseAvailable(): boolean {
-  return !!(
-    process.env.AZURE_STORAGE_ACCOUNT_NAME &&
-    process.env.AZURE_STORAGE_ACCOUNT_KEY
-  );
-}
-
-// Helper function to create table client
-function createTableClient(): TableClient {
-  const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-  const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
-  const tableEndpoint = `https://${accountName}.table.core.windows.net`;
-  const credential = new AzureNamedKeyCredential(accountName, accountKey);
-  return new TableClient(tableEndpoint, tableName, credential);
-}
-
 export async function GET(request: NextRequest) {
   try {
-    // Check if database is available (environment variables present)
-    if (!isDatabaseAvailable()) {
-      console.log("Database configuration not available");
-      return NextResponse.json(
-        { error: "Database service temporarily unavailable" },
-        { status: 503 }
-      );
-    }
-
-    // Create table client with validated environment variables
-    const tableClient = createTableClient();
-
     // Get JWT token from cookie
     const authToken = request.cookies.get("auth-token")?.value;
 
@@ -53,95 +20,58 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verify JWT token
-    const payload = verifyToken(authToken);
+    // Verify token
+    const tokenPayload = await verifyToken(authToken);
 
-    if (!payload) {
+    if (!tokenPayload) {
       return NextResponse.json(
         {
           authenticated: false,
-          error: "Invalid or expired token",
+          error: "Invalid authentication token",
         },
         { status: 401 }
       );
     }
 
-    // Get updated user data from database
-    try {
-      const userEntity = await tableClient!.getEntity<UserEntity>(
-        "users",
-        payload.userId
-      );
+    // Get user from database
+    const user = await userQueries.findById(tokenPayload.userId);
 
-      // Check if user account is still active
-      if (!userEntity.IsActive) {
-        return NextResponse.json(
-          {
-            authenticated: false,
-            error: "Account is inactive",
-          },
-          { status: 403 }
-        );
-      }
-
-      // Return user data (without sensitive information)
-      return NextResponse.json({
-        authenticated: true,
-        user: {
-          id: userEntity.rowKey,
-          email: userEntity.Email,
-          firstName: userEntity.FirstName,
-          lastName: userEntity.LastName,
-          country: userEntity.Country,
-          balance: userEntity.Balance || 0,
-          isActive: userEntity.IsActive,
-          isAdmin: userEntity.IsAdmin || false, // Include admin flag
-          lastLoginAt: userEntity.LastLoginAt,
-          totalRedemptions: userEntity.TotalRedemptions || 0,
-          totalRedemptionValue: userEntity.TotalRedemptionValue || 0,
+    if (!user || !user.isActive) {
+      return NextResponse.json(
+        {
+          authenticated: false,
+          error: "User not found or inactive",
         },
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      const azureError = error as { statusCode?: number };
-
-      if (azureError.statusCode === 404) {
-        return NextResponse.json(
-          {
-            authenticated: false,
-            error: "User not found",
-          },
-          { status: 404 }
-        );
-      }
-
-      throw error;
+        { status: 404 }
+      );
     }
+
+    // Return user information
+    return NextResponse.json({
+      authenticated: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        country: user.country,
+        balance: Number(user.balance),
+        isActive: user.isActive,
+        isAdmin: user.isAdmin,
+        totalRedemptions: user.totalRedemptions,
+        totalRedemptionValue: Number(user.totalRedemptionValue),
+        lastLoginAt: user.lastLoginAt,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (error) {
-    console.error("Error in auth status API:", error);
+    console.error("Auth verification error:", error);
     return NextResponse.json(
       {
         authenticated: false,
-        error: "Internal server error",
+        error: "Authentication verification failed",
       },
       { status: 500 }
     );
   }
-}
-
-// Prevent other HTTP methods
-export async function POST() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
-
-export async function PUT() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
-
-export async function PATCH() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
-
-export async function DELETE() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }

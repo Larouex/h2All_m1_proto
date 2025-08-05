@@ -1,0 +1,54 @@
+version: "2"
+
+services:
+  # Web UX Service (Next.js Frontend)
+  web:
+    source: .
+    build:
+      commands:
+        - npm ci
+        - npm run build
+    start:
+      command: npm start
+    env:
+      NODE_ENV: production
+      PORT: ${{ PORT }}
+      NEXTAUTH_URL: ${{ RAILWAY_STATIC_URL }}
+      NEXTAUTH_SECRET: ${{ NEXTAUTH_SECRET }}
+      DATABASE_URL: ${{ Postgres.DATABASE_URL }}
+      JWT_SECRET: ${{ JWT_SECRET }}
+    domains:
+      - h2all-web.up.railway.app
+    regions:
+      - us-west1
+
+  # API Service (if needed separately)
+  # api:
+  #   source: .
+  #   build:
+  #     commands:
+  #       - npm ci
+  #   start:
+  #     command: node server/api.js
+  #   env:
+  #     NODE_ENV: production
+  #     PORT: ${{ PORT }}
+  #     DATABASE_URL: ${{ Postgres.DATABASE_URL }}
+  #     JWT_SECRET: ${{ JWT_SECRET }}
+  #   regions:
+  #     - us-west1
+
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:15
+    env:
+      POSTGRES_DB: h2all
+      POSTGRES_USER: ${{ POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ POSTGRES_PASSWORD }}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    regions:
+      - us-west1
+
+volumes:
+  postgres_data:

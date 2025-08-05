@@ -1,49 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
-import type { UserEntity } from "@/types/user";
+import { verifyToken } from "@/app/lib/auth";
+import { userQueries } from "@/app/lib/database-pg";
 
 // Specify runtime for Node.js compatibility
 export const runtime = "nodejs";
 
-// Configuration constants - will be validated at runtime
-const tableName = "users";
-
-// Helper function to check if database configuration is available
-function isDatabaseAvailable(): boolean {
-  return !!(
-    process.env.AZURE_STORAGE_ACCOUNT_NAME &&
-    process.env.AZURE_STORAGE_ACCOUNT_KEY
-  );
-}
-
-// Helper function to create table client
-function createTableClient(): TableClient {
-  const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-  const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
-  const tableEndpoint = `https://${accountName}.table.core.windows.net`;
-  const credential = new AzureNamedKeyCredential(accountName, accountKey);
-  return new TableClient(tableEndpoint, tableName, credential);
-}
-
-// Helper function to encode email for rowKey (MUST match registration exactly)
-function encodeEmailToRowKey(email: string): string {
-  const lowercaseEmail = email.toLowerCase();
-  return Buffer.from(lowercaseEmail).toString("base64");
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Check if database is available (environment variables present)
-    if (!isDatabaseAvailable()) {
-      console.log("Database configuration not available");
+    // Verify admin authentication
+    const authToken = request.cookies.get("auth-token")?.value;
+    if (!authToken) {
       return NextResponse.json(
-        { error: "Database service temporarily unavailable" },
-        { status: 503 }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
-    // Create table client with validated environment variables
-    const tableClient = createTableClient();
+    const tokenPayload = await verifyToken(authToken);
+    if (!tokenPayload || !tokenPayload.isAdmin) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
+    }
 
     const { email, isAdmin } = await request.json();
 
@@ -51,39 +30,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const partitionKey = "users";
-    const rowKey = encodeEmailToRowKey(email);
-
-    // Get the user
+    // Get the user by email
     try {
-      const userEntity = await tableClient!.getEntity<UserEntity>(
-        partitionKey,
-        rowKey
-      );
+      const user = await userQueries.findByEmail(email.toLowerCase());
+
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
 
       // Update the user's admin status
-      const updatedUser = {
-        ...userEntity,
-        IsAdmin: isAdmin === true,
-        UpdatedAt: new Date().toISOString(),
-      };
-
-      await tableClient!.updateEntity(updatedUser, "Replace");
+      const updatedUser = await userQueries.update(user.id, {
+        isAdmin: isAdmin === true,
+      });
 
       return NextResponse.json({
         message: `User ${email} admin status updated successfully`,
         user: {
-          email: userEntity.Email,
-          firstName: userEntity.FirstName,
-          lastName: userEntity.LastName,
-          isAdmin: isAdmin === true,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          isAdmin: updatedUser.isAdmin,
         },
       });
     } catch (error) {
-      const azureError = error as { statusCode?: number };
-      if (azureError.statusCode === 404) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
+      console.error("Database error:", error);
       throw error;
     }
   } catch (error) {

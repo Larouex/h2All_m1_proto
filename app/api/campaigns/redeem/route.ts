@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyToken } from "@/app/lib/auth";
 import {
-  campaignTableClient,
-  redemptionCodeTableClient,
-  userTableClient,
-  encodeEmailToRowKey,
-} from "@/lib/database";
-import type { CampaignEntity } from "@/types/campaign";
-import type { RedemptionCodeEntity } from "@/types/redemption";
-import type { UserEntity } from "@/types/user";
+  campaignQueries,
+  redemptionCodeQueries,
+  userQueries,
+} from "@/app/lib/database-pg";
+
+// Specify runtime for Node.js compatibility
+export const runtime = "nodejs";
 
 /**
  * @swagger
@@ -18,8 +18,6 @@ import type { UserEntity } from "@/types/user";
  *     tags:
  *       - Campaigns
  *       - Redemption
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -29,453 +27,175 @@ import type { UserEntity } from "@/types/user";
  *             required:
  *               - campaign_id
  *               - unique_code
- *               - user_email
- *               - user_password
  *             properties:
  *               campaign_id:
  *                 type: string
  *                 description: The campaign identifier
- *                 example: "summer2025"
  *               unique_code:
  *                 type: string
  *                 description: The redemption code to redeem
- *                 example: "A7B9C3D2"
- *               user_email:
- *                 type: string
- *                 format: email
- *                 description: User email for authentication
- *                 example: "user@example.com"
- *               user_password:
- *                 type: string
- *                 description: User password for authentication
- *                 example: "securepassword"
- *               metadata:
- *                 type: object
- *                 description: Optional redemption metadata
- *                 properties:
- *                   source:
- *                     type: string
- *                     example: "email"
- *                   device:
- *                     type: string
- *                     example: "mobile"
- *                   location:
- *                     type: string
- *                     example: "US"
  *     responses:
  *       200:
- *         description: Successfully redeemed code
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Code redeemed successfully"
- *                 redemption:
- *                   type: object
- *                   properties:
- *                     campaignName:
- *                       type: string
- *                       example: "Summer 2025 Promotion"
- *                     redemptionValue:
- *                       type: number
- *                       example: 25
- *                     newBalance:
- *                       type: number
- *                       example: 100
- *                     redeemedAt:
- *                       type: string
- *                       format: date-time
- *                       example: "2025-08-03T17:30:00Z"
+ *         description: Code redeemed successfully
  *       400:
- *         description: Invalid request data
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   examples:
- *                     missing_params:
- *                       value: "Missing required parameters"
- *                     invalid_campaign:
- *                       value: "Campaign not found or inactive"
- *                     invalid_code:
- *                       value: "Invalid or already used code"
- *                     expired:
- *                       value: "Code or campaign has expired"
+ *         description: Invalid parameters or code already used
  *       401:
- *         description: Authentication failed
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Invalid credentials"
- *       409:
- *         description: Concurrency conflict - code already redeemed
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Code has already been redeemed"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Redemption failed due to system error"
+ *         description: Authentication required
+ *       404:
+ *         description: Campaign or code not found
  */
-
-// Simple password hashing (same as login/register)
-function hashPassword(password: string): string {
-  return Buffer.from(password + "salt").toString("base64");
-}
-
-// Simple password verification
-function verifyPassword(
-  inputPassword: string,
-  storedPasswordHash: string
-): boolean {
-  const inputPasswordHash = hashPassword(inputPassword);
-  return inputPasswordHash === storedPasswordHash;
-}
-
-// Authenticate user credentials
-async function authenticateUser(
-  email: string,
-  password: string
-): Promise<UserEntity | null> {
-  try {
-    const userRowKey = encodeEmailToRowKey(email);
-    const userEntity = await userTableClient!.getEntity<UserEntity>(
-      "users",
-      userRowKey
-    );
-
-    if (!userEntity.IsActive) {
-      return null; // User account is inactive
-    }
-
-    if (verifyPassword(password, userEntity.PasswordHash as string)) {
-      return userEntity;
-    }
-
-    return null; // Invalid password
-  } catch {
-    // User not found or other error
-    return null;
-  }
-}
-
-// Validate campaign and code (reusing validation logic)
-async function validateCampaignAndCode(campaignId: string, uniqueCode: string) {
-  const now = new Date();
-
-  // Get campaign
-  let campaignEntity: CampaignEntity;
-  try {
-    campaignEntity = await campaignTableClient!.getEntity<CampaignEntity>(
-      "campaign",
-      campaignId
-    );
-  } catch {
-    return {
-      valid: false,
-      error: "Campaign not found",
-      statusCode: 404,
-    };
-  }
-
-  // Check if campaign is active
-  if (!campaignEntity.IsActive) {
-    return {
-      valid: false,
-      error: "Campaign is not active",
-      statusCode: 410,
-    };
-  }
-
-  // Check campaign expiration
-  const campaignEndDate = new Date(campaignEntity.ExpiresAt);
-  if (now > campaignEndDate) {
-    return {
-      valid: false,
-      error: "Campaign has expired",
-      statusCode: 410,
-    };
-  }
-
-  // Get redemption code
-  let codeEntity: RedemptionCodeEntity;
-  try {
-    // Query for the code by campaign and unique code
-    const entities = redemptionCodeTableClient!.listEntities({
-      queryOptions: {
-        filter: `PartitionKey eq '${campaignId}' and UniqueCode eq '${uniqueCode}'`,
-      },
-    });
-
-    let foundCode = null;
-    for await (const entity of entities) {
-      foundCode = entity;
-      break; // Get first (should be only) match
-    }
-
-    if (!foundCode) {
-      return {
-        valid: false,
-        error: "Redemption code not found",
-        statusCode: 404,
-      };
-    }
-
-    codeEntity = foundCode as unknown as RedemptionCodeEntity;
-  } catch {
-    return {
-      valid: false,
-      error: "Error accessing redemption codes",
-      statusCode: 500,
-    };
-  }
-
-  // Check if code is already used
-  if (codeEntity.IsUsed) {
-    return {
-      valid: false,
-      error: "Code has already been redeemed",
-      statusCode: 409,
-    };
-  }
-
-  // Check code expiration if set
-  if (codeEntity.ExpiresAt) {
-    const codeEndDate = new Date(codeEntity.ExpiresAt);
-    if (now > codeEndDate) {
-      return {
-        valid: false,
-        error: "Redemption code has expired",
-        statusCode: 410,
-      };
-    }
-  }
-
-  return {
-    valid: true,
-    campaign: campaignEntity,
-    code: codeEntity,
-  };
-}
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if environment variables are available
-    if (
-      !process.env.AZURE_STORAGE_ACCOUNT_NAME ||
-      !process.env.AZURE_STORAGE_ACCOUNT_KEY
-    ) {
+    // Verify authentication
+    const authToken = request.cookies.get("auth-token")?.value;
+    if (!authToken) {
       return NextResponse.json(
-        { error: "Service temporarily unavailable - configuration missing" },
-        { status: 503 }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
-    // Ensure table clients are available
-    if (
-      !userTableClient ||
-      !campaignTableClient ||
-      !redemptionCodeTableClient
-    ) {
+    const tokenPayload = await verifyToken(authToken);
+    if (!tokenPayload) {
       return NextResponse.json(
-        { error: "Database service not available" },
-        { status: 503 }
+        { error: "Invalid authentication token" },
+        { status: 401 }
       );
     }
 
-    const body = await request.json();
-    const {
-      campaign_id,
-      unique_code,
-      user_email,
-      user_password,
-      metadata = {},
-    } = body;
+    const { campaign_id, unique_code } = await request.json();
 
     // Validate required parameters
-    if (!campaign_id || !unique_code || !user_email || !user_password) {
+    if (!campaign_id || !unique_code) {
+      return NextResponse.json(
+        { error: "Both campaign_id and unique_code are required" },
+        { status: 400 }
+      );
+    }
+
+    // Get user
+    const user = await userQueries.findById(tokenPayload.userId);
+    if (!user || !user.isActive) {
+      return NextResponse.json(
+        { error: "User not found or inactive" },
+        { status: 404 }
+      );
+    }
+
+    // Get campaign information
+    const campaign = await campaignQueries.findById(campaign_id);
+    if (!campaign) {
+      return NextResponse.json(
+        { error: "Campaign not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if campaign is active
+    if (!campaign.isActive) {
+      return NextResponse.json(
+        { error: "Campaign is not active" },
+        { status: 400 }
+      );
+    }
+
+    // Check if campaign has expired
+    if (campaign.expiresAt && new Date() > campaign.expiresAt) {
+      return NextResponse.json(
+        { error: "Campaign has expired" },
+        { status: 400 }
+      );
+    }
+
+    // Find the redemption code
+    const redemptionCode = await redemptionCodeQueries.findByCode(unique_code);
+    if (!redemptionCode) {
+      return NextResponse.json(
+        { error: "Redemption code not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the code belongs to this campaign
+    if (redemptionCode.campaignId !== campaign_id) {
+      return NextResponse.json(
+        { error: "Code does not belong to this campaign" },
+        { status: 400 }
+      );
+    }
+
+    // Check if code is already used
+    if (redemptionCode.isUsed) {
       return NextResponse.json(
         {
-          success: false,
-          error:
-            "Missing required parameters: campaign_id, unique_code, user_email, user_password",
+          error: "Code has already been used",
+          redeemedAt: redemptionCode.redeemedAt,
+          redeemedBy: redemptionCode.userEmail,
         },
         { status: 400 }
       );
     }
 
-    // Authenticate user
-    const userEntity = await authenticateUser(user_email, user_password);
-    if (!userEntity) {
+    // Check if code has expired
+    if (redemptionCode.expiresAt && new Date() > redemptionCode.expiresAt) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid credentials or inactive account",
-        },
-        { status: 401 }
+        { error: "Redemption code has expired" },
+        { status: 400 }
       );
     }
 
-    // Validate campaign and code
-    const validation = await validateCampaignAndCode(campaign_id, unique_code);
-    if (!validation.valid) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: validation.error,
-        },
-        { status: validation.statusCode }
-      );
-    }
-
-    const { campaign, code } = validation;
-    const now = new Date();
-    const redemptionValue = parseFloat(
-      campaign!.RedemptionValue?.toString() || "0"
+    // Redeem the code
+    const redeemedCode = await redemptionCodeQueries.redeem(
+      redemptionCode.id,
+      user.id,
+      user.email
     );
 
-    // Start atomic transaction-like operations
-    // Note: Azure Table Storage doesn't support true transactions across entities,
-    // so we'll implement optimistic concurrency control
+    // Update user balance
+    const newBalance = Number(user.balance) + Number(campaign.redemptionValue);
+    const updatedUser = await userQueries.update(user.id, {
+      balance: newBalance.toString(),
+      totalRedemptions: user.totalRedemptions + 1,
+      totalRedemptionValue: (
+        Number(user.totalRedemptionValue) + Number(campaign.redemptionValue)
+      ).toString(),
+    });
 
-    try {
-      // Step 1: Re-check and mark code as used (with optimistic concurrency)
-      const updatedCode: RedemptionCodeEntity = {
-        ...code!,
-        IsUsed: true,
-        UserEmail: user_email,
-        RedeemedAt: now,
-        UpdatedAt: now.toISOString(),
-        RedemptionValue: redemptionValue,
-        RedemptionSource: metadata.source || "api",
-        RedemptionDevice: metadata.device || "unknown",
-        RedemptionLocation: metadata.location || "unknown",
-      };
+    // Update campaign stats
+    await campaignQueries.update(campaign_id, {
+      currentRedemptions: campaign.currentRedemptions + 1,
+      totalRedemptions: campaign.totalRedemptions + 1,
+      totalRedemptionValue: (
+        Number(campaign.totalRedemptionValue) + Number(campaign.redemptionValue)
+      ).toString(),
+    });
 
-      // Use ETag for optimistic concurrency control
-      await redemptionCodeTableClient!.updateEntity(updatedCode, "Replace", {
-        etag: (code as { etag?: string }).etag,
-      });
-
-      // Step 2: Update user balance and stats
-      const updatedUser: UserEntity = {
-        ...userEntity,
-        Balance: (userEntity.Balance || 0) + redemptionValue,
-        TotalRedemptions: (userEntity.TotalRedemptions || 0) + 1,
-        TotalRedemptionValue:
-          (userEntity.TotalRedemptionValue || 0) + redemptionValue,
-        UpdatedAt: now.toISOString(),
-      };
-
-      await userTableClient!.updateEntity(updatedUser, "Replace");
-
-      // Success response
-      return NextResponse.json({
-        success: true,
-        message: "Code redeemed successfully",
-        redemption: {
-          campaignName: campaign!.Name,
-          redemptionValue: redemptionValue,
-          newBalance: updatedUser.Balance,
-          redeemedAt: now.toISOString(),
-        },
-      });
-    } catch (updateError: unknown) {
-      // Handle concurrency conflicts
-      const azureError = updateError as { statusCode?: number };
-      if (azureError?.statusCode === 412) {
-        // Precondition Failed (ETag mismatch)
-        // Re-check if code was used by another request
-        try {
-          // Query for the code by campaign and unique code
-          const entities = redemptionCodeTableClient!.listEntities({
-            queryOptions: {
-              filter: `PartitionKey eq '${campaign_id}' and UniqueCode eq '${unique_code}'`,
-            },
-          });
-
-          let reCheckedCode = null;
-          for await (const entity of entities) {
-            reCheckedCode = entity;
-            break; // Get first (should be only) match
-          }
-
-          if (
-            reCheckedCode &&
-            (reCheckedCode as unknown as RedemptionCodeEntity).IsUsed
-          ) {
-            return NextResponse.json(
-              {
-                success: false,
-                error: "Code has already been redeemed by another request",
-              },
-              { status: 409 }
-            );
-          }
-        } catch (recheckError) {
-          // Code might have been deleted or other error
-          console.error(
-            "Error rechecking code after concurrency conflict:",
-            recheckError
-          );
-        }
-
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Concurrency conflict - please try again",
-          },
-          { status: 409 }
-        );
-      }
-
-      // Other update errors
-      console.error("Error updating entities during redemption:", updateError);
-      throw updateError;
-    }
-  } catch (error) {
-    console.error("Error in redemption API:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Redemption failed due to system error",
+    return NextResponse.json({
+      success: true,
+      message: "Code redeemed successfully",
+      redemption: {
+        codeId: redeemedCode.id,
+        uniqueCode: redeemedCode.uniqueCode,
+        redemptionValue: Number(campaign.redemptionValue),
+        redeemedAt: redeemedCode.redeemedAt,
       },
+      user: {
+        email: updatedUser.email,
+        newBalance: Number(updatedUser.balance),
+        totalRedemptions: updatedUser.totalRedemptions,
+        totalRedemptionValue: Number(updatedUser.totalRedemptionValue),
+      },
+      campaign: {
+        id: campaign.id,
+        name: campaign.name,
+        redemptionValue: Number(campaign.redemptionValue),
+      },
+    });
+  } catch (error) {
+    console.error("Error redeeming code:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -483,41 +203,17 @@ export async function POST(request: NextRequest) {
 
 // Prevent other HTTP methods
 export async function GET() {
-  return NextResponse.json(
-    {
-      success: false,
-      error: "Method not allowed - use POST to redeem codes",
-    },
-    { status: 405 }
-  );
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
 export async function PUT() {
-  return NextResponse.json(
-    {
-      success: false,
-      error: "Method not allowed - use POST to redeem codes",
-    },
-    { status: 405 }
-  );
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
 export async function PATCH() {
-  return NextResponse.json(
-    {
-      success: false,
-      error: "Method not allowed - use POST to redeem codes",
-    },
-    { status: 405 }
-  );
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
 export async function DELETE() {
-  return NextResponse.json(
-    {
-      success: false,
-      error: "Method not allowed - use POST to redeem codes",
-    },
-    { status: 405 }
-  );
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }

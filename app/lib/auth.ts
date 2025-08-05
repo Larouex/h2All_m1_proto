@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { jwtVerify } from "jose";
 import crypto from "crypto";
 import type { UserEntity } from "@/types/user";
+import { userQueries } from "@/app/lib/database-pg";
 
 // Environment variables for security
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-here";
@@ -229,67 +230,36 @@ export async function authenticate(
   password: string
 ): Promise<UserEntity | null> {
   try {
-    // Azure Table Storage configuration
-    const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
-    const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
+    // Get user from PostgreSQL database
+    const user = await userQueries.findByEmail(email);
 
-    if (!accountName || !accountKey) {
-      console.error("Azure Storage configuration missing");
-      return null;
-    }
-
-    // Import Azure Table Storage client
-    const { TableClient, AzureNamedKeyCredential } = await import(
-      "@azure/data-tables"
-    );
-
-    const tableName = "users";
-    const tableEndpoint = `https://${accountName}.table.core.windows.net`;
-    const credential = new AzureNamedKeyCredential(accountName, accountKey);
-    const tableClient = new TableClient(tableEndpoint, tableName, credential);
-
-    // Helper function to encode email for rowKey (MUST match registration exactly)
-    function encodeEmailToRowKey(email: string): string {
-      const lowercaseEmail = email.toLowerCase();
-      return Buffer.from(lowercaseEmail).toString("base64");
-    }
-
-    const partitionKey = "users";
-    const rowKey = encodeEmailToRowKey(email);
-
-    // Query user from database
-    const userEntity = await tableClient.getEntity(partitionKey, rowKey);
-
-    if (!userEntity || !userEntity.IsActive) {
+    if (!user || !user.isActive) {
       return null;
     }
 
     // Verify password
-    const isValid = await verifyPassword(
-      password,
-      (userEntity.PasswordHash as string) || ""
-    );
+    const isValid = await verifyPassword(password, user.passwordHash || "");
 
     if (!isValid) {
       return null;
     }
 
-    // Return user data (this matches UserEntity interface)
+    // Convert PostgreSQL user to UserEntity format for compatibility
     return {
-      partitionKey: userEntity.partitionKey as string,
-      rowKey: userEntity.rowKey as string,
-      Email: userEntity.Email as string,
-      FirstName: userEntity.FirstName as string,
-      LastName: userEntity.LastName as string,
-      Country: userEntity.Country as string,
-      PasswordHash: userEntity.PasswordHash as string,
-      Balance: userEntity.Balance as number,
-      IsActive: userEntity.IsActive as boolean,
-      IsAdmin: (userEntity.IsAdmin as boolean) || false, // Default to false if not set
-      CreatedDateTime: userEntity.CreatedDateTime as Date,
-      TotalRedemptions: userEntity.TotalRedemptions as number,
-      TotalRedemptionValue: userEntity.TotalRedemptionValue as number,
-      UpdatedAt: userEntity.UpdatedAt as Date | string,
+      partitionKey: "users", // Keep for API compatibility
+      rowKey: user.id,
+      Email: user.email,
+      FirstName: user.firstName,
+      LastName: user.lastName,
+      Country: user.country,
+      PasswordHash: user.passwordHash || "",
+      Balance: Number(user.balance),
+      IsActive: user.isActive,
+      IsAdmin: user.isAdmin,
+      CreatedDateTime: user.createdAt,
+      TotalRedemptions: user.totalRedemptions,
+      TotalRedemptionValue: Number(user.totalRedemptionValue),
+      UpdatedAt: user.updatedAt,
     };
   } catch (error) {
     console.error("Authentication error:", error);

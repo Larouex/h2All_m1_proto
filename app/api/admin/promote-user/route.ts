@@ -1,30 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
-import { isAdminUser } from "@/lib/auth";
-import type { UserEntity } from "@/types/user";
+import { verifyToken } from "@/app/lib/auth";
+import { userQueries } from "@/app/lib/database-pg";
 
 // Specify runtime for Node.js compatibility
 export const runtime = "nodejs";
-
-// Configuration constants - will be validated at runtime
-const tableName = "users";
-
-// Helper function to check if database configuration is available
-function isDatabaseAvailable(): boolean {
-  return !!(
-    process.env.AZURE_STORAGE_ACCOUNT_NAME &&
-    process.env.AZURE_STORAGE_ACCOUNT_KEY
-  );
-}
-
-// Helper function to create table client
-function createTableClient(): TableClient {
-  const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-  const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
-  const tableEndpoint = `https://${accountName}.table.core.windows.net`;
-  const credential = new AzureNamedKeyCredential(accountName, accountKey);
-  return new TableClient(tableEndpoint, tableName, credential);
-}
 
 /**
  * @swagger
@@ -56,22 +35,19 @@ function createTableClient(): TableClient {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Check if database is available (environment variables present)
-    if (!isDatabaseAvailable()) {
-      console.log("Database configuration not available");
+    // Verify admin authentication
+    const authToken = request.cookies.get("auth-token")?.value;
+    if (!authToken) {
       return NextResponse.json(
-        { error: "Database service temporarily unavailable" },
-        { status: 503 }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
-    // Create table client with validated environment variables
-    const tableClient = createTableClient();
-
-    // Check if current user is admin
-    if (!isAdminUser(request)) {
+    const tokenPayload = await verifyToken(authToken);
+    if (!tokenPayload || !tokenPayload.isAdmin) {
       return NextResponse.json(
-        { error: "Access denied - admin privileges required" },
+        { error: "Admin access required" },
         { status: 403 }
       );
     }
@@ -82,43 +58,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    // Encode email for row key
-    const rowKey = Buffer.from(email.toLowerCase()).toString("base64");
-
     try {
-      // Get user entity
-      const userEntity = await tableClient!.getEntity<UserEntity>(
-        "user",
-        rowKey
-      );
+      // Get user by email
+      const user = await userQueries.findByEmail(email.toLowerCase());
+
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
 
       // Update user to admin
-      const updatedUser = {
-        partitionKey: userEntity.partitionKey,
-        rowKey: userEntity.rowKey,
-        IsAdmin: true,
-        UpdatedAt: new Date().toISOString(),
-      };
-
-      await tableClient!.updateEntity(updatedUser, "Merge");
+      const updatedUser = await userQueries.update(user.id, {
+        isAdmin: true,
+      });
 
       return NextResponse.json({
         message: `User ${email} promoted to admin successfully`,
         user: {
-          email: userEntity.Email,
-          firstName: userEntity.FirstName,
-          lastName: userEntity.LastName,
-          isAdmin: true,
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          isAdmin: updatedUser.isAdmin,
         },
       });
     } catch (error) {
       console.error("Error promoting user:", error);
-      const azureError = error as { statusCode?: number };
-
-      if (azureError.statusCode === 404) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
       throw error;
     }
   } catch (error) {

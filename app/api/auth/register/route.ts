@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TableClient, AzureNamedKeyCredential } from "@azure/data-tables";
 import {
   hashPassword,
   generateToken,
@@ -7,37 +6,12 @@ import {
   validatePassword,
   checkRateLimit,
   generateSecureRandom,
-} from "@/lib/auth";
-import type { UserEntity, RegisterUserDto } from "@/types/user";
+} from "@/app/lib/auth";
+import { userQueries } from "@/app/lib/database-pg";
+import type { RegisterUserDto } from "@/types/user";
 
 // Specify runtime for Node.js compatibility
 export const runtime = "nodejs";
-
-// Configuration constants - will be validated at runtime
-const tableName = "users";
-
-// Helper function to check if database configuration is available
-function isDatabaseAvailable(): boolean {
-  return !!(
-    process.env.AZURE_STORAGE_ACCOUNT_NAME &&
-    process.env.AZURE_STORAGE_ACCOUNT_KEY
-  );
-}
-
-// Helper function to create table client
-function createTableClient(): TableClient {
-  const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME!;
-  const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY!;
-  const tableEndpoint = `https://${accountName}.table.core.windows.net`;
-  const credential = new AzureNamedKeyCredential(accountName, accountKey);
-  return new TableClient(tableEndpoint, tableName, credential);
-}
-
-// Helper function to encode email for rowKey (MUST match login exactly)
-function encodeEmailToRowKey(email: string): string {
-  const lowercaseEmail = email.toLowerCase();
-  return Buffer.from(lowercaseEmail).toString("base64");
-}
 
 // Get client IP for rate limiting
 function getClientIP(request: NextRequest): string {
@@ -52,23 +26,11 @@ function getClientIP(request: NextRequest): string {
     return realIP;
   }
 
-  return "unknown";
+  return "127.0.0.1";
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if database is available (environment variables present)
-    if (!isDatabaseAvailable()) {
-      console.log("Database configuration not available");
-      return NextResponse.json(
-        { error: "Database service temporarily unavailable" },
-        { status: 503 }
-      );
-    }
-
-    // Create table client with validated environment variables
-    const tableClient = createTableClient();
-
     const body: RegisterUserDto = await request.json();
     const { email, firstName, lastName, country, password } = body;
 
@@ -122,29 +84,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Define the partitionKey and rowKey
-    const partitionKey = "users";
-    const rowKey = encodeEmailToRowKey(email);
-
     console.log(
       `Registration attempt for email: ${email} from IP: ${clientIP}`
     );
 
     // Check if user already exists
     try {
-      await tableClient!.getEntity(partitionKey, rowKey);
-      // User exists
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 409 }
-      );
-    } catch (error: unknown) {
-      const azureError = error as { statusCode?: number };
-      if (azureError.statusCode !== 404) {
-        // Unexpected error
-        throw error;
+      const existingUser = await userQueries.findByEmail(email);
+      if (existingUser) {
+        return NextResponse.json(
+          { error: "User with this email already exists" },
+          { status: 409 }
+        );
       }
-      // User doesn't exist, continue with registration
+    } catch (error) {
+      console.error("Error checking existing user:", error);
+      return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
     // Hash password securely
@@ -153,16 +108,8 @@ export async function POST(request: NextRequest) {
     // Check if this is the first user in the system (make them admin)
     let isFirstUser = false;
     try {
-      const existingUsers = tableClient!.listEntities({
-        queryOptions: { select: ["RowKey"] },
-      });
-      let userCount = 0;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _user of existingUsers) {
-        userCount++;
-        if (userCount > 0) break; // We only need to know if there are any users
-      }
-      isFirstUser = userCount === 0;
+      const allUsers = await userQueries.list(1, 0); // Just check if any users exist
+      isFirstUser = allUsers.length === 0;
     } catch (error) {
       console.log(
         "Could not check existing users, assuming not first user:",
@@ -171,103 +118,79 @@ export async function POST(request: NextRequest) {
       isFirstUser = false;
     }
 
-    // Create user entity
-    const newUser: UserEntity = {
-      partitionKey,
-      rowKey,
-      Email: email.toLowerCase(),
-      FirstName: firstName.trim(),
-      LastName: lastName.trim(),
-      Country: country.trim(),
-      PasswordHash: passwordHash,
-      Balance: 0,
-      CreatedDateTime: new Date(),
-      IsActive: true,
-      IsAdmin: isFirstUser, // First user becomes admin automatically
-      TotalRedemptions: 0,
-      TotalRedemptionValue: 0,
-      UpdatedAt: new Date(),
-    };
-
-    // Save user to database
-    await tableClient!.createEntity(newUser);
-
-    console.log(`User registered successfully: ${email}`);
-
-    // Generate JWT token for immediate login
-    const token = generateToken({
-      userId: rowKey,
-      email: email.toLowerCase(),
-      isAdmin: isFirstUser, // Match the database record
-    });
-
-    // Generate session ID
-    const sessionId = generateSecureRandom(32);
-
-    // Create response
-    const response = NextResponse.json({
-      user: {
-        id: rowKey,
+    // Create user
+    try {
+      const newUser = await userQueries.create({
         email: email.toLowerCase(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         country: country.trim(),
-        balance: 0,
+        passwordHash,
+        balance: "0",
         isActive: true,
-        isAdmin: isFirstUser, // Match the database record
+        isAdmin: isFirstUser,
         totalRedemptions: 0,
-        totalRedemptionValue: 0,
-      },
-      sessionId,
-      message: "Registration successful",
-    });
+        totalRedemptionValue: "0",
+      });
 
-    // Set secure HTTP-only cookie with JWT token
-    response.cookies.set("auth-token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: "/",
-    });
+      console.log(`User registered successfully: ${email}`);
 
-    // Set session ID cookie for additional CSRF protection
-    response.cookies.set("session-id", sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: "/",
-    });
+      // Generate JWT token for immediate login
+      const token = generateToken({
+        userId: newUser.id,
+        email: email.toLowerCase(),
+        isAdmin: isFirstUser,
+      });
 
-    // Add security headers
-    response.headers.set("X-Content-Type-Options", "nosniff");
-    response.headers.set("X-Frame-Options", "DENY");
-    response.headers.set("X-XSS-Protection", "1; mode=block");
+      // Generate session ID
+      const sessionId = generateSecureRandom(32);
 
-    return response;
+      // Create response
+      const response = NextResponse.json({
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          country: newUser.country,
+          balance: Number(newUser.balance),
+          isActive: newUser.isActive,
+          isAdmin: newUser.isAdmin,
+          totalRedemptions: newUser.totalRedemptions,
+          totalRedemptionValue: Number(newUser.totalRedemptionValue),
+        },
+        sessionId,
+        message: "Registration successful",
+      });
+
+      // Set secure HTTP-only cookie with JWT token
+      response.cookies.set("auth-token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: "/",
+      });
+
+      // Set session ID cookie for additional CSRF protection
+      response.cookies.set("session-id", sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+        path: "/",
+      });
+
+      return response;
+    } catch (error) {
+      console.error("User creation error:", error);
+      return NextResponse.json(
+        { error: "Failed to create user" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error in registration API:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("Registration error:", error);
+    return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }
-}
-
-// Prevent other HTTP methods
-export async function GET() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
-
-export async function PUT() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
-
-export async function PATCH() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
-
-export async function DELETE() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
