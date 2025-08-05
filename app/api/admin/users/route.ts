@@ -116,3 +116,48 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
+// DELETE /api/admin/users - Delete user permanently
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("id");
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user exists
+    const existingUser = await userQueries.findById(userId);
+    if (!existingUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Delete user from database
+    const deletedUser = await userQueries.delete(userId);
+
+    if (!deletedUser) {
+      return NextResponse.json(
+        { error: "Failed to delete user" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      message: "User deleted successfully",
+      deletedUser: {
+        id: deletedUser.id,
+        email: deletedUser.email,
+      },
+    });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json(
+      { error: "Failed to delete user" },
+      { status: 500 }
+    );
+  }
+}

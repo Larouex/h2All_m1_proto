@@ -81,6 +81,11 @@ export const userQueries = {
       .offset(offset)
       .orderBy(desc(users.createdAt));
   },
+
+  async delete(id: string) {
+    const result = await db.delete(users).where(eq(users.id, id)).returning();
+    return result[0];
+  },
 };
 
 // Campaign utility functions

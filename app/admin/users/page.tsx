@@ -148,6 +148,39 @@ export default function UserManager() {
     }
   };
 
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (
+      confirm(
+        `⚠️ DANGER: Are you sure you want to permanently delete user "${userEmail}"?\n\nThis action CANNOT be undone and will remove:\n- User account and all data\n- Redemption history\n- Balance information\n\nType "DELETE" in the next prompt to confirm.`
+      )
+    ) {
+      const confirmation = prompt(
+        `To confirm deletion of user "${userEmail}", type "DELETE" exactly:`
+      );
+
+      if (confirmation === "DELETE") {
+        try {
+          const response = await fetch(`/api/admin/users?id=${userId}`, {
+            method: "DELETE",
+          });
+
+          if (response.ok) {
+            fetchUsers();
+            alert(`User "${userEmail}" has been permanently deleted.`);
+          } else {
+            const errorData = await response.json();
+            setError(errorData.error || "Failed to delete user");
+          }
+        } catch (err) {
+          console.error("Error deleting user:", err);
+          setError("Error deleting user");
+        }
+      } else {
+        alert("Deletion cancelled - confirmation text did not match.");
+      }
+    }
+  };
+
   const handleViewUser = (user: User) => {
     setSelectedUser(user);
     setShowModal(true);
@@ -224,7 +257,8 @@ export default function UserManager() {
                     <Form.Select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
-                      aria-label="Filter by status"
+                      aria-label="Filter users by status"
+                      title="Filter users by status"
                     >
                       <option value="all">All Users</option>
                       <option value="active">Active Users</option>
@@ -296,7 +330,7 @@ export default function UserManager() {
                           variant="outline-info"
                           size="sm"
                           onClick={() => handleViewUser(user)}
-                          className="me-1"
+                          className="me-1 mb-1"
                         >
                           View
                         </Button>
@@ -310,7 +344,7 @@ export default function UserManager() {
                           onClick={() =>
                             handleToggleUserStatus(user.id, user.isActive)
                           }
-                          className="me-1"
+                          className="me-1 mb-1"
                         >
                           {user.isActive ? "Deactivate" : "Activate"}
                         </Button>
@@ -322,8 +356,18 @@ export default function UserManager() {
                           onClick={() =>
                             handleToggleAdminStatus(user.id, user.isAdmin)
                           }
+                          className="me-1 mb-1"
                         >
                           {user.isAdmin ? "Remove Admin" : "Make Admin"}
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteUser(user.id, user.email)}
+                          className="mb-1"
+                          title="Permanently delete user (cannot be undone)"
+                        >
+                          🗑️ Delete
                         </Button>
                       </td>
                     </tr>
