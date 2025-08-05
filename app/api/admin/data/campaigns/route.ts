@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { campaigns } from "@/db/schema";
+import { campaigns, type NewCampaign } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET() {
@@ -113,12 +113,12 @@ export async function POST(request: NextRequest) {
     const dataLines = lines.slice(1);
 
     let imported = 0;
-    let errors = [];
+    const errors: string[] = [];
 
     for (let i = 0; i < dataLines.length; i++) {
       try {
         const values = parseCSVLine(dataLines[i]);
-        const campaignData: any = {};
+        const campaignData = {} as Record<string, unknown>;
 
         headers.forEach((header, index) => {
           const value = values[index]?.replace(/"/g, "").trim();
@@ -181,22 +181,22 @@ export async function POST(request: NextRequest) {
           const existing = await db
             .select()
             .from(campaigns)
-            .where(eq(campaigns.id, campaignData.id));
+            .where(eq(campaigns.id, campaignData.id as string));
 
           if (existing.length > 0) {
             // Update existing campaign
             await db
               .update(campaigns)
-              .set(campaignData)
-              .where(eq(campaigns.id, campaignData.id));
+              .set(campaignData as Partial<NewCampaign>)
+              .where(eq(campaigns.id, campaignData.id as string));
           } else {
             // Insert new campaign
-            await db.insert(campaigns).values(campaignData);
+            await db.insert(campaigns).values(campaignData as NewCampaign);
           }
         } else {
           // Insert new campaign without ID (will be auto-generated)
           delete campaignData.id;
-          await db.insert(campaigns).values(campaignData);
+          await db.insert(campaigns).values(campaignData as NewCampaign);
         }
 
         imported++;

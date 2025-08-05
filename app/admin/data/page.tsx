@@ -526,7 +526,7 @@ export default function DataManager() {
                           <ol className="small">
                             <li>Go to your Railway project dashboard</li>
                             <li>Navigate to Database tab</li>
-                            <li>Click "Create Backup"</li>
+                            <li>Click &quot;Create Backup&quot;</li>
                             <li>Download backup file</li>
                           </ol>
                         </Col>
@@ -648,7 +648,7 @@ export default function DataManager() {
 
               <Form.Group>
                 <Form.Label className="fw-bold">
-                  Type "Yes" to confirm this action:
+                  Type &quot;Yes&quot; to confirm this action:
                 </Form.Label>
                 <Form.Control
                   type="text"
@@ -661,7 +661,8 @@ export default function DataManager() {
                   autoComplete="off"
                 />
                 <Form.Text className="text-muted">
-                  You must type "Yes" exactly to enable the delete button.
+                  You must type &quot;Yes&quot; exactly to enable the delete
+                  button.
                 </Form.Text>
               </Form.Group>
             </Modal.Body>

@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < dataLines.length; i++) {
       try {
         const values = parseCSVLine(dataLines[i]);
-        const codeData: any = {};
+        const codeData = {} as Record<string, unknown>;
 
         headers.forEach((header, index) => {
           const value = values[index]?.replace(/"/g, "").trim();
@@ -200,22 +200,22 @@ export async function POST(request: NextRequest) {
           const existing = await db
             .select()
             .from(redemptionCodes)
-            .where(eq(redemptionCodes.id, codeData.id));
+            .where(eq(redemptionCodes.id, codeData.id as string));
 
           if (existing.length > 0) {
             // Update existing code
             await db
               .update(redemptionCodes)
-              .set(codeData)
-              .where(eq(redemptionCodes.id, codeData.id));
+              .set(codeData as any)
+              .where(eq(redemptionCodes.id, codeData.id as string));
           } else {
             // Insert new code
-            await db.insert(redemptionCodes).values(codeData);
+            await db.insert(redemptionCodes).values(codeData as any);
           }
         } else {
           // Insert new code without ID (will be auto-generated)
           delete codeData.id;
-          await db.insert(redemptionCodes).values(codeData);
+          await db.insert(redemptionCodes).values(codeData as any);
         }
 
         imported++;
