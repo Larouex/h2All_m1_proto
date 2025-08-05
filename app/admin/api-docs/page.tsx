@@ -8,17 +8,22 @@ import {
   Card,
   Button,
   Alert,
-  Badge,
+  Spinner,
 } from "react-bootstrap";
 import { useRouter } from "next/navigation";
-
-interface SwaggerPath {
-  [method: string]: unknown;
-}
+import SwaggerUI from "@/app/components/SwaggerUI";
 
 interface SwaggerSpec {
-  paths?: {
-    [path: string]: SwaggerPath;
+  openapi: string;
+  info: {
+    title: string;
+    version: string;
+    description: string;
+  };
+  paths: {
+    [path: string]: {
+      [method: string]: unknown;
+    };
   };
   [key: string]: unknown;
 }
@@ -35,6 +40,8 @@ export default function AdminApiDocs() {
 
   const fetchSwaggerSpec = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const response = await fetch("/api/swagger");
       if (response.ok) {
         const spec = await response.json();
@@ -55,10 +62,10 @@ export default function AdminApiDocs() {
       <Container className="py-5">
         <Row className="justify-content-center">
           <Col md={8} className="text-center">
-            <div className="spinner-border" role="status">
+            <Spinner animation="border" role="status" className="mb-3">
               <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="mt-3">Loading API documentation...</p>
+            </Spinner>
+            <p>Loading API documentation...</p>
           </Col>
         </Row>
       </Container>
@@ -89,38 +96,38 @@ export default function AdminApiDocs() {
         <Col>
           <Card className="mb-4">
             <Card.Body>
-              <div className="d-flex justify-content-between align-items-start">
+              <div className="d-flex justify-content-between align-items-start mb-3">
                 <div>
-                  <Card.Title>H2All M1 API Documentation</Card.Title>
-                  <Card.Text>
-                    Complete API documentation for the H2All M1 campaign and
-                    redemption code system. Use this documentation to understand
-                    available endpoints, request/response formats, and test API
-                    functionality.
+                  <Card.Title className="h4">
+                    {swaggerSpec?.info?.title || "H2All M1 API Documentation"}
+                  </Card.Title>
+                  <Card.Text className="text-muted">
+                    {swaggerSpec?.info?.description ||
+                      "Complete API documentation for the H2All M1 campaign and redemption code system. Test all endpoints directly in your browser."}
                   </Card.Text>
+                  {swaggerSpec?.info?.version && (
+                    <small className="text-muted">
+                      Version: {swaggerSpec.info.version}
+                    </small>
+                  )}
                 </div>
                 <Button
                   variant="outline-secondary"
                   onClick={() => router.push("/admin")}
+                  size="sm"
                 >
                   ← Back to Admin
                 </Button>
               </div>
+
               <div className="d-flex gap-2 flex-wrap">
                 <Button
-                  variant="primary"
-                  onClick={() => window.open("/swagger.json", "_blank")}
-                  size="sm"
-                >
-                  🧪 View OpenAPI Spec
-                </Button>
-                <Button
-                  variant="outline-secondary"
+                  variant="outline-primary"
                   href="/api/test"
                   target="_blank"
                   size="sm"
                 >
-                  ⚡ Run Database Tests
+                  🧪 Database Tests
                 </Button>
                 <Button
                   variant="outline-info"
@@ -128,7 +135,7 @@ export default function AdminApiDocs() {
                   target="_blank"
                   size="sm"
                 >
-                  📊 Campaign API Tests
+                  📊 Campaign Tests
                 </Button>
                 <Button
                   variant="outline-success"
@@ -136,15 +143,15 @@ export default function AdminApiDocs() {
                   target="_blank"
                   size="sm"
                 >
-                  🎫 Redemption API Tests
+                  🎫 Redemption Tests
                 </Button>
                 <Button
                   variant="outline-warning"
-                  href="/test-validation-api.html"
+                  href="/api/swagger"
                   target="_blank"
                   size="sm"
                 >
-                  ✅ Validation API Tests
+                  📄 Raw JSON
                 </Button>
               </div>
             </Card.Body>
@@ -153,98 +160,14 @@ export default function AdminApiDocs() {
           {swaggerSpec && (
             <Card>
               <Card.Header>
-                <h5>API Documentation</h5>
+                <h5 className="mb-0">🚀 Interactive API Explorer</h5>
+                <small className="text-muted">
+                  Click any endpoint below to expand it, then use &quot;Try it
+                  out&quot; to test your APIs directly
+                </small>
               </Card.Header>
-              <Card.Body>
-                <p className="text-muted mb-3">
-                  The API specification has been loaded successfully. You can:
-                </p>
-                <div className="d-flex gap-2 flex-wrap mb-3">
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      const blob = new Blob(
-                        [JSON.stringify(swaggerSpec, null, 2)],
-                        {
-                          type: "application/json",
-                        }
-                      );
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = "h2all-api-spec.json";
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      URL.revokeObjectURL(url);
-                    }}
-                    size="sm"
-                  >
-                    📥 Download API Spec
-                  </Button>
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => {
-                      const swaggerUrl = `https://editor.swagger.io/?url=${encodeURIComponent(
-                        window.location.origin + "/swagger.json"
-                      )}`;
-                      window.open(swaggerUrl, "_blank");
-                    }}
-                    size="sm"
-                  >
-                    🔗 Open in Swagger Editor
-                  </Button>
-                  <Button
-                    variant="outline-secondary"
-                    onClick={() => window.open("/swagger.json", "_blank")}
-                    size="sm"
-                  >
-                    📄 View Raw JSON
-                  </Button>
-                </div>
-
-                <Alert variant="info">
-                  <Alert.Heading>Using the API Documentation</Alert.Heading>
-                  <ul className="mb-0">
-                    <li>
-                      Click &quot;Open in Swagger Editor&quot; to use the
-                      interactive API explorer
-                    </li>
-                    <li>
-                      Use the test buttons above to run pre-built API tests
-                    </li>
-                    <li>
-                      Download the API spec to import into tools like Postman or
-                      Insomnia
-                    </li>
-                  </ul>
-                </Alert>
-
-                <details className="mt-3">
-                  <summary className="fw-bold">API Endpoints Summary</summary>
-                  <div className="mt-2">
-                    {swaggerSpec.paths &&
-                      Object.keys(swaggerSpec.paths).map((path) => (
-                        <div key={path} className="mb-2">
-                          <code className="text-primary">{path}</code>
-                          <div className="ms-3 small text-muted">
-                            {swaggerSpec.paths &&
-                              Object.keys(swaggerSpec.paths[path] || {}).map(
-                                (method) => (
-                                  <Badge
-                                    key={method}
-                                    bg="secondary"
-                                    className="me-1"
-                                  >
-                                    {method.toUpperCase()}
-                                  </Badge>
-                                )
-                              )}
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </details>
+              <Card.Body className="p-0">
+                <SwaggerUI spec={swaggerSpec} />
               </Card.Body>
             </Card>
           )}
