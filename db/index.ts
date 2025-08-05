@@ -10,6 +10,9 @@ const dbConfig = process.env.DATABASE_URL
         process.env.NODE_ENV === "production"
           ? { rejectUnauthorized: false }
           : false,
+      max: 20, // Maximum pool size
+      idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+      connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection could not be established
     }
   : {
       host: process.env.DB_HOST || "localhost",
@@ -18,10 +21,29 @@ const dbConfig = process.env.DATABASE_URL
       password: process.env.DB_PASSWORD || "",
       database: process.env.DB_NAME || "h2all_m1_proto",
       ssl: false,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
     };
 
 // Create connection pool
 const pool = new Pool(dbConfig);
+
+// Add error handling for pool
+pool.on("error", (err) => {
+  console.error("Unexpected database pool error:", err);
+});
+
+// Test connection on startup
+pool
+  .connect()
+  .then((client) => {
+    console.log("Database connected successfully");
+    client.release();
+  })
+  .catch((err) => {
+    console.error("Database connection failed:", err);
+  });
 
 // Create Drizzle instance
 export const db = drizzle(pool, { schema });

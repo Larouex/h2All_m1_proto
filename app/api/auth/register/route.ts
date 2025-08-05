@@ -99,6 +99,20 @@ export async function POST(request: NextRequest) {
       }
     } catch (error) {
       console.error("Error checking existing user:", error);
+      // Check if it's a connection error
+      if (
+        error instanceof Error &&
+        (error.message.includes("ECONNREFUSED") ||
+          error.message.includes("ENOTFOUND") ||
+          error.message.includes("ETIMEDOUT") ||
+          error.message.includes("connection") ||
+          error.message.includes("pool"))
+      ) {
+        return NextResponse.json(
+          { error: "Database service temporarily unavailable" },
+          { status: 503 }
+        );
+      }
       return NextResponse.json({ error: "Database error" }, { status: 500 });
     }
 
@@ -184,6 +198,20 @@ export async function POST(request: NextRequest) {
       return response;
     } catch (error) {
       console.error("User creation error:", error);
+      // Check if it's a connection error
+      if (
+        error instanceof Error &&
+        (error.message.includes("ECONNREFUSED") ||
+          error.message.includes("ENOTFOUND") ||
+          error.message.includes("ETIMEDOUT") ||
+          error.message.includes("connection") ||
+          error.message.includes("pool"))
+      ) {
+        return NextResponse.json(
+          { error: "Database service temporarily unavailable" },
+          { status: 503 }
+        );
+      }
       return NextResponse.json(
         { error: "Failed to create user" },
         { status: 500 }
