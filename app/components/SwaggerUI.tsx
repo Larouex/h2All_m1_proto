@@ -26,25 +26,66 @@ export default function SwaggerUI({ url, spec }: SwaggerUIProps) {
   useEffect(() => {
     setMounted(true);
 
-    // Suppress known swagger-ui-react warnings in development
+    // More comprehensive warning suppression for swagger-ui-react
     if (process.env.NODE_ENV === "development") {
+      // Store original console methods
       const originalWarn = console.warn;
+      const originalError = console.error;
+
+      // Override console.warn
       console.warn = (...args) => {
-        const message = args[0];
+        const message = String(args[0] || "");
+        if (
+          message.includes("UNSAFE_componentWillReceiveProps") ||
+          message.includes("UNSAFE_componentWillMount") ||
+          message.includes("UNSAFE_componentWillUpdate") ||
+          message.includes("ModelCollapse") ||
+          message.includes("OperationContainer") ||
+          message.includes("componentWillReceiveProps") ||
+          message.includes("react-dev-tools") ||
+          message.includes("strict mode")
+        ) {
+          // Suppress these warnings
+          return;
+        }
+        originalWarn.apply(console, args);
+      };
+
+      // Override console.error for React warnings
+      console.error = (...args) => {
+        const message = String(args[0] || "");
+        if (
+          message.includes("UNSAFE_componentWillReceiveProps") ||
+          message.includes("componentWillReceiveProps") ||
+          message.includes("ModelCollapse") ||
+          message.includes("OperationContainer")
+        ) {
+          // Suppress these errors
+          return;
+        }
+        originalError.apply(console, args);
+      };
+
+      // Also suppress React warnings at the window level
+      const originalWindowError = window.onerror;
+      window.onerror = (message, source, lineno, colno, error) => {
         if (
           typeof message === "string" &&
           (message.includes("UNSAFE_componentWillReceiveProps") ||
             message.includes("ModelCollapse") ||
             message.includes("OperationContainer"))
         ) {
-          // Suppress these specific warnings from swagger-ui-react
-          return;
+          return true; // Prevent default error handling
         }
-        originalWarn.apply(console, args);
+        return originalWindowError
+          ? originalWindowError(message, source, lineno, colno, error)
+          : false;
       };
 
       return () => {
         console.warn = originalWarn;
+        console.error = originalError;
+        window.onerror = originalWindowError;
       };
     }
   }, []);

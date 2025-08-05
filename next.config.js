@@ -12,6 +12,9 @@ const nextConfig = {
   experimental: {
     webpackBuildWorker: false,
   },
+
+  // Disable React strict mode to avoid swagger-ui warnings
+  reactStrictMode: false,
 };
 
 module.exports = nextConfig;
