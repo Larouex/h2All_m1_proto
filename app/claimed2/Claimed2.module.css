@@ -1,0 +1,26 @@
+.heroSection {
+  height: 16rem;
+}
+
+.clickableLink {
+  cursor: pointer;
+}
+
+.orangeButton {
+  background-color: #ea580c !important;
+  border-color: #ea580c !important;
+  color: white !important;
+}
+
+.orangeButton:hover {
+  background-color: #c2410c !important;
+  border-color: #c2410c !important;
+}
+
+.bottomImage {
+  height: 400px;
+}
+
+.progressBarCustom {
+  height: 12px;
+}
