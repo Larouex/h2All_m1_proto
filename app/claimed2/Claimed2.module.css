@@ -18,9 +18,20 @@
 }
 
 .bottomImage {
-  height: 400px;
+  height: 300px;
 }
 
 .progressBarCustom {
   height: 12px;
+}
+
+/* Mobile-first optimizations */
+@media (max-width: 576px) {
+  .heroSection {
+    height: 14rem;
+  }
+
+  .bottomImage {
+    height: 250px;
+  }
 }
