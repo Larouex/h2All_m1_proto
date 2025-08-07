@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { Button } from "react-bootstrap";
 import CampaignProgress from "@/app/components/CampaignProgress";
 import MyImpact from "@/app/components/MyImpact";
 import VersionFooter from "@/app/components/VersionFooter";
@@ -63,15 +62,6 @@ export default function TrackPage() {
             Your Kodema Village Impact
           </h4>
           <MyImpact campaignId="kodema-village" />
-        </div>
-
-        {/* Tell a Friend Button */}
-        <div className="mb-3">
-          <Button
-            className={`w-100 py-3 fs-6 fw-semibold rounded ${styles.orangeButton}`}
-          >
-            Tell a Friend About H2ALL
-          </Button>
         </div>
 
         {/* About Section */}

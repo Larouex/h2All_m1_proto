@@ -15,6 +15,13 @@
       "when": 1754355609354,
       "tag": "0001_silky_meggan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754604120544,
+      "tag": "0002_strong_blue_blade",
+      "breakpoints": true
     }
   ]
 }

@@ -89,11 +89,6 @@ export default function MyImpact({
     fetchImpactData();
   }, [fetchImpactData]);
 
-  // Calculate water funded based on bottles claimed (assuming 10L per bottle)
-  const calculateWaterFunded = (bottles: number): number => {
-    return bottles * 10; // 10 liters per bottle
-  };
-
   // Format impact metrics for display
   const getImpactMetrics = (): ImpactMetric[] => {
     if (!impactData) return [];
@@ -104,13 +99,6 @@ export default function MyImpact({
         iconColor: "text-muted",
         label: "Claimed Bottles",
         value: impactData.claimedBottles.toString(),
-      },
-      {
-        icon: "bi-droplet-fill",
-        iconColor: "text-primary",
-        label: "Clean Water Funded",
-        value: calculateWaterFunded(impactData.claimedBottles).toString(),
-        unit: "L",
       },
       {
         icon: "bi-currency-dollar",

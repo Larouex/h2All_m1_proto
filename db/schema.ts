@@ -5,7 +5,6 @@ import {
   boolean,
   timestamp,
   decimal,
-  uuid,
 } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -122,6 +121,17 @@ export const subscriptions = pgTable("subscriptions", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Email claims table (for tracking email claim submissions)
+export const emailClaims = pgTable("email_claims", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  email: text("email").notNull().unique(), // indexed for lookup
+  claimCount: integer("claim_count").notNull().default(1),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Export types for use in the application
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -133,3 +143,5 @@ export type Project = typeof projects.$inferSelect;
 export type NewProject = typeof projects.$inferInsert;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type NewSubscription = typeof subscriptions.$inferInsert;
+export type EmailClaim = typeof emailClaims.$inferSelect;
+export type NewEmailClaim = typeof emailClaims.$inferInsert;

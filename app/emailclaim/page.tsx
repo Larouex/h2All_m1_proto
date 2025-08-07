@@ -7,6 +7,7 @@ import styles from "./EmailClaim.module.css";
 
 export default function EmailClaimPage() {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Email validation function
   const isValidEmail = (email: string) => {
@@ -14,12 +15,40 @@ export default function EmailClaimPage() {
     return emailRegex.test(email);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isValidEmail(email)) {
-      console.log("Email submitted:", email);
-      // Redirect to track page after successful email submission
-      window.location.href = "/track";
+    if (!isValidEmail(email)) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const response = await fetch("/api/emailclaim", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Email claim successful:", data);
+
+        // Store email in localStorage for tracking page
+        localStorage.setItem("userEmail", email);
+
+        // Redirect to track page after successful email submission
+        window.location.href = "/track";
+      } else {
+        const errorData = await response.json();
+        console.error("Email claim failed:", errorData);
+        alert("Failed to process email claim. Please try again.");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      alert("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -66,9 +95,20 @@ export default function EmailClaimPage() {
               size="lg"
               className={`py-3 fw-bold fs-5 text-white ${styles.claimButton}`}
               type="submit"
-              disabled={!isValidEmail(email)}
+              disabled={!isValidEmail(email) || isSubmitting}
             >
-              Claim My Bottle
+              {isSubmitting ? (
+                <>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  Processing...
+                </>
+              ) : (
+                "Claim My Bottle"
+              )}
             </Button>
           </div>
         </Form>
