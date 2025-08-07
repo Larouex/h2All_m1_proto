@@ -138,7 +138,11 @@ export default function CampaignProgress({
     );
   }
 
-  if (!campaignData) {
+  if (
+    !campaignData ||
+    typeof campaignData.currentFunding === "undefined" ||
+    typeof campaignData.fundingGoal === "undefined"
+  ) {
     return (
       <Card className={`shadow ${className}`}>
         <Card.Body className="p-3">
@@ -148,8 +152,9 @@ export default function CampaignProgress({
     );
   }
 
-  const progressPercentage =
-    (campaignData.currentFunding / campaignData.fundingGoal) * 100;
+  const currentFunding = campaignData.currentFunding || 0;
+  const fundingGoal = campaignData.fundingGoal || 5000;
+  const progressPercentage = (currentFunding / fundingGoal) * 100;
 
   return (
     <>
@@ -174,10 +179,10 @@ export default function CampaignProgress({
           <div className="mb-3">
             <div className="d-flex align-items-baseline gap-2 mb-2">
               <span className="fs-3 fw-bold text-black">
-                ${campaignData.currentFunding.toFixed(2)}
+                ${currentFunding.toFixed(2)}
               </span>
               <span className="text-muted small">
-                of ${campaignData.fundingGoal.toLocaleString()} raised
+                of ${fundingGoal.toLocaleString()} raised
               </span>
             </div>
             <ProgressBar
@@ -192,7 +197,7 @@ export default function CampaignProgress({
             <div className="mt-2">
               <small className="text-muted">
                 Total Redemptions: $
-                {campaignData.totalRedemptionValue.toFixed(2)}
+                {(campaignData.totalRedemptionValue || 0).toFixed(2)}
               </small>
             </div>
           )}
@@ -238,10 +243,10 @@ export default function CampaignProgress({
               <div className="bg-light p-3 rounded">
                 <h6 className="mb-2">Campaign Stats</h6>
                 <small className="text-muted d-block">
-                  Goal: ${campaignData.fundingGoal.toLocaleString()}
+                  Goal: ${fundingGoal.toLocaleString()}
                 </small>
                 <small className="text-muted d-block">
-                  Current Funding: ${campaignData.currentFunding.toFixed(2)}
+                  Current Funding: ${currentFunding.toFixed(2)}
                 </small>
                 <small className="text-muted d-block">
                   Progress: {progressPercentage.toFixed(1)}%

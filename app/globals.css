@@ -1,3 +1,16 @@
+/* Global font family */
+:root {
+  --font-nunito-sans: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  font-family: var(--font-nunito-sans) !important;
+}
+
+body {
+  font-family: var(--font-nunito-sans) !important;
+}
+
 .loading-container {
   min-height: 200px;
 }

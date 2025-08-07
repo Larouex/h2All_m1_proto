@@ -1,6 +1,6 @@
 "use client";
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Nunito_Sans } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
@@ -10,19 +10,38 @@ import Footer from "@/components/Footer";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const nunitoSans = Nunito_Sans({
+  variable: "--font-nunito-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdminPage = pathname?.startsWith("/admin");
+  const isClaimPage = pathname === "/claim";
+  const isEmailClaimPage = pathname === "/emailclaim";
+  const isTrackPage = pathname === "/track";
+
+  // Check if we're on redeem subdomain and handle redirects
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      const isRedeemSubdomain = hostname === "redeem.h2all.com";
+
+      if (isRedeemSubdomain) {
+        // On redeem subdomain, only allow claim flow pages
+        const allowedPages = ["/claim", "/emailclaim", "/track"];
+        const isAllowedPage = allowedPages.includes(pathname);
+
+        if (!isAllowedPage && !isAdminPage) {
+          // Redirect to main site for any other pages
+          window.location.href = "https://h2all.com/";
+          return;
+        }
+      }
+    }
+  }, [pathname, isAdminPage]);
 
   // Set page title and description
   useEffect(() => {
@@ -36,12 +55,35 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // For claim flow pages, render without navbar/footer and without padding
+  if (isClaimPage || isEmailClaimPage || isTrackPage) {
+    return (
+      <AuthProvider>
+        <div className="d-flex flex-column min-vh-100">
+          <main className="flex-grow-1">{children}</main>
+        </div>
+      </AuthProvider>
+    );
+  }
+
+  // For admin pages, render without navbar/footer but with main-content padding
+  if (isAdminPage) {
+    return (
+      <AuthProvider>
+        <div className="d-flex flex-column min-vh-100">
+          <main className="flex-grow-1 main-content">{children}</main>
+        </div>
+      </AuthProvider>
+    );
+  }
+
+  // For regular pages, render with navbar/footer and main-content padding
   return (
     <AuthProvider>
       <div className="d-flex flex-column min-vh-100">
-        {!isAdminPage && <NavBar />}
-        <main className="main-content flex-grow-1">{children}</main>
-        {!isAdminPage && <Footer />}
+        <NavBar />
+        <main className="flex-grow-1 main-content">{children}</main>
+        <Footer />
       </div>
     </AuthProvider>
   );
@@ -61,9 +103,7 @@ export default function RootLayout({
         />
         <title>H2All - Track Your Impact</title>
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${nunitoSans.variable} antialiased`}>
         <LayoutContent>{children}</LayoutContent>
       </body>
     </html>

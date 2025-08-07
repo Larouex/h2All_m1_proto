@@ -1,43 +1,55 @@
-.claimContainer {
-  min-height: 100vh;
-  padding-top: 80px;
+/* Claim Page Styles - Mobile First */
+
+.imageCard {
+  border-radius: 1rem;
 }
 
-.waterBottleCard {
-  max-width: 240px;
-  background-color: #dbeafe !important;
-  /* bg-blue-100 */
-  border: 0 !important;
-  border-radius: 1.5rem !important;
-  /* rounded-3xl */
+.overlayGradient {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
 }
 
-.bottleIconContainer {
-  height: 220px;
-  /* increased to accommodate 200px icon */
+.claimButton {
+  background-color: #f57c00;
+  border-color: #f57c00;
+  border-radius: 0.75rem;
+  font-weight: 600;
 }
 
-.bottleIcon {
-  font-size: 100px;
-  color: #3b82f6;
-  /* text-blue-500 - Bootstrap Icons use font-size, not width/height */
+.claimButton:hover {
+  background-color: #e65100;
+  border-color: #e65100;
+}
+
+.claimButton:disabled {
+  background-color: #ffcc80;
+  border-color: #ffcc80;
+}
+
+.contentContainer {
+  max-width: 400px;
 }
 
 .mainContent {
   max-width: 320px;
 }
 
-.claimButton {
-  max-width: 320px;
+/* Responsive adjustments */
+@media (min-width: 576px) {
+  .contentContainer {
+    max-width: 450px;
+  }
+
+  .mainContent {
+    max-width: 450px;
+  }
 }
 
-.featuresList {
-  max-width: 320px;
-}
+@media (min-width: 768px) {
+  .contentContainer {
+    max-width: 500px;
+  }
 
-.featureDot {
-  width: 8px;
-  height: 8px;
-  background-color: #10b981;
-  /* bg-green-500 */
+  .mainContent {
+    max-width: 500px;
+  }
 }

@@ -1,3 +1,9 @@
+/* Track Page Styles - Mobile First */
+
+.mainContent {
+  max-width: 320px;
+}
+
 .heroSection {
   height: 16rem;
 }
@@ -25,13 +31,23 @@
   height: 12px;
 }
 
-/* Mobile-first optimizations */
-@media (max-width: 576px) {
+/* Responsive adjustments */
+@media (min-width: 576px) {
+  .mainContent {
+    max-width: 450px;
+  }
+
   .heroSection {
     height: 14rem;
   }
 
   .bottomImage {
     height: 250px;
+  }
+}
+
+@media (min-width: 768px) {
+  .mainContent {
+    max-width: 500px;
   }
 }
