@@ -1,14 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { Card, Button, ProgressBar } from "react-bootstrap";
+import { Button } from "react-bootstrap";
+import CampaignProgress from "@/app/components/CampaignProgress";
+import MyImpact from "@/app/components/MyImpact";
 import styles from "./Claimed2.module.css";
 
 export default function Claimed2Page() {
-  const raisedAmount = 412.05;
-  const goalAmount = 5000;
-  const progressPercentage = (raisedAmount / goalAmount) * 100;
-
   return (
     <div className="min-vh-100 bg-white">
       {/* Header */}
@@ -49,65 +47,11 @@ export default function Claimed2Page() {
 
       {/* Main Content - Mobile First */}
       <div className="px-3">
-        {/* Campaign Progress */}
-        <Card className="mt-3 shadow">
-          <Card.Body className="p-3">
-            <h3 className="fs-5 fw-bold text-black mb-2">Campaign Progress</h3>
-            <p className="text-muted mb-3 small">
-              Our goal: clean water within 5 minutes of every home in Kodema
-              Village.
-            </p>
+        {/* Campaign Progress Component */}
+        <CampaignProgress campaignId="kodema-village" className="mt-3" />
 
-            <div className="mb-3">
-              <div className="d-flex align-items-baseline gap-2 mb-2">
-                <span className="fs-3 fw-bold text-black">
-                  ${raisedAmount.toFixed(2)}
-                </span>
-                <span className="text-muted small">
-                  of ${goalAmount.toLocaleString()} raised
-                </span>
-              </div>
-              <ProgressBar
-                now={progressPercentage}
-                className={`mb-0 ${styles.progressBarCustom}`}
-                variant="primary"
-              />
-            </div>
-          </Card.Body>
-        </Card>
-
-        {/* My Impact */}
-        <Card className="mt-3 shadow">
-          <Card.Body className="p-3">
-            <h3 className="fs-5 fw-bold text-black mb-3">My Impact</h3>
-
-            <div className="d-flex flex-column gap-3">
-              <div className="d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center gap-2">
-                  <i className="bi bi-people-fill text-muted"></i>
-                  <span className="text-muted small">Claimed Bottle</span>
-                </div>
-                <span className="fw-bold text-black">1</span>
-              </div>
-
-              <div className="d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center gap-2">
-                  <i className="bi bi-droplet-fill text-primary"></i>
-                  <span className="text-muted small">Clean Water Funded</span>
-                </div>
-                <span className="fw-bold text-black">10L</span>
-              </div>
-
-              <div className="d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center gap-2">
-                  <i className="bi bi-currency-dollar text-success"></i>
-                  <span className="text-muted small">Contribution</span>
-                </div>
-                <span className="fw-bold text-black">$0.05</span>
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
+        {/* My Impact Component */}
+        <MyImpact campaignId="kodema-village" className="mt-3" />
 
         {/* Tell a Friend Button */}
         <div className="mt-3">
