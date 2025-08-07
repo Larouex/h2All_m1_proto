@@ -50,8 +50,19 @@ export default function Claimed2Page() {
         {/* Campaign Progress Component */}
         <CampaignProgress campaignId="kodema-village" className="mt-3" />
 
-        {/* My Impact Component */}
-        <MyImpact campaignId="kodema-village" className="mt-3" />
+        {/* Total Impact Component - Shows ALL campaigns */}
+        <div className="mt-3">
+          <h4 className="fs-5 fw-bold text-black mb-2">Your Total Impact</h4>
+          <MyImpact className="mb-3" />
+        </div>
+
+        {/* Campaign-Specific Impact Component */}
+        <div className="mt-3">
+          <h4 className="fs-5 fw-bold text-black mb-2">
+            Your Kodema Village Impact
+          </h4>
+          <MyImpact campaignId="kodema-village" />
+        </div>
 
         {/* Tell a Friend Button */}
         <div className="mt-3">

@@ -52,12 +52,20 @@ export default function MyImpact({
         params.append("campaignId", campaignId);
       }
 
-      const response = await fetch(`/api/user/impact?${params}`);
+      const apiUrl = `/api/user/impact?${params}`;
+      console.log("MyImpact: Fetching impact data from:", apiUrl);
+      console.log("MyImpact: User ID:", user.id);
+      console.log("MyImpact: Campaign ID:", campaignId || "ALL CAMPAIGNS");
+
+      const response = await fetch(apiUrl);
+      console.log("MyImpact: Response status:", response.status);
 
       if (response.ok) {
         const data = await response.json();
+        console.log("MyImpact: Received data:", data);
         setImpactData(data);
       } else if (response.status === 404) {
+        console.log("MyImpact: No impact data found (404)");
         // No impact data found - set default values
         setImpactData({
           claimedBottles: 0,
@@ -66,10 +74,11 @@ export default function MyImpact({
         });
       } else {
         const errorData = await response.json();
+        console.error("MyImpact: API error:", errorData);
         setError(errorData.error || "Failed to fetch impact data");
       }
     } catch (err) {
-      console.error("Error fetching impact data:", err);
+      console.error("MyImpact: Network error:", err);
       setError("Network error while fetching impact data");
     } finally {
       setLoading(false);
