@@ -33,24 +33,12 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy startup script and database files
-COPY --chown=nextjs:nodejs start.sh ./
-COPY --chown=nextjs:nodejs db/ ./db/
-COPY --chown=nextjs:nodejs drizzle.config.ts ./
-COPY --chown=nextjs:nodejs package.json ./
-
-# Install drizzle-kit for migrations
-RUN npm install drizzle-kit
-
-# Make startup script executable
-RUN chmod +x start.sh
-
 USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
 # Run the application
-CMD ["./start.sh"]
+CMD ["node", "server.js"]
