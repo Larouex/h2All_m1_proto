@@ -25,10 +25,11 @@ import { verifyToken } from "@/app/lib/auth";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const campaign = await campaignQueries.findById(params.id);
+    const { id } = await params;
+    const campaign = await campaignQueries.findById(id);
 
     if (!campaign) {
       return NextResponse.json(
@@ -107,9 +108,10 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Verify admin authentication
     const authToken = request.cookies.get("auth-token")?.value;
 
@@ -135,7 +137,7 @@ export async function PUT(
       body;
 
     // Check if campaign exists
-    const existingCampaign = await campaignQueries.findById(params.id);
+    const existingCampaign = await campaignQueries.findById(id);
 
     if (!existingCampaign) {
       return NextResponse.json(
@@ -160,7 +162,7 @@ export async function PUT(
     if (maxRedemptions !== undefined)
       updateData.maxRedemptions = maxRedemptions;
 
-    const updatedCampaign = await campaignQueries.update(params.id, updateData);
+    const updatedCampaign = await campaignQueries.update(id, updateData);
 
     return NextResponse.json({
       id: updatedCampaign.id,
@@ -215,9 +217,10 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Verify admin authentication
     const authToken = request.cookies.get("auth-token")?.value;
 
@@ -238,7 +241,7 @@ export async function DELETE(
     }
 
     // Check if campaign exists
-    const existingCampaign = await campaignQueries.findById(params.id);
+    const existingCampaign = await campaignQueries.findById(id);
 
     if (!existingCampaign) {
       return NextResponse.json(
@@ -248,11 +251,11 @@ export async function DELETE(
     }
 
     // Delete campaign
-    await campaignQueries.delete(params.id);
+    await campaignQueries.delete(id);
 
     return NextResponse.json({
       message: "Campaign deleted successfully",
-      deletedId: params.id,
+      deletedId: id,
     });
   } catch (error) {
     console.error("Error in DELETE /api/campaigns/[id]:", error);

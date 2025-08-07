@@ -1,0 +1,29 @@
+# Railway Service Configuration
+#
+# This file configures the deployment settings for Railway
+
+# Build settings
+build:
+  # Use the build script from package.json
+  buildCommand: npm run build
+
+# Runtime settings
+deploy:
+  # Use the start script from package.json
+  startCommand: npm run start
+  # Health check endpoint
+  healthcheckPath: /health
+
+# Environment variables
+env:
+  # Set NODE_ENV for production
+  NODE_ENV: production
+  # Default port if not provided by Railway
+  PORT: 3000
+
+# Resource settings
+resource:
+  # Memory limit for the service
+  memory: 512
+  # CPU limit
+  cpu: 0.5
