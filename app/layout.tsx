@@ -22,6 +22,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const isClaimPage = pathname === "/claim";
   const isEmailClaimPage = pathname === "/emailclaim";
   const isTrackPage = pathname === "/track";
+  const isHomePage = pathname === "/";
 
   // Check if we're on redeem subdomain and handle redirects
   useEffect(() => {
@@ -55,8 +56,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // For claim flow pages, render without navbar/footer and without padding
-  if (isClaimPage || isEmailClaimPage || isTrackPage) {
+  // For claim flow pages or home page, render without navbar/footer and without padding
+  if (isClaimPage || isEmailClaimPage || isTrackPage || isHomePage) {
     return (
       <AuthProvider>
         <div className="d-flex flex-column min-vh-100">
