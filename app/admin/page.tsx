@@ -123,6 +123,24 @@ export default function AdminDashboard() {
             </Col>
 
             <Col md={6} className="mb-4">
+              <Card className="h-100 border-success">
+                <Card.Body>
+                  <Card.Title>📧 Email Claims Management</Card.Title>
+                  <Card.Text>
+                    Monitor and manage email claim submissions. View statistics,
+                    edit claim counts, and manage user email data.
+                  </Card.Text>
+                  <Button
+                    variant="success"
+                    onClick={() => router.push("/admin/email-claims")}
+                  >
+                    Manage Email Claims
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col md={6} className="mb-4">
               <Card className="h-100 border-primary">
                 <Card.Body>
                   <Card.Title>🔐 Secure Code Generation</Card.Title>
@@ -210,6 +228,13 @@ export default function AdminDashboard() {
                   User Management
                 </Button>
                 <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => router.push("/admin/email-claims")}
+                >
+                  📧 Email Claims
+                </Button>
+                <Button
                   variant="outline-info"
                   size="sm"
                   onClick={() => router.push("/admin/test-cookies")}
@@ -240,6 +265,13 @@ export default function AdminDashboard() {
                   onClick={() => window.open("/api/health", "_blank")}
                 >
                   System Health
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => router.push("/admin/database-init")}
+                >
+                  🗄️ DB Init
                 </Button>
               </div>
             </Card.Body>

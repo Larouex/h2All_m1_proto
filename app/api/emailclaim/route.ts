@@ -63,6 +63,18 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error processing email claim:", error);
+    
+    // Check if it's a table doesn't exist error
+    if (error instanceof Error && error.message.includes('relation "email_claims" does not exist')) {
+      return NextResponse.json(
+        { 
+          error: "Email claims system is not yet initialized. Please contact support.",
+          code: "TABLE_NOT_EXISTS"
+        },
+        { status: 503 }
+      );
+    }
+    
     return NextResponse.json(
       { error: "Failed to process email claim" },
       { status: 500 }
