@@ -92,20 +92,21 @@ export default function AdminDatabaseInit() {
             </Card.Header>
             <Card.Body>
               <p>
-                Initialize the email_claims table in the production database. This is required
-                for the email claim functionality to work properly.
+                Initialize the email_claims table in the production database.
+                This is required for the email claim functionality to work
+                properly.
               </p>
-              
+
               <div className="d-flex gap-2 mb-3">
-                <Button 
-                  variant="primary" 
+                <Button
+                  variant="primary"
                   onClick={handleMigration}
                   disabled={loading}
                 >
                   {loading ? <Spinner size="sm" /> : "Create Table"}
                 </Button>
-                <Button 
-                  variant="outline-info" 
+                <Button
+                  variant="outline-info"
                   onClick={handleCheck}
                   disabled={loading}
                 >

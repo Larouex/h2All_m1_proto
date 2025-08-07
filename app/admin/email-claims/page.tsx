@@ -61,8 +61,10 @@ export default function AdminEmailClaims() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`/api/admin/email-claims?page=${page}&limit=20`);
-      
+      const response = await fetch(
+        `/api/admin/email-claims?page=${page}&limit=20`
+      );
+
       if (response.ok) {
         const result = await response.json();
         setData(result);
@@ -77,14 +79,19 @@ export default function AdminEmailClaims() {
   };
 
   const handleDelete = async (email: string) => {
-    if (!confirm(`Are you sure you want to delete the email claim for ${email}?`)) {
+    if (
+      !confirm(`Are you sure you want to delete the email claim for ${email}?`)
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/admin/email-claims?email=${encodeURIComponent(email)}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/admin/email-claims?email=${encodeURIComponent(email)}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         await fetchEmailClaims(currentPage);
@@ -155,11 +162,23 @@ export default function AdminEmailClaims() {
 
     return (
       <Pagination>
-        <Pagination.First onClick={() => setCurrentPage(1)} disabled={page === 1} />
-        <Pagination.Prev onClick={() => setCurrentPage(page - 1)} disabled={page === 1} />
+        <Pagination.First
+          onClick={() => setCurrentPage(1)}
+          disabled={page === 1}
+        />
+        <Pagination.Prev
+          onClick={() => setCurrentPage(page - 1)}
+          disabled={page === 1}
+        />
         {items}
-        <Pagination.Next onClick={() => setCurrentPage(page + 1)} disabled={page === totalPages} />
-        <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={page === totalPages} />
+        <Pagination.Next
+          onClick={() => setCurrentPage(page + 1)}
+          disabled={page === totalPages}
+        />
+        <Pagination.Last
+          onClick={() => setCurrentPage(totalPages)}
+          disabled={page === totalPages}
+        />
       </Pagination>
     );
   };
@@ -202,7 +221,9 @@ export default function AdminEmailClaims() {
           <Col md={3}>
             <Card className="text-center">
               <Card.Body>
-                <h3 className="text-primary">{data.stats.totalEmails.toLocaleString()}</h3>
+                <h3 className="text-primary">
+                  {data.stats.totalEmails.toLocaleString()}
+                </h3>
                 <p className="mb-0">Total Emails</p>
               </Card.Body>
             </Card>
@@ -210,7 +231,9 @@ export default function AdminEmailClaims() {
           <Col md={3}>
             <Card className="text-center">
               <Card.Body>
-                <h3 className="text-success">{data.stats.totalClaims.toLocaleString()}</h3>
+                <h3 className="text-success">
+                  {data.stats.totalClaims.toLocaleString()}
+                </h3>
                 <p className="mb-0">Total Claims</p>
               </Card.Body>
             </Card>
@@ -239,7 +262,9 @@ export default function AdminEmailClaims() {
         <Col>
           <Card>
             <Card.Header>
-              <h5 className="mb-0">Email Claims ({data?.pagination.totalCount.toLocaleString()})</h5>
+              <h5 className="mb-0">
+                Email Claims ({data?.pagination.totalCount.toLocaleString()})
+              </h5>
             </Card.Header>
             <Card.Body className="p-0">
               <Table responsive striped>
@@ -257,7 +282,9 @@ export default function AdminEmailClaims() {
                     <tr key={claim.id}>
                       <td>{claim.email}</td>
                       <td>
-                        <Badge bg={claim.claimCount > 5 ? "warning" : "secondary"}>
+                        <Badge
+                          bg={claim.claimCount > 5 ? "warning" : "secondary"}
+                        >
                           {claim.claimCount}
                         </Badge>
                       </td>
@@ -314,7 +341,9 @@ export default function AdminEmailClaims() {
                   type="number"
                   min="0"
                   value={editClaimCount}
-                  onChange={(e) => setEditClaimCount(parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setEditClaimCount(parseInt(e.target.value) || 0)
+                  }
                 />
               </Form.Group>
             </Form>
