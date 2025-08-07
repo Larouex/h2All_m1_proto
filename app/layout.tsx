@@ -31,18 +31,18 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       const isRedeemSubdomain = hostname === "redeem.h2all.com";
 
       if (isRedeemSubdomain) {
-        // On redeem subdomain, only allow claim flow pages
+        // On redeem subdomain, only allow these specific pages
         const allowedPages = ["/claim", "/emailclaim", "/track"];
         const isAllowedPage = allowedPages.includes(pathname);
 
-        if (!isAllowedPage && !isAdminPage) {
-          // Redirect to main site for any other pages
+        if (!isAllowedPage) {
+          // Redirect to main site for any other pages (including admin)
           window.location.href = "https://h2all.com/";
           return;
         }
       }
     }
-  }, [pathname, isAdminPage]);
+  }, [pathname]);
 
   // Set page title and description
   useEffect(() => {
