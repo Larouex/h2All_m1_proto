@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { campaigns, type NewCampaign } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { withAdminAuth } from "@/src/app/lib/api-security";
 
-export async function GET() {
+async function handleGET() {
   try {
     const campaignData = await db.select().from(campaigns);
 
@@ -60,7 +61,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -225,3 +226,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export protected endpoints
+export const GET = withAdminAuth(handleGET);
+export const POST = withAdminAuth(handlePOST);

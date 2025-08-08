@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { userQueries } from "@/app/lib/database-pg";
+import { withAdminAuth } from "@/src/app/lib/api-security";
 
 // GET /api/admin/users - List all users
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
 }
 
 // PUT /api/admin/users - Update user status
-export async function PUT(request: NextRequest) {
+async function handlePUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { userId, updates } = body;
@@ -118,7 +119,7 @@ export async function PUT(request: NextRequest) {
 }
 
 // DELETE /api/admin/users - Delete user permanently
-export async function DELETE(request: NextRequest) {
+async function handleDELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("id");
@@ -161,3 +162,8 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+// Export protected endpoints
+export const GET = withAdminAuth(handleGET);
+export const PUT = withAdminAuth(handlePUT);
+export const DELETE = withAdminAuth(handleDELETE);
