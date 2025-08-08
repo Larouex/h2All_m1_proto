@@ -141,6 +141,42 @@ export default function AdminDashboard() {
             </Col>
 
             <Col md={6} className="mb-4">
+              <Card className="h-100 border-info">
+                <Card.Body>
+                  <Card.Title>🚀 Projects Management</Card.Title>
+                  <Card.Text>
+                    Manage water projects, funding goals, and project status.
+                    Track funding progress and project completion.
+                  </Card.Text>
+                  <Button
+                    variant="info"
+                    onClick={() => router.push("/admin/projects")}
+                  >
+                    Manage Projects
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col md={6} className="mb-4">
+              <Card className="h-100 border-warning">
+                <Card.Body>
+                  <Card.Title>📰 Subscriptions Management</Card.Title>
+                  <Card.Text>
+                    Monitor newsletter subscriptions, submission counters, and
+                    campaign tracking data for all users.
+                  </Card.Text>
+                  <Button
+                    variant="warning"
+                    onClick={() => router.push("/admin/subscriptions")}
+                  >
+                    Manage Subscriptions
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col md={6} className="mb-4">
               <Card className="h-100 border-primary">
                 <Card.Body>
                   <Card.Title>🔐 Secure Code Generation</Card.Title>
@@ -233,6 +269,20 @@ export default function AdminDashboard() {
                   onClick={() => router.push("/admin/email-claims")}
                 >
                   📧 Email Claims
+                </Button>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => router.push("/admin/projects")}
+                >
+                  🚀 Projects
+                </Button>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => router.push("/admin/subscriptions")}
+                >
+                  📰 Subscriptions
                 </Button>
                 <Button
                   variant="outline-info"

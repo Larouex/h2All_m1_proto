@@ -44,11 +44,14 @@ export async function POST(request: NextRequest) {
       );
     } else {
       // Create new email claim
+      const now = new Date();
       result = await db
         .insert(emailClaims)
         .values({
           email: email,
           claimCount: 1,
+          createdAt: now,
+          updatedAt: now,
         })
         .returning();
 
