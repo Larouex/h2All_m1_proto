@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "react-bootstrap";
 import { useAuth } from "@/app/lib/auth-context";
 
@@ -38,75 +38,75 @@ export default function MyImpact({
   const [error, setError] = useState<string | null>(null);
 
   // Fetch user impact data
-  const fetchImpactData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Check if user has an email stored from email claim flow
-      const userEmail = localStorage.getItem("userEmail");
-
-      let apiUrl: string;
-      let logContext: string;
-
-      if (userEmail) {
-        // Use email-based impact API
-        const params = new URLSearchParams();
-        params.append("email", userEmail);
-        apiUrl = `/api/user/email-impact?${params}`;
-        logContext = `Email: ${userEmail}`;
-      } else if (isAuthenticated && user) {
-        // Use user-based impact API (existing functionality)
-        const params = new URLSearchParams();
-        params.append("userId", user.id);
-        if (campaignId) {
-          params.append("campaignId", campaignId);
-        }
-        apiUrl = `/api/user/impact?${params}`;
-        logContext = `User ID: ${user.id}, Campaign ID: ${
-          campaignId || "ALL CAMPAIGNS"
-        }`;
-      } else {
-        // No user email or authentication
-        setLoading(false);
-        setError("Please log in or claim a bottle to view your impact");
-        return;
-      }
-
-      console.log("MyImpact: Fetching impact data from:", apiUrl);
-      console.log("MyImpact: Context:", logContext);
-
-      const response = await fetch(apiUrl);
-      console.log("MyImpact: Response status:", response.status);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("MyImpact: Received data:", data);
-        setImpactData(data);
-      } else if (response.status === 404) {
-        console.log("MyImpact: No impact data found (404)");
-        // No impact data found - set default values
-        setImpactData({
-          claimedBottles: 0,
-          totalContribution: 0,
-          waterFunded: 0,
-        });
-      } else {
-        const errorData = await response.json();
-        console.error("MyImpact: API error:", errorData);
-        setError(errorData.error || "Failed to fetch impact data");
-      }
-    } catch (err) {
-      console.error("MyImpact: Network error:", err);
-      setError("Network error while fetching impact data");
-    } finally {
-      setLoading(false);
-    }
-  }, [user, isAuthenticated, campaignId]);
-
   useEffect(() => {
+    const fetchImpactData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Check if user has an email stored from email claim flow
+        const userEmail = localStorage.getItem("userEmail");
+
+        let apiUrl: string;
+        let logContext: string;
+
+        if (userEmail) {
+          // Use email-based impact API
+          const params = new URLSearchParams();
+          params.append("email", userEmail);
+          apiUrl = `/api/user/email-impact?${params}`;
+          logContext = `Email: ${userEmail}`;
+        } else if (isAuthenticated && user) {
+          // Use user-based impact API (existing functionality)
+          const params = new URLSearchParams();
+          params.append("userId", user.id);
+          if (campaignId) {
+            params.append("campaignId", campaignId);
+          }
+          apiUrl = `/api/user/impact?${params}`;
+          logContext = `User ID: ${user.id}, Campaign ID: ${
+            campaignId || "ALL CAMPAIGNS"
+          }`;
+        } else {
+          // No user email or authentication
+          setLoading(false);
+          setError("Please log in or claim a bottle to view your impact");
+          return;
+        }
+
+        console.log("MyImpact: Fetching impact data from:", apiUrl);
+        console.log("MyImpact: Context:", logContext);
+
+        const response = await fetch(apiUrl);
+        console.log("MyImpact: Response status:", response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("MyImpact: Received data:", data);
+          setImpactData(data);
+        } else if (response.status === 404) {
+          console.log("MyImpact: No impact data found (404)");
+          // No impact data found - set default values
+          setImpactData({
+            claimedBottles: 0,
+            totalContribution: 0,
+            waterFunded: 0,
+          });
+        } else {
+          const errorData = await response.json();
+          console.error("MyImpact: API error:", errorData);
+          setError(errorData.error || "Failed to fetch impact data");
+        }
+      } catch (err) {
+        console.error("MyImpact: Network error:", err);
+        setError("Network error while fetching impact data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchImpactData();
-  }, [fetchImpactData]);
+  }, [user, isAuthenticated, campaignId]);
 
   // Format impact metrics for display
   const getImpactMetrics = (): ImpactMetric[] => {
