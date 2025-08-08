@@ -1,0 +1,11 @@
+/* Admin Panel Styles */
+.admin-loading-container {
+  min-height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-icon-large {
+  font-size: 3rem;
+}

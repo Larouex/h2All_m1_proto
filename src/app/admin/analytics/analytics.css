@@ -1,4 +1,11 @@
-/* Analytics Dashboard Styles */
+/* Additional styles for admin authentication */
+.loading-container {
+  min-height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .analytics-dashboard {
   display: flex;
   min-height: 100vh;

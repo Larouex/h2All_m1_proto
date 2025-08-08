@@ -1,0 +1,43 @@
+/* Footer Component Styles */
+.footer {
+  margin-top: auto;
+  background-color: #343a40 !important;
+  border-top: 1px solid #495057;
+  font-size: 0.875rem;
+}
+
+.socialButton {
+  border: none !important;
+  background: none !important;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+}
+
+.socialButton:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+.socialButton:focus {
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.5);
+  outline: none;
+}
+
+.socialButton i {
+  transition: color 0.2s ease;
+}
+
+.socialButton:hover i {
+  color: #007bff !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .footer {
+    font-size: 0.8rem;
+  }
+
+  .socialButton {
+    font-size: 0.9rem;
+  }
+}
