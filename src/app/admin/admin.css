@@ -9,3 +9,8 @@
 .admin-icon-large {
   font-size: 3rem;
 }
+
+.sticky-nav {
+  position: sticky;
+  top: 20px;
+}

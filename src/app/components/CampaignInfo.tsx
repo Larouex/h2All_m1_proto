@@ -1,7 +1,17 @@
 "use client";
 
-import React from "react";
-import { Card, Button, Spinner, Alert, Badge } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  Row,
+  Col,
+  ProgressBar,
+  Badge,
+  Spinner,
+  Alert,
+  Button,
+} from "react-bootstrap";
+import { formatDateSimple } from "../lib/utils/dateUtils";
 import Link from "next/link";
 import styles from "./CampaignInfo.module.css";
 
@@ -322,15 +332,13 @@ export default function CampaignInfo({
             <div className="col-md-6">
               <small>
                 <i className="bi bi-calendar-event me-1"></i>
-                <strong>Start:</strong>{" "}
-                {new Date(campaign.startDate).toLocaleDateString()}
+                <strong>Start:</strong> {formatDateSimple(campaign.startDate)}
               </small>
             </div>
             <div className="col-md-6">
               <small>
                 <i className="bi bi-calendar-x me-1"></i>
-                <strong>End:</strong>{" "}
-                {new Date(campaign.endDate).toLocaleDateString()}
+                <strong>End:</strong> {formatDateSimple(campaign.endDate)}
               </small>
             </div>
           </div>

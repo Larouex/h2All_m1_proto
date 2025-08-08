@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { Table, Form, InputGroup, Button } from "react-bootstrap";
 import { DateRange } from "@/types/analytics";
 import { useAnalytics } from "@/context/AnalyticsContext";
+import { formatDateSimple } from "../../../lib/utils/dateUtils";
 
 interface TableWidgetProps {
   title: string;
@@ -137,42 +138,27 @@ export default function TableWidget({ title, config }: TableWidgetProps) {
     }
   };
 
-  const formatCellValue = (value: string | number | Date, column: string) => {
-    if (value instanceof Date) {
-      return value.toLocaleDateString();
+  const formatCellValue = (value: any, column: string): string => {
+    if (value === null || value === undefined) {
+      return "Not set";
     }
 
+    // Check if this looks like a date column and format accordingly
+    if (
+      column.toLowerCase().includes("created") ||
+      column.toLowerCase().includes("updated") ||
+      column.toLowerCase().includes("date")
+    ) {
+      return formatDateSimple(value);
+    }
+
+    // Handle other data types
     if (typeof value === "number") {
-      if (
-        column.toLowerCase().includes("goal") ||
-        column.toLowerCase().includes("raised") ||
-        column.toLowerCase().includes("contribution") ||
-        column.toLowerCase().includes("value")
-      ) {
-        return new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(value);
-      }
-
-      if (column.toLowerCase().includes("progress")) {
-        return `${value}%`;
-      }
-
-      return new Intl.NumberFormat("en-US").format(value);
-    }
-
-    if (column.toLowerCase().includes("status")) {
-      return (
-        <span className={`badge bg-${getStatusColor(String(value))}`}>
-          {String(value).charAt(0).toUpperCase() + String(value).slice(1)}
-        </span>
-      );
+      return value.toLocaleString();
     }
 
     return String(value);
   };
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "active":

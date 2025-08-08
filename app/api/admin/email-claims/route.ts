@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import {
+  createEmailClaimUpdateValues,
+  isValidEmail,
+  normalizeEmail,
+} from "../../../../src/app/lib/utils/emailClaimUtils";
 
 export async function GET(request: NextRequest) {
   try {
@@ -104,6 +109,14 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { error: "Valid email address is required" },
+        { status: 400 }
+      );
+    }
+
     if (claimCount < 0) {
       return NextResponse.json(
         { error: "Claim count cannot be negative" },
@@ -111,13 +124,14 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Normalize email and create proper update values
+    const normalizedEmail = normalizeEmail(email);
+    const updateValues = createEmailClaimUpdateValues({ claimCount });
+
     const result = await db
       .update(emailClaims)
-      .set({
-        claimCount: claimCount,
-        updatedAt: new Date(),
-      })
-      .where(eq(emailClaims.email, email))
+      .set(updateValues)
+      .where(eq(emailClaims.email, normalizedEmail))
       .returning();
 
     if (result.length === 0) {
@@ -130,7 +144,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       claim: result[0],
-      message: `Email claim for ${email} updated successfully`,
+      message: `Email claim for ${normalizedEmail} updated successfully`,
     });
   } catch (error) {
     console.error("Error updating email claim:", error);

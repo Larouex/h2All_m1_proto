@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import VersionFooter from "@/app/components/VersionFooter";
+import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
 import styles from "./EmailClaim.module.css";
 
 export default function EmailClaimPage() {
@@ -122,6 +123,8 @@ export default function EmailClaimPage() {
         {/* Version Footer */}
         <VersionFooter />
       </div>
+      {/* Google Analytics (production only) */}
+      <GoogleAnalytics />
     </div>
   );
 }

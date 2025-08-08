@@ -2,60 +2,62 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import {
+  createEmailClaimInsertValues,
+  createEmailClaimUpdateValues,
+  isValidEmail,
+  normalizeEmail,
+} from "../../../src/app/lib/utils/emailClaimUtils";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email } = body;
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
+    // Validate email format using utility function
+    if (!email || !isValidEmail(email)) {
       return NextResponse.json(
         { error: "Valid email address is required" },
         { status: 400 }
       );
     }
 
+    // Normalize email address
+    const normalizedEmail = normalizeEmail(email);
+
     // Check if email already exists
     const existingClaim = await db
       .select()
       .from(emailClaims)
-      .where(eq(emailClaims.email, email))
+      .where(eq(emailClaims.email, normalizedEmail))
       .limit(1);
 
     let result;
 
     if (existingClaim.length > 0) {
       // Update existing claim - increment count and update timestamp
+      const updateValues = createEmailClaimUpdateValues({
+        claimCount: existingClaim[0].claimCount + 1,
+      });
+
       result = await db
         .update(emailClaims)
-        .set({
-          claimCount: existingClaim[0].claimCount + 1,
-          updatedAt: new Date(),
-        })
-        .where(eq(emailClaims.email, email))
+        .set(updateValues)
+        .where(eq(emailClaims.email, normalizedEmail))
         .returning();
 
       console.log(
-        `Updated email claim for ${email}, new count: ${
+        `Updated email claim for ${normalizedEmail}, new count: ${
           existingClaim[0].claimCount + 1
         }`
       );
     } else {
-      // Create new email claim
-      const now = new Date();
-      result = await db
-        .insert(emailClaims)
-        .values({
-          email: email,
-          claimCount: 1,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
+      // Create new email claim with proper timestamps
+      const insertValues = createEmailClaimInsertValues(normalizedEmail, 1);
 
-      console.log(`Created new email claim for ${email}`);
+      result = await db.insert(emailClaims).values(insertValues).returning();
+
+      console.log(`Created new email claim for ${normalizedEmail}`);
     }
 
     return NextResponse.json({

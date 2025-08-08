@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Button } from "react-bootstrap";
 import { useState } from "react";
 import VersionFooter from "@/app/components/VersionFooter";
+import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
 import styles from "./Claim.module.css";
 
 export default function ClaimPage() {
@@ -90,6 +91,8 @@ export default function ClaimPage() {
         {/* Version Footer */}
         <VersionFooter />
       </div>
+      {/* Google Analytics (production only) */}
+      <GoogleAnalytics />
     </div>
   );
 }

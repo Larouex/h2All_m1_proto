@@ -13,6 +13,7 @@ import {
   Modal,
 } from "react-bootstrap";
 import { useAuth } from "@/lib/auth-context";
+import { formatDate } from "../lib/utils/dateUtils";
 
 interface Campaign {
   id: string;
@@ -176,14 +177,6 @@ export default function RedemptionConfirmation({
       style: "currency",
       currency: "USD",
     }).format(amount);
-  };
-
-  const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
   };
 
   // Success state
