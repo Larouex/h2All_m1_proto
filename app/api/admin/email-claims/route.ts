@@ -7,8 +7,9 @@ import {
   isValidEmail,
   normalizeEmail,
 } from "../../../../src/app/lib/utils/emailClaimUtils";
+import { withAdminAuth } from "../../../../src/app/lib/api-security";
 
-export async function GET(request: NextRequest) {
+async function handleGetEmailClaims(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -60,7 +61,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+// Export with admin authentication
+export const GET = withAdminAuth(handleGetEmailClaims);
+
+async function handleDeleteEmailClaim(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
@@ -97,7 +101,9 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export const DELETE = withAdminAuth(handleDeleteEmailClaim);
+
+async function handleUpdateEmailClaim(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, claimCount } = body;
@@ -154,3 +160,5 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
+export const PUT = withAdminAuth(handleUpdateEmailClaim);

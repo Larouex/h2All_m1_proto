@@ -8,8 +8,9 @@ import {
   isValidEmail,
   normalizeEmail,
 } from "../../../src/app/lib/utils/emailClaimUtils";
+import { withOriginAuth } from "../../../src/app/lib/api-security";
 
-export async function POST(request: NextRequest) {
+async function handleEmailClaim(request: NextRequest) {
   try {
     const body = await request.json();
     const { email } = body;
@@ -90,6 +91,9 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export POST handler with origin protection (only allow from /emailclaim page)
+export const POST = withOriginAuth(handleEmailClaim, ["/emailclaim"]);
 
 export async function GET(request: NextRequest) {
   try {

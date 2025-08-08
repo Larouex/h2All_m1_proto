@@ -138,7 +138,7 @@ export default function TableWidget({ title, config }: TableWidgetProps) {
     }
   };
 
-  const formatCellValue = (value: any, column: string): string => {
+  const formatCellValue = (value: unknown, column: string): string => {
     if (value === null || value === undefined) {
       return "Not set";
     }
@@ -149,7 +149,10 @@ export default function TableWidget({ title, config }: TableWidgetProps) {
       column.toLowerCase().includes("updated") ||
       column.toLowerCase().includes("date")
     ) {
-      return formatDateSimple(value);
+      // Type guard for date values
+      if (typeof value === "string" || value instanceof Date) {
+        return formatDateSimple(value);
+      }
     }
 
     // Handle other data types
@@ -159,25 +162,6 @@ export default function TableWidget({ title, config }: TableWidgetProps) {
 
     return String(value);
   };
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return "success";
-      case "completed":
-        return "primary";
-      case "used":
-        return "secondary";
-      case "expired":
-        return "danger";
-      case "draft":
-        return "warning";
-      case "pending":
-        return "info";
-      default:
-        return "secondary";
-    }
-  };
-
   const getColumnLabel = (column: string) => {
     return column
       .replace(/([A-Z])/g, " $1")
