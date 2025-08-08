@@ -19,7 +19,7 @@ export default function VersionFooter() {
 
   return (
     <div className="text-center py-2 mt-4">
-      <small className={`text-muted ${styles.versionText}`}>
+      <small className={`text-white ${styles.versionText}`}>
         v{version} • {build} • {buildDate} {buildTime}
       </small>
     </div>

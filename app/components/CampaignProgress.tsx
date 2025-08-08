@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, Button, ProgressBar, Form, Modal } from "react-bootstrap";
 import { useAuth } from "@/app/lib/auth-context";
 
 interface CampaignProgressProps {
-  campaignId?: string;
   className?: string;
 }
 
@@ -20,137 +19,51 @@ interface CampaignData {
 }
 
 export default function CampaignProgress({
-  campaignId = "default",
   className = "",
 }: CampaignProgressProps) {
   const { user } = useAuth();
-  const [campaignData, setCampaignData] = useState<CampaignData | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  // Static placeholder data instead of database fetch
+  const [campaignData] = useState<CampaignData>({
+    id: "kodema-village",
+    name: "Campaign Progress",
+    description:
+      "Our goal: clean water within 5 minutes of every home in Kodema Village.",
+    fundingGoal: 5000,
+    currentFunding: 1250.5,
+    totalRedemptionValue: 1250.5,
+    isActive: true,
+  });
+
   const [showEditor, setShowEditor] = useState(false);
   const [editData, setEditData] = useState({
-    title: "",
-    description: "",
+    title: campaignData.name,
+    description: campaignData.description,
   });
   const [saving, setSaving] = useState(false);
 
-  // Fetch campaign data from database
-  const fetchCampaignData = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/campaigns?id=${campaignId}`);
-
-      if (response.ok) {
-        const data = await response.json();
-        setCampaignData(data);
-        setEditData({
-          title: data.name || "Campaign Progress",
-          description:
-            data.description ||
-            "Our goal: clean water within 5 minutes of every home.",
-        });
-      } else {
-        // Fallback to default data if campaign not found
-        const defaultData: CampaignData = {
-          id: "default",
-          name: "Campaign Progress",
-          description:
-            "Our goal: clean water within 5 minutes of every home in Kodema Village.",
-          fundingGoal: 5000,
-          currentFunding: 412.05,
-          totalRedemptionValue: 412.05,
-          isActive: true,
-        };
-        setCampaignData(defaultData);
-        setEditData({
-          title: defaultData.name,
-          description: defaultData.description,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching campaign data:", error);
-      // Fallback to default data on error
-      const defaultData: CampaignData = {
-        id: "default",
-        name: "Campaign Progress",
-        description:
-          "Our goal: clean water within 5 minutes of every home in Kodema Village.",
-        fundingGoal: 5000,
-        currentFunding: 412.05,
-        totalRedemptionValue: 412.05,
-        isActive: true,
-      };
-      setCampaignData(defaultData);
-      setEditData({
-        title: defaultData.name,
-        description: defaultData.description,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Save campaign updates
+  // Save campaign updates (placeholder - doesn't actually save to database)
   const handleSave = async () => {
     if (!campaignData || !user?.isAdmin) return;
 
     try {
       setSaving(true);
-      const response = await fetch(`/api/campaigns/${campaignData.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: editData.title,
-          description: editData.description,
-        }),
+      // Simulate saving delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Just update local state for demo purposes
+      setEditData({
+        title: editData.title,
+        description: editData.description,
       });
 
-      if (response.ok) {
-        const updatedData = await response.json();
-        setCampaignData(updatedData);
-        setShowEditor(false);
-      } else {
-        console.error("Failed to update campaign");
-      }
+      setShowEditor(false);
     } catch (error) {
       console.error("Error updating campaign:", error);
     } finally {
       setSaving(false);
     }
   };
-
-  useEffect(() => {
-    fetchCampaignData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campaignId]);
-
-  if (loading) {
-    return (
-      <Card className={`shadow ${className}`}>
-        <Card.Body className="p-3 text-center">
-          <div className="spinner-border spinner-border-sm" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="text-muted mt-2 mb-0 small">Loading campaign data...</p>
-        </Card.Body>
-      </Card>
-    );
-  }
-
-  if (
-    !campaignData ||
-    typeof campaignData.currentFunding === "undefined" ||
-    typeof campaignData.fundingGoal === "undefined"
-  ) {
-    return (
-      <Card className={`shadow ${className}`}>
-        <Card.Body className="p-3">
-          <p className="text-muted mb-0">Campaign data not available</p>
-        </Card.Body>
-      </Card>
-    );
-  }
 
   const currentFunding = campaignData.currentFunding || 0;
   const fundingGoal = campaignData.fundingGoal || 5000;

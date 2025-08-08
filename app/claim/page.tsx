@@ -49,20 +49,6 @@ export default function ClaimPage() {
           </div>
         </div>
 
-        {/* Message Text */}
-        <div className="text-center mb-4">
-          <p className="fs-2 fw-medium text-dark mb-0">
-            Millions lack clean, safe water. Your bottle helps change that.
-          </p>
-        </div>
-
-        {/* Funding Information */}
-        <div className="text-center mb-4">
-          <p className="fs-5 fw-medium text-dark mb-0">
-            Your bottle gives 5¢ to fund a clean water well in Uganda.
-          </p>
-        </div>
-
         {/* Call to Action Button */}
         <div className="d-grid gap-2 mb-4">
           <Button
@@ -85,6 +71,20 @@ export default function ClaimPage() {
               "Claim My Bottle"
             )}
           </Button>
+        </div>
+
+        {/* Message Text */}
+        <div className="text-center mb-4">
+          <p className="fs-2 fw-medium text-dark mb-0">
+            Millions lack clean, safe water. Your bottle helps change that.
+          </p>
+        </div>
+
+        {/* Funding Information */}
+        <div className="text-center mb-4">
+          <p className="fs-5 fw-medium text-dark mb-0">
+            Your bottle gives 5¢ to fund a clean water well in Uganda.
+          </p>
         </div>
 
         {/* Version Footer */}

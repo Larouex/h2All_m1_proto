@@ -15,6 +15,9 @@ interface ImpactData {
   waterFunded: number; // in liters
   campaignName?: string;
   lastRedemptionDate?: string;
+  lastClaimDate?: string;
+  hasData?: boolean;
+  email?: string;
 }
 
 interface ImpactMetric {
@@ -36,26 +39,42 @@ export default function MyImpact({
 
   // Fetch user impact data
   const fetchImpactData = useCallback(async () => {
-    if (!isAuthenticated || !user) {
-      setLoading(false);
-      setError("Please log in to view your impact");
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
 
-      const params = new URLSearchParams();
-      params.append("userId", user.id);
-      if (campaignId) {
-        params.append("campaignId", campaignId);
+      // Check if user has an email stored from email claim flow
+      const userEmail = localStorage.getItem("userEmail");
+
+      let apiUrl: string;
+      let logContext: string;
+
+      if (userEmail) {
+        // Use email-based impact API
+        const params = new URLSearchParams();
+        params.append("email", userEmail);
+        apiUrl = `/api/user/email-impact?${params}`;
+        logContext = `Email: ${userEmail}`;
+      } else if (isAuthenticated && user) {
+        // Use user-based impact API (existing functionality)
+        const params = new URLSearchParams();
+        params.append("userId", user.id);
+        if (campaignId) {
+          params.append("campaignId", campaignId);
+        }
+        apiUrl = `/api/user/impact?${params}`;
+        logContext = `User ID: ${user.id}, Campaign ID: ${
+          campaignId || "ALL CAMPAIGNS"
+        }`;
+      } else {
+        // No user email or authentication
+        setLoading(false);
+        setError("Please log in or claim a bottle to view your impact");
+        return;
       }
 
-      const apiUrl = `/api/user/impact?${params}`;
       console.log("MyImpact: Fetching impact data from:", apiUrl);
-      console.log("MyImpact: User ID:", user.id);
-      console.log("MyImpact: Campaign ID:", campaignId || "ALL CAMPAIGNS");
+      console.log("MyImpact: Context:", logContext);
 
       const response = await fetch(apiUrl);
       console.log("MyImpact: Response status:", response.status);
@@ -95,8 +114,8 @@ export default function MyImpact({
 
     return [
       {
-        icon: "bi-people-fill",
-        iconColor: "text-muted",
+        icon: "bi-cup-straw",
+        iconColor: "text-primary",
         label: "Claimed Bottles",
         value: impactData.claimedBottles.toString(),
       },
@@ -136,14 +155,16 @@ export default function MyImpact({
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !localStorage.getItem("userEmail")) {
     return (
       <Card className={`shadow ${className}`}>
         <Card.Body className="p-3">
           <h3 className="fs-5 fw-bold text-black mb-3">My Impact</h3>
           <div className="text-center text-muted">
             <i className="bi bi-person-circle fs-3 d-block mb-2"></i>
-            <p className="small mb-2">Sign in to track your impact</p>
+            <p className="small mb-2">
+              Sign in or claim a bottle to track your impact
+            </p>
             <button
               className="btn btn-primary btn-sm"
               onClick={() => (window.location.href = "/auth")}
@@ -185,15 +206,6 @@ export default function MyImpact({
                 </span>
               </div>
             ))}
-
-            {impactData?.lastRedemptionDate && (
-              <div className="mt-2 pt-2 border-top">
-                <small className="text-muted">
-                  Last redemption:{" "}
-                  {new Date(impactData.lastRedemptionDate).toLocaleDateString()}
-                </small>
-              </div>
-            )}
           </div>
         ) : (
           <div className="text-center text-muted py-3">

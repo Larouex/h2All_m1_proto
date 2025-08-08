@@ -48,20 +48,12 @@ export default function TrackPage() {
         </div>
 
         {/* Campaign Progress Component */}
-        <CampaignProgress campaignId="kodema-village" className="mb-3" />
+        <CampaignProgress className="mb-3" />
 
         {/* Total Impact Component - Shows ALL campaigns */}
         <div className="mb-3">
           <h4 className="fs-5 fw-bold text-black mb-2">Your Total Impact</h4>
           <MyImpact className="mb-3" />
-        </div>
-
-        {/* Campaign-Specific Impact Component */}
-        <div className="mb-3">
-          <h4 className="fs-5 fw-bold text-black mb-2">
-            Your Kodema Village Impact
-          </h4>
-          <MyImpact campaignId="kodema-village" />
         </div>
 
         {/* About Section */}
@@ -79,12 +71,7 @@ export default function TrackPage() {
             <p className="small">
               This contaminated source is causing widespread waterborne
               illnesses, affecting children, families, and the future of the
-              community.{" "}
-              <span
-                className={`text-primary text-decoration-underline ${styles.clickableLink}`}
-              >
-                Get to Know Kodema Village
-              </span>
+              community.
             </p>
           </div>
 
