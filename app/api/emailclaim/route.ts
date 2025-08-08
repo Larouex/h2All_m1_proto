@@ -41,11 +41,24 @@ async function handleEmailClaim(request: NextRequest) {
         claimCount: existingClaim[0].claimCount + 1,
       });
 
+      console.log(
+        "📅 DATABASE UPDATE - Sending values to database:",
+        updateValues
+      );
+
       result = await db
         .update(emailClaims)
         .set(updateValues)
         .where(eq(emailClaims.email, normalizedEmail))
         .returning();
+
+      console.log("📅 DATABASE UPDATE - Result from database:", {
+        id: result[0].id,
+        email: result[0].email,
+        claimCount: result[0].claimCount,
+        createdAt: result[0].createdAt,
+        updatedAt: result[0].updatedAt,
+      });
 
       console.log(
         `Updated email claim for ${normalizedEmail}, new count: ${
@@ -56,7 +69,20 @@ async function handleEmailClaim(request: NextRequest) {
       // Create new email claim with proper timestamps
       const insertValues = createEmailClaimInsertValues(normalizedEmail, 1);
 
+      console.log(
+        "📅 DATABASE INSERT - Sending values to database:",
+        insertValues
+      );
+
       result = await db.insert(emailClaims).values(insertValues).returning();
+
+      console.log("📅 DATABASE INSERT - Result from database:", {
+        id: result[0].id,
+        email: result[0].email,
+        claimCount: result[0].claimCount,
+        createdAt: result[0].createdAt,
+        updatedAt: result[0].updatedAt,
+      });
 
       console.log(`Created new email claim for ${normalizedEmail}`);
     }

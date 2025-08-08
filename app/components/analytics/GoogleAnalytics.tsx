@@ -1,12 +1,18 @@
 "use client";
 
 import Script from "next/script";
-
-// Only render GA in production
-const isProd = process.env.NODE_ENV === "production";
+import { useEffect, useState } from "react";
 
 export default function GoogleAnalytics() {
-  if (!isProd) return null;
+  const [isProduction, setIsProduction] = useState(false);
+
+  useEffect(() => {
+    // Only set to true in production environment on client side
+    setIsProduction(process.env.NODE_ENV === "production");
+  }, []);
+
+  // Don't render anything during SSR or in development
+  if (!isProduction) return null;
 
   return (
     <>

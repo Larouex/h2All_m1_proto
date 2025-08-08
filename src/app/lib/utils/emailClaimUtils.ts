@@ -53,12 +53,21 @@ export function createEmailClaimInsertValues(
 ) {
   const now = createTimestamp();
 
-  return {
+  const insertValues = {
     email: email.toLowerCase().trim(),
     claimCount,
     createdAt: now,
     updatedAt: now,
   };
+
+  console.log("📅 CREATE EMAIL CLAIM - Insert values:", {
+    email: insertValues.email,
+    claimCount: insertValues.claimCount,
+    createdAt: insertValues.createdAt.toISOString(),
+    updatedAt: insertValues.updatedAt.toISOString(),
+  });
+
+  return insertValues;
 }
 
 /**
@@ -89,6 +98,12 @@ export function createEmailClaimUpdateValues(
   if (updates.email !== undefined) {
     updateValues.email = updates.email.toLowerCase().trim();
   }
+
+  console.log("📅 UPDATE EMAIL CLAIM - Update values:", {
+    updatedAt: updateValues.updatedAt.toISOString(),
+    claimCount: updateValues.claimCount,
+    email: updateValues.email,
+  });
 
   return updateValues;
 }
