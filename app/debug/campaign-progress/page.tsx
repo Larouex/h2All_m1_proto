@@ -402,27 +402,21 @@ export default function CampaignProgressDebugPage() {
                   <small className="text-muted">
                     Test with Campaign ID: {testCampaignId}
                   </small>
-                  <CampaignProgress
-                    campaignId={testCampaignId}
-                    className="mb-3"
-                  />
+                  <CampaignProgress className="mb-3" />
                 </div>
 
                 <div className="mb-3">
                   <small className="text-muted">
                     Test with Default Campaign
                   </small>
-                  <CampaignProgress campaignId="default" className="mb-3" />
+                  <CampaignProgress className="mb-3" />
                 </div>
 
                 <div className="mb-3">
                   <small className="text-muted">
                     Test with Non-existent Campaign
                   </small>
-                  <CampaignProgress
-                    campaignId="non-existent-campaign"
-                    className="mb-3"
-                  />
+                  <CampaignProgress className="mb-3" />
                 </div>
               </div>
 
