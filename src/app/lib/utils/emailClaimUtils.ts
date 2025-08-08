@@ -51,13 +51,19 @@ export function createEmailClaimInsertValues(
   email: string,
   claimCount: number = 1
 ) {
-  const now = createTimestamp();
+  // FORCE explicit timestamp creation - NEVER null or undefined
+  const now = new Date();
+
+  // Validate the date is valid
+  if (isNaN(now.getTime())) {
+    throw new Error("Failed to create valid timestamp for email claim insert");
+  }
 
   const insertValues = {
     email: email.toLowerCase().trim(),
     claimCount,
-    createdAt: now,
-    updatedAt: now,
+    createdAt: now, // EXPLICIT DATE FROM CODE - NOT DATABASE DEFAULT
+    updatedAt: now, // EXPLICIT DATE FROM CODE - NOT DATABASE DEFAULT
   };
 
   console.log("📅 CREATE EMAIL CLAIM - Insert values:", {
@@ -66,6 +72,11 @@ export function createEmailClaimInsertValues(
     createdAt: insertValues.createdAt.toISOString(),
     updatedAt: insertValues.updatedAt.toISOString(),
   });
+
+  // Final validation - ensure no null/undefined dates
+  if (!insertValues.createdAt || !insertValues.updatedAt) {
+    throw new Error("CRITICAL: createdAt or updatedAt is null/undefined");
+  }
 
   return insertValues;
 }
@@ -81,14 +92,20 @@ export function createEmailClaimUpdateValues(
     email: string;
   }>
 ) {
-  const now = createTimestamp();
+  // FORCE explicit timestamp creation - NEVER null or undefined
+  const now = new Date();
+
+  // Validate the date is valid
+  if (isNaN(now.getTime())) {
+    throw new Error("Failed to create valid timestamp for email claim update");
+  }
 
   const updateValues: {
     updatedAt: Date;
     claimCount?: number;
     email?: string;
   } = {
-    updatedAt: now,
+    updatedAt: now, // EXPLICIT DATE FROM CODE - NOT DATABASE DEFAULT
   };
 
   if (updates.claimCount !== undefined) {
@@ -104,6 +121,11 @@ export function createEmailClaimUpdateValues(
     claimCount: updateValues.claimCount,
     email: updateValues.email,
   });
+
+  // Final validation - ensure updatedAt is not null/undefined
+  if (!updateValues.updatedAt) {
+    throw new Error("CRITICAL: updatedAt is null/undefined");
+  }
 
   return updateValues;
 }

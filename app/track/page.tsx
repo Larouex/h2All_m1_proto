@@ -4,11 +4,13 @@ import Image from "next/image";
 import CampaignProgress from "@/app/components/CampaignProgress";
 import MyImpact from "@/app/components/MyImpact";
 import VersionFooter from "@/app/components/VersionFooter";
+import GoogleAnalytics from "@/app/components/analytics/GoogleAnalytics";
 import styles from "./Track.module.css";
 
 export default function TrackPage() {
   return (
     <div className="bg-white d-flex flex-column align-items-center px-3">
+      <GoogleAnalytics />
       {/* Header */}
       <div className="text-center pt-3 mb-3">
         <h1 className="fs-3 fw-bold text-black mb-0">
