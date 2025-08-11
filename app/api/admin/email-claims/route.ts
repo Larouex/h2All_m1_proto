@@ -6,8 +6,7 @@ import {
   createEmailClaimUpdateValues,
   isValidEmail,
   normalizeEmail,
-} from "../../../../src/app/lib/utils/emailClaimUtils";
-import { withAdminAuth } from "../../../../src/app/lib/api-security";
+} from "../../../lib/utils/emailClaimUtils";
 
 async function handleGetEmailClaims(request: NextRequest) {
   try {
@@ -61,8 +60,8 @@ async function handleGetEmailClaims(request: NextRequest) {
   }
 }
 
-// Export with admin authentication
-export const GET = withAdminAuth(handleGetEmailClaims);
+// Export handlers
+export const GET = handleGetEmailClaims;
 
 async function handleDeleteEmailClaim(request: NextRequest) {
   try {
@@ -101,7 +100,7 @@ async function handleDeleteEmailClaim(request: NextRequest) {
   }
 }
 
-export const DELETE = withAdminAuth(handleDeleteEmailClaim);
+export const DELETE = handleDeleteEmailClaim;
 
 async function handleUpdateEmailClaim(request: NextRequest) {
   try {
@@ -161,4 +160,4 @@ async function handleUpdateEmailClaim(request: NextRequest) {
   }
 }
 
-export const PUT = withAdminAuth(handleUpdateEmailClaim);
+export const PUT = handleUpdateEmailClaim;
