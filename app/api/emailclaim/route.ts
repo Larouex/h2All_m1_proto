@@ -7,7 +7,7 @@ import {
   createEmailClaimUpdateValues,
   isValidEmail,
   normalizeEmail,
-} from "../../../src/app/lib/utils/emailClaimUtils";
+} from "../../lib/utils/emailClaimUtils";
 import { withOriginAuth } from "../../../src/app/lib/api-security";
 
 async function handleEmailClaim(request: NextRequest) {
