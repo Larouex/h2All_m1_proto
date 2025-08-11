@@ -23,9 +23,7 @@
   border-color: #c2410c !important;
 }
 
-.bottomImage {
-  height: 300px;
-}
+
 
 .progressBarCustom {
   height: 12px;
@@ -41,9 +39,7 @@
     height: 14rem;
   }
 
-  .bottomImage {
-    height: 250px;
-  }
+
 }
 
 @media (min-width: 768px) {

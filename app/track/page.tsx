@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import CampaignProgress from "@/app/components/CampaignProgress";
-import MyImpact from "@/app/components/MyImpact";
+import CampaignWithImpact from "@/app/components/CampaignWithImpact";
 import VersionFooter from "@/app/components/VersionFooter";
 import GoogleAnalytics from "@/app/components/analytics/GoogleAnalytics";
 import StickyHeader from "@/app/components/StickyHeader";
@@ -23,68 +22,72 @@ export default function TrackPage() {
             Your bottle has been claimed!
           </span>
         </div>
-
         {/* Hero Section */}
-        <div className="position-relative mb-3">
+        <div className="position-relative mb-3 rounded overflow-hidden">
+          <Image
+            src="/track-top-81525.png"
+            alt="People in Kodema Village working to access clean water"
+            layout="responsive"
+            width={700}
+            height={525}
+            style={{ objectFit: "contain", width: "100%", height: "auto" }}
+          />
           <div
-            className={`position-relative overflow-hidden rounded ${styles.heroSection}`}
+            className="position-absolute top-0 start-0 w-100 d-flex justify-content-center"
+            style={{ paddingTop: "20px" }}
           >
-            <Image
-              src="/village.png"
-              alt="People in Kodema Village working to access clean water"
-              fill
-              className="object-fit-cover"
-              priority
-            />
-            <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50"></div>
-            <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center px-3">
-              <h2 className="text-white fs-4 fw-bold text-center lh-sm">
-                Thanks for your help to bring clean water to Kodema Village.
-              </h2>
-            </div>
+            <h2
+              className="text-white text-center"
+              style={{
+                fontWeight: 900,
+                fontStyle: "normal",
+                fontSize: "32px",
+                lineHeight: "38px",
+                letterSpacing: "0%",
+                margin: 0,
+                padding: "0 20px",
+              }}
+            >
+              Thanks for your help to bring clean water to Kodema Village.
+            </h2>
           </div>
         </div>
 
-        {/* Campaign Progress Component */}
-        <CampaignProgress className="mb-3" />
-
-        {/* Total Impact Component - Shows ALL campaigns */}
-        <div className="mb-3">
-          <h4 className="fs-5 fw-bold text-black mb-2">Your Total Impact</h4>
-          <MyImpact className="mb-3" />
-        </div>
+        {/* CampaignWithImpact Component - Below image */}
+        <CampaignWithImpact className="mb-3" />
 
         {/* About Section */}
         <div className="mb-4">
           <h3 className="fs-4 fw-bold text-black mb-3">About Kodema Village</h3>
 
-          <div className="d-flex flex-column gap-3 text-dark lh-base">
-            <p className="small">
-              Kodema Village, located in the Busia District of Uganda, is home
-              to over 5,000 people. Today, the only available water source in
-              Kodema is a shallow, unprotected well—a place where animals and
+          <div className="text-dark lh-base">
+            <p className="small mb-2">
+              Kodema Village, located in the Busia District of Uganda, is home
+              to over 5,000 people. Today, the only available water source in
+              Kodema is a shallow, unprotected well—a place where animals and
               humans share the same water.
             </p>
-
             <p className="small">
-              This contaminated source is causing widespread waterborne
+              This contaminated source is causing widespread waterborne
               illnesses, affecting children, families, and the future of the
               community.
             </p>
           </div>
 
-          {/* Bottom Image */}
-          <div className="mt-3 rounded overflow-hidden">
-            <Image
-              src="/village.png"
-              alt="People collecting water from contaminated source in Kodema Village"
-              width={350}
-              height={300}
-              className={`w-100 object-fit-cover ${styles.bottomImage}`}
-            />
-          </div>
+          {/* Bottom Image removed from About section */}
         </div>
-
+        {/* Bottom Image moved to very bottom */}
+        <div className="mt-4 rounded overflow-hidden">
+          <Image
+            src="/track-bottom-81525..png"
+            alt="People collecting water from contaminated source in Kodema Village"
+            layout="responsive"
+            width={700}
+            height={525}
+            className={styles.bottomImage}
+            style={{ objectFit: "contain", width: "100%", height: "auto" }}
+          />
+        </div>
         {/* Version Footer */}
         <VersionFooter />
       </div>
