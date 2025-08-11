@@ -33,7 +33,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
       if (isRedeemSubdomain) {
         // On redeem subdomain, only allow these specific pages
-        const allowedPages = ["/claim", "/emailclaim", "/track"];
+        const allowedPages = ["/claim", "/emailclaim", "/track", "/privacy"];
         const isAllowedPage = allowedPages.includes(pathname);
 
         if (!isAllowedPage) {
