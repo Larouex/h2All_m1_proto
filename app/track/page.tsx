@@ -53,8 +53,10 @@ export default function TrackPage() {
           </div>
         </div>
 
-        {/* CampaignWithImpact Component - Below image */}
-        <CampaignWithImpact className="mb-3 mt-n14" />
+        {/* CampaignWithImpact Component - Below image with responsive negative margin */}
+        <CampaignWithImpact
+          className={`mb-3 ${styles.campaignWithImpactResponsive}`}
+        />
 
         {/* About Section */}
         <div className="mb-4">
