@@ -3,7 +3,7 @@
 import { Container, Row, Col, Card, Spinner, Alert } from "react-bootstrap";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
-import { formatDateSimple } from "../../src/app/lib/utils/dateUtils";
+import { formatDateSimple } from "../lib/utils/dateUtils";
 
 interface ProjectData {
   id: string;

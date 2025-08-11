@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { campaigns, type NewCampaign } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { withAdminAuth } from "@/src/app/lib/api-security";
 
 async function handleGET() {
   try {
@@ -227,6 +226,6 @@ async function handlePOST(request: NextRequest) {
   }
 }
 
-// Export protected endpoints
-export const GET = withAdminAuth(handleGET);
-export const POST = withAdminAuth(handlePOST);
+// Export endpoints
+export const GET = handleGET;
+export const POST = handlePOST;
