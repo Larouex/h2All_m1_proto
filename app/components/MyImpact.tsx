@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "react-bootstrap";
 import { useAuth } from "@/app/lib/auth-context";
 
@@ -37,9 +37,31 @@ export default function MyImpact({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Use ref to prevent duplicate API calls and track current request
+  const isCurrentlyFetching = useRef(false);
+  const lastFetchKey = useRef<string>("");
+
   // Fetch user impact data
   useEffect(() => {
     const fetchImpactData = async () => {
+      // Create a unique key for this fetch based on dependencies
+      const fetchKey = `${user?.id || "no-user"}-${isAuthenticated}-${
+        campaignId || "no-campaign"
+      }`;
+
+      // Prevent duplicate calls with the same parameters or while already fetching
+      if (isCurrentlyFetching.current || lastFetchKey.current === fetchKey) {
+        console.log(
+          "MyImpact: Skipping duplicate fetch call for key:",
+          fetchKey,
+          "isCurrentlyFetching:",
+          isCurrentlyFetching.current
+        );
+        return;
+      }
+
+      isCurrentlyFetching.current = true;
+      lastFetchKey.current = fetchKey;
       try {
         setLoading(true);
         setError(null);
@@ -56,7 +78,7 @@ export default function MyImpact({
           params.append("email", userEmail);
           apiUrl = `/api/user/email-impact?${params}`;
           logContext = `Email: ${userEmail}`;
-        } else if (isAuthenticated && user) {
+        } else if (isAuthenticated && user?.id) {
           // Use user-based impact API (existing functionality)
           const params = new URLSearchParams();
           params.append("userId", user.id);
@@ -102,11 +124,12 @@ export default function MyImpact({
         setError("Network error while fetching impact data");
       } finally {
         setLoading(false);
+        isCurrentlyFetching.current = false; // Reset fetching flag
       }
     };
 
     fetchImpactData();
-  }, [user, isAuthenticated, campaignId]);
+  }, [user?.id, isAuthenticated, campaignId]); // Only depend on user ID, not the entire user object
 
   // Format impact metrics for display
   const getImpactMetrics = (): ImpactMetric[] => {
@@ -131,7 +154,10 @@ export default function MyImpact({
   if (loading) {
     return (
       <Card className={`shadow ${className}`}>
-        <Card.Body className="p-3 text-center">
+        <Card.Body
+          className="p-3 text-center"
+          style={{ backgroundColor: "#F7F7F7" }}
+        >
           <div className="spinner-border spinner-border-sm" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
@@ -144,7 +170,7 @@ export default function MyImpact({
   if (error) {
     return (
       <Card className={`shadow ${className}`}>
-        <Card.Body className="p-3">
+        <Card.Body className="p-3" style={{ backgroundColor: "#F7F7F7" }}>
           <h3 className="fs-5 fw-bold text-black mb-3">My Impact</h3>
           <div className="text-center text-muted">
             <i className="bi bi-exclamation-circle fs-3 d-block mb-2"></i>
@@ -158,7 +184,7 @@ export default function MyImpact({
   if (!isAuthenticated && !localStorage.getItem("userEmail")) {
     return (
       <Card className={`shadow ${className}`}>
-        <Card.Body className="p-3">
+        <Card.Body className="p-3" style={{ backgroundColor: "#F7F7F7" }}>
           <h3 className="fs-5 fw-bold text-black mb-3">My Impact</h3>
           <div className="text-center text-muted">
             <i className="bi bi-person-circle fs-3 d-block mb-2"></i>
@@ -181,7 +207,7 @@ export default function MyImpact({
 
   return (
     <Card className={`shadow ${className}`}>
-      <Card.Body className="p-3">
+      <Card.Body className="p-3" style={{ backgroundColor: "#F7F7F7" }}>
         <div className="d-flex align-items-center justify-content-between mb-3">
           <h3 className="fs-5 fw-bold text-black mb-0">My Impact</h3>
           {campaignId && impactData?.campaignName && (

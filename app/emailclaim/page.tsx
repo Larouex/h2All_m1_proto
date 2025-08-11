@@ -83,9 +83,6 @@ export default function EmailClaimPage() {
               className={styles.emailInput}
               required
             />
-            <div className={styles.inputIcon}>
-              <i className={`${styles.chartIcon} bi bi-bar-chart`}></i>
-            </div>
           </div>
 
           {/* Claim Button */}

@@ -6,6 +6,7 @@ import { useAuth } from "@/app/lib/auth-context";
 
 interface CampaignProgressProps {
   className?: string;
+  campaignData?: CampaignData; // Make campaignData optional prop
 }
 
 interface CampaignData {
@@ -20,11 +21,13 @@ interface CampaignData {
 
 export default function CampaignProgress({
   className = "",
+  campaignData: propCampaignData,
 }: CampaignProgressProps) {
   const { user } = useAuth();
 
-  // Static placeholder data instead of database fetch
-  const [campaignData] = useState<CampaignData>({
+  // Use prop data if provided, otherwise fall back to static placeholder data
+  // Update campaignData when propCampaignData changes
+  const campaignData: CampaignData = propCampaignData || {
     id: "kodema-village",
     name: "Campaign Progress",
     description:
@@ -33,7 +36,7 @@ export default function CampaignProgress({
     currentFunding: 1250.5,
     totalRedemptionValue: 1250.5,
     isActive: true,
-  });
+  };
 
   const [showEditor, setShowEditor] = useState(false);
   const [editData, setEditData] = useState({
@@ -65,10 +68,10 @@ export default function CampaignProgress({
     }
   };
 
-  const currentFunding = campaignData.currentFunding || 0;
+  const currentFunding =
+    campaignData.currentFunding + campaignData.totalRedemptionValue * 0.05 || 0;
   const fundingGoal = campaignData.fundingGoal || 5000;
   const progressPercentage = (currentFunding / fundingGoal) * 100;
-
   return (
     <>
       <Card className={`shadow ${className}`}>
@@ -106,14 +109,6 @@ export default function CampaignProgress({
             />
           </div>
 
-          {user?.isAdmin && (
-            <div className="mt-2">
-              <small className="text-muted">
-                Total Redemptions: $
-                {(campaignData.totalRedemptionValue || 0).toFixed(2)}
-              </small>
-            </div>
-          )}
         </Card.Body>
       </Card>
 

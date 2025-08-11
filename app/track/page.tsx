@@ -54,7 +54,7 @@ export default function TrackPage() {
         </div>
 
         {/* CampaignWithImpact Component - Below image */}
-        <CampaignWithImpact className="mb-3" />
+        <CampaignWithImpact className="mb-3 mt-n14" />
 
         {/* About Section */}
         <div className="mb-4">

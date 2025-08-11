@@ -4,6 +4,7 @@ import { Nunito_Sans } from "next/font/google";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
+import "./styles/negative-margins.css";
 import { AuthProvider } from "@/lib/auth-context";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";

@@ -1,0 +1,649 @@
+/* Custom Negative Margin Utilities */
+/* Following Bootstrap's naming convention with 'n' prefix for negative values */
+
+/* Negative Top Margins */
+.mt-n1 {
+  margin-top: -0.25rem !important;
+}
+
+.mt-n2 {
+  margin-top: -0.5rem !important;
+}
+
+.mt-n3 {
+  margin-top: -1rem !important;
+}
+
+.mt-n4 {
+  margin-top: -1.5rem !important;
+}
+
+.mt-n5 {
+  margin-top: -3rem !important;
+}
+
+.mt-n6 {
+  margin-top: -4rem !important;
+}
+
+.mt-n7 {
+  margin-top: -5rem !important;
+}
+
+.mt-n8 {
+  margin-top: -6rem !important;
+}
+
+.mt-n9 {
+  margin-top: -7rem !important;
+}
+
+.mt-n10 {
+  margin-top: -8rem !important;
+}
+
+.mt-n11 {
+  margin-top: -9rem !important;
+}
+
+.mt-n12 {
+  margin-top: -10rem !important;
+}
+
+.mt-n13 {
+  margin-top: -11rem !important;
+}
+
+.mt-n14 {
+  margin-top: -12rem !important;
+}
+
+.mt-n15 {
+  margin-top: -13rem !important;
+}
+
+.mt-n16 {
+  margin-top: -14rem !important;
+}
+
+.mt-n17 {
+  margin-top: -15rem !important;
+}
+
+.mt-n18 {
+  margin-top: -16rem !important;
+}
+
+.mt-n19 {
+  margin-top: -17rem !important;
+}
+
+.mt-n20 {
+  margin-top: -18rem !important;
+}
+
+/* Negative Bottom Margins */
+.mb-n1 {
+  margin-bottom: -0.25rem !important;
+}
+
+.mb-n2 {
+  margin-bottom: -0.5rem !important;
+}
+
+.mb-n3 {
+  margin-bottom: -1rem !important;
+}
+
+.mb-n4 {
+  margin-bottom: -1.5rem !important;
+}
+
+.mb-n5 {
+  margin-bottom: -3rem !important;
+}
+
+.mb-n6 {
+  margin-bottom: -4rem !important;
+}
+
+.mb-n7 {
+  margin-bottom: -5rem !important;
+}
+
+.mb-n8 {
+  margin-bottom: -6rem !important;
+}
+
+.mb-n9 {
+  margin-bottom: -7rem !important;
+}
+
+.mb-n10 {
+  margin-bottom: -8rem !important;
+}
+
+.mb-n11 {
+  margin-bottom: -9rem !important;
+}
+
+.mb-n12 {
+  margin-bottom: -10rem !important;
+}
+
+.mb-n13 {
+  margin-bottom: -11rem !important;
+}
+
+.mb-n14 {
+  margin-bottom: -12rem !important;
+}
+
+.mb-n15 {
+  margin-bottom: -13rem !important;
+}
+
+.mb-n16 {
+  margin-bottom: -14rem !important;
+}
+
+.mb-n17 {
+  margin-bottom: -15rem !important;
+}
+
+.mb-n18 {
+  margin-bottom: -16rem !important;
+}
+
+.mb-n19 {
+  margin-bottom: -17rem !important;
+}
+
+.mb-n20 {
+  margin-bottom: -18rem !important;
+}
+
+/* Negative Left Margins */
+.ml-n1,
+.ms-n1 {
+  margin-left: -0.25rem !important;
+}
+
+.ml-n2,
+.ms-n2 {
+  margin-left: -0.5rem !important;
+}
+
+.ml-n3,
+.ms-n3 {
+  margin-left: -1rem !important;
+}
+
+.ml-n4,
+.ms-n4 {
+  margin-left: -1.5rem !important;
+}
+
+.ml-n5,
+.ms-n5 {
+  margin-left: -3rem !important;
+}
+
+.ml-n6,
+.ms-n6 {
+  margin-left: -4rem !important;
+}
+
+.ml-n7,
+.ms-n7 {
+  margin-left: -5rem !important;
+}
+
+.ml-n8,
+.ms-n8 {
+  margin-left: -6rem !important;
+}
+
+.ml-n9,
+.ms-n9 {
+  margin-left: -7rem !important;
+}
+
+.ml-n10,
+.ms-n10 {
+  margin-left: -8rem !important;
+}
+
+.ml-n11,
+.ms-n11 {
+  margin-left: -9rem !important;
+}
+
+.ml-n12,
+.ms-n12 {
+  margin-left: -10rem !important;
+}
+
+.ml-n13,
+.ms-n13 {
+  margin-left: -11rem !important;
+}
+
+.ml-n14,
+.ms-n14 {
+  margin-left: -12rem !important;
+}
+
+.ml-n15,
+.ms-n15 {
+  margin-left: -13rem !important;
+}
+
+.ml-n16,
+.ms-n16 {
+  margin-left: -14rem !important;
+}
+
+.ml-n17,
+.ms-n17 {
+  margin-left: -15rem !important;
+}
+
+.ml-n18,
+.ms-n18 {
+  margin-left: -16rem !important;
+}
+
+.ml-n19,
+.ms-n19 {
+  margin-left: -17rem !important;
+}
+
+.ml-n20,
+.ms-n20 {
+  margin-left: -18rem !important;
+}
+
+/* Negative Right Margins */
+.mr-n1,
+.me-n1 {
+  margin-right: -0.25rem !important;
+}
+
+.mr-n2,
+.me-n2 {
+  margin-right: -0.5rem !important;
+}
+
+.mr-n3,
+.me-n3 {
+  margin-right: -1rem !important;
+}
+
+.mr-n4,
+.me-n4 {
+  margin-right: -1.5rem !important;
+}
+
+.mr-n5,
+.me-n5 {
+  margin-right: -3rem !important;
+}
+
+.mr-n6,
+.me-n6 {
+  margin-right: -4rem !important;
+}
+
+.mr-n7,
+.me-n7 {
+  margin-right: -5rem !important;
+}
+
+.mr-n8,
+.me-n8 {
+  margin-right: -6rem !important;
+}
+
+.mr-n9,
+.me-n9 {
+  margin-right: -7rem !important;
+}
+
+.mr-n10,
+.me-n10 {
+  margin-right: -8rem !important;
+}
+
+.mr-n11,
+.me-n11 {
+  margin-right: -9rem !important;
+}
+
+.mr-n12,
+.me-n12 {
+  margin-right: -10rem !important;
+}
+
+.mr-n13,
+.me-n13 {
+  margin-right: -11rem !important;
+}
+
+.mr-n14,
+.me-n14 {
+  margin-right: -12rem !important;
+}
+
+.mr-n15,
+.me-n15 {
+  margin-right: -13rem !important;
+}
+
+.mr-n16,
+.me-n16 {
+  margin-right: -14rem !important;
+}
+
+.mr-n17,
+.me-n17 {
+  margin-right: -15rem !important;
+}
+
+.mr-n18,
+.me-n18 {
+  margin-right: -16rem !important;
+}
+
+.mr-n19,
+.me-n19 {
+  margin-right: -17rem !important;
+}
+
+.mr-n20,
+.me-n20 {
+  margin-right: -18rem !important;
+}
+
+/* Negative Horizontal Margins (Left + Right) */
+.mx-n1 {
+  margin-left: -0.25rem !important;
+  margin-right: -0.25rem !important;
+}
+
+.mx-n2 {
+  margin-left: -0.5rem !important;
+  margin-right: -0.5rem !important;
+}
+
+.mx-n3 {
+  margin-left: -1rem !important;
+  margin-right: -1rem !important;
+}
+
+.mx-n4 {
+  margin-left: -1.5rem !important;
+  margin-right: -1.5rem !important;
+}
+
+.mx-n5 {
+  margin-left: -3rem !important;
+  margin-right: -3rem !important;
+}
+
+.mx-n6 {
+  margin-left: -4rem !important;
+  margin-right: -4rem !important;
+}
+
+.mx-n7 {
+  margin-left: -5rem !important;
+  margin-right: -5rem !important;
+}
+
+.mx-n8 {
+  margin-left: -6rem !important;
+  margin-right: -6rem !important;
+}
+
+.mx-n9 {
+  margin-left: -7rem !important;
+  margin-right: -7rem !important;
+}
+
+.mx-n10 {
+  margin-left: -8rem !important;
+  margin-right: -8rem !important;
+}
+
+.mx-n11 {
+  margin-left: -9rem !important;
+  margin-right: -9rem !important;
+}
+
+.mx-n12 {
+  margin-left: -10rem !important;
+  margin-right: -10rem !important;
+}
+
+.mx-n13 {
+  margin-left: -11rem !important;
+  margin-right: -11rem !important;
+}
+
+.mx-n14 {
+  margin-left: -12rem !important;
+  margin-right: -12rem !important;
+}
+
+.mx-n15 {
+  margin-left: -13rem !important;
+  margin-right: -13rem !important;
+}
+
+.mx-n16 {
+  margin-left: -14rem !important;
+  margin-right: -14rem !important;
+}
+
+.mx-n17 {
+  margin-left: -15rem !important;
+  margin-right: -15rem !important;
+}
+
+.mx-n18 {
+  margin-left: -16rem !important;
+  margin-right: -16rem !important;
+}
+
+.mx-n19 {
+  margin-left: -17rem !important;
+  margin-right: -17rem !important;
+}
+
+.mx-n20 {
+  margin-left: -18rem !important;
+  margin-right: -18rem !important;
+}
+
+/* Negative Vertical Margins (Top + Bottom) */
+.my-n1 {
+  margin-top: -0.25rem !important;
+  margin-bottom: -0.25rem !important;
+}
+
+.my-n2 {
+  margin-top: -0.5rem !important;
+  margin-bottom: -0.5rem !important;
+}
+
+.my-n3 {
+  margin-top: -1rem !important;
+  margin-bottom: -1rem !important;
+}
+
+.my-n4 {
+  margin-top: -1.5rem !important;
+  margin-bottom: -1.5rem !important;
+}
+
+.my-n5 {
+  margin-top: -3rem !important;
+  margin-bottom: -3rem !important;
+}
+
+.my-n6 {
+  margin-top: -4rem !important;
+  margin-bottom: -4rem !important;
+}
+
+.my-n7 {
+  margin-top: -5rem !important;
+  margin-bottom: -5rem !important;
+}
+
+.my-n8 {
+  margin-top: -6rem !important;
+  margin-bottom: -6rem !important;
+}
+
+.my-n9 {
+  margin-top: -7rem !important;
+  margin-bottom: -7rem !important;
+}
+
+.my-n10 {
+  margin-top: -8rem !important;
+  margin-bottom: -8rem !important;
+}
+
+.my-n11 {
+  margin-top: -9rem !important;
+  margin-bottom: -9rem !important;
+}
+
+.my-n12 {
+  margin-top: -10rem !important;
+  margin-bottom: -10rem !important;
+}
+
+.my-n13 {
+  margin-top: -11rem !important;
+  margin-bottom: -11rem !important;
+}
+
+.my-n14 {
+  margin-top: -12rem !important;
+  margin-bottom: -12rem !important;
+}
+
+.my-n15 {
+  margin-top: -13rem !important;
+  margin-bottom: -13rem !important;
+}
+
+.my-n16 {
+  margin-top: -14rem !important;
+  margin-bottom: -14rem !important;
+}
+
+.my-n17 {
+  margin-top: -15rem !important;
+  margin-bottom: -15rem !important;
+}
+
+.my-n18 {
+  margin-top: -16rem !important;
+  margin-bottom: -16rem !important;
+}
+
+.my-n19 {
+  margin-top: -17rem !important;
+  margin-bottom: -17rem !important;
+}
+
+.my-n20 {
+  margin-top: -18rem !important;
+  margin-bottom: -18rem !important;
+}
+
+/* Negative All Margins */
+.m-n1 {
+  margin: -0.25rem !important;
+}
+
+.m-n2 {
+  margin: -0.5rem !important;
+}
+
+.m-n3 {
+  margin: -1rem !important;
+}
+
+.m-n4 {
+  margin: -1.5rem !important;
+}
+
+.m-n5 {
+  margin: -3rem !important;
+}
+
+.m-n6 {
+  margin: -4rem !important;
+}
+
+.m-n7 {
+  margin: -5rem !important;
+}
+
+.m-n8 {
+  margin: -6rem !important;
+}
+
+.m-n9 {
+  margin: -7rem !important;
+}
+
+.m-n10 {
+  margin: -8rem !important;
+}
+
+.m-n11 {
+  margin: -9rem !important;
+}
+
+.m-n12 {
+  margin: -10rem !important;
+}
+
+.m-n13 {
+  margin: -11rem !important;
+}
+
+.m-n14 {
+  margin: -12rem !important;
+}
+
+.m-n15 {
+  margin: -13rem !important;
+}
+
+.m-n16 {
+  margin: -14rem !important;
+}
+
+.m-n17 {
+  margin: -15rem !important;
+}
+
+.m-n18 {
+  margin: -16rem !important;
+}
+
+.m-n19 {
+  margin: -17rem !important;
+}
+
+.m-n20 {
+  margin: -18rem !important;
+}
