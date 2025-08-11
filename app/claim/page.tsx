@@ -80,7 +80,8 @@ export default function ClaimPage() {
         {/* Funding Information */}
         <div className="text-center mb-4">
           <p className="fs-5 fw-medium text-dark mb-0">
-            Your bottle gives 5¢ to fund a clean water well in Uganda.
+            Track your impact in real time, as each bottle provides access to
+            clean and safe water.
           </p>
         </div>
 

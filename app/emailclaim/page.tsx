@@ -60,13 +60,16 @@ export default function EmailClaimPage() {
 
       {/* Main Content Container with Mobile Width */}
       <div className={`${styles.mainContent} text-center mb-5`}>
-        <h2 className="display-6 fw-bold text-dark mb-4 lh-sm">
-          See the impact you&apos;re making
+        <h2
+          className={`display-6 fw-bold text-dark lh-sm pt-5`}
+          style={{ marginBottom: 0 }}
+        >
+          See your impact.
         </h2>
 
         {/* Email Instructions */}
-        <p className="fs-5 text-dark mb-4">
-          Enter your email to track your bottle&apos;s contribution.
+        <p className={`fs-5 text-dark pb-5 emailInstructions`}>
+          Enter email to track contribution.
         </p>
 
         {/* Email Input Form */}
@@ -111,9 +114,12 @@ export default function EmailClaimPage() {
         </Form>
 
         {/* Subtext */}
-        <p className="text-muted">
+        <p className="text-muted subtext">
           By entering your email, you agree to receive updates about this
-          campaign and messages about future H2ALL initiatives.
+          campaign and messages about future H2ALL initiatives.{" "}
+          <a href="/privacy" className="text-decoration-underline text-primary">
+            Privacy Policy
+          </a>
         </p>
 
         {/* Version Footer */}

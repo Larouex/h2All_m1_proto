@@ -39,6 +39,15 @@ export default function VersionFooter() {
         v{buildInfo.version} • {buildInfo.build} • {buildInfo.buildDate}{" "}
         {buildInfo.buildTime}
       </small>
+      <div>
+        <a
+          href="/privacy"
+          className="text-decoration-underline text-white-50 small"
+          style={{ display: "inline-block", marginTop: 4 }}
+        >
+          Privacy Policy
+        </a>
+      </div>
     </div>
   );
 }

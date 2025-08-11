@@ -24,15 +24,22 @@
   margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   padding: 0 1rem;
 }
 
 .logo {
   display: block;
-  height: auto;
-  width: auto;
-  max-width: 100%;
+  width: 97px;
+  height: 25px;
+  object-fit: contain;
+}
+
+.right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 /* Responsive adjustments, match page content widths */
