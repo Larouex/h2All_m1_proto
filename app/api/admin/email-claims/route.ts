@@ -26,6 +26,34 @@ async function handleGetEmailClaims(request: NextRequest) {
       .limit(limit)
       .offset(offset);
 
+    // Debug: Log raw data from database
+    console.log("📅 EMAIL CLAIMS API - Raw database results:", {
+      count: claims.length,
+      sample: claims.slice(0, 2).map((claim) => ({
+        id: claim.id,
+        email: claim.email,
+        claimCount: claim.claimCount,
+        createdAt: claim.createdAt,
+        updatedAt: claim.updatedAt,
+        createdAtType: typeof claim.createdAt,
+        updatedAtType: typeof claim.updatedAt,
+        createdAtValue: claim.createdAt?.toString(),
+        updatedAtValue: claim.updatedAt?.toString(),
+      })),
+    });
+
+    // Ensure dates are properly serialized
+    const serializedClaims = claims.map((claim) => ({
+      ...claim,
+      createdAt: claim.createdAt?.toISOString() || null,
+      updatedAt: claim.updatedAt?.toISOString() || null,
+    }));
+
+    console.log("📅 EMAIL CLAIMS API - Serialized for response:", {
+      count: serializedClaims.length,
+      sample: serializedClaims.slice(0, 2),
+    });
+
     // Calculate stats from all claims
     const totalEmails = allClaims.length;
     const totalClaims = allClaims.reduce(
@@ -37,7 +65,7 @@ async function handleGetEmailClaims(request: NextRequest) {
       totalEmails > 0 ? Math.max(...allClaims.map((c) => c.claimCount)) : 0;
 
     return NextResponse.json({
-      claims,
+      claims: serializedClaims,
       pagination: {
         page,
         limit,

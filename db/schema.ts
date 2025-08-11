@@ -128,8 +128,8 @@ export const emailClaims = pgTable("email_claims", {
     .$defaultFn(() => createId()),
   email: text("email").notNull().unique(), // indexed for lookup
   claimCount: integer("claim_count").notNull().default(1),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Export types for use in the application

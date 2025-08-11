@@ -16,6 +16,7 @@ import {
   Pagination,
 } from "react-bootstrap";
 import { useRouter } from "next/navigation";
+import { formatDate } from "../../lib/utils/dateUtils";
 
 interface EmailClaim {
   id: string;
@@ -136,10 +137,6 @@ export default function AdminEmailClaims() {
     } catch {
       alert("Network error occurred while updating");
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
   };
 
   const renderPagination = () => {
