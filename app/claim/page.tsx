@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Button } from "react-bootstrap";
 import { useState } from "react";
 import VersionFooter from "@/app/components/VersionFooter";
+import StickyHeader from "@/app/components/StickyHeader";
 import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
 import styles from "./Claim.module.css";
 
@@ -21,12 +22,7 @@ export default function ClaimPage() {
 
   return (
     <div className="bg-white d-flex flex-column align-items-center px-3">
-      {/* Header */}
-      <div className="text-center pt-3 mb-4">
-        <h1 className="fs-3 fw-bold text-dark mb-0">
-          H2<span className="text-primary">ALL</span> WATER
-        </h1>
-      </div>
+      <StickyHeader />
 
       {/* Main Content Container with Mobile Width */}
       <div className={styles.mainContent}>

@@ -1,0 +1,49 @@
+.root {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  z-index: 1030;
+  overflow: hidden;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.container {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 1rem;
+}
+
+.logo {
+  display: block;
+  height: auto;
+  width: auto;
+  max-width: 100%;
+}
+
+/* Responsive adjustments, match page content widths */
+@media (min-width: 576px) {
+  .container {
+    max-width: 450px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 500px;
+  }
+}
