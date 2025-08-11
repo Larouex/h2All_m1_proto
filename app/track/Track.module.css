@@ -29,47 +29,15 @@
 
 /* Responsive negative margin for CampaignWithImpact component */
 .campaignWithImpactResponsive {
-  margin-top: -6rem;
-  /* Default: mt-n6 for very small screens */
+  margin-top: -4rem;
+  /* Default: mt-n4 for all mobile devices */
 }
 
-/* Small mobile phones (up to 375px) */
-@media (max-width: 375px) {
+/* All mobile devices (up to 575px) use mt-n4 */
+@media (max-width: 575px) {
   .campaignWithImpactResponsive {
     margin-top: -4rem;
-    /* mt-n4 */
-  }
-}
-
-/* Galaxy S20 and similar Android devices (360px width) */
-@media (max-width: 360px) and (min-height: 740px) {
-  .campaignWithImpactResponsive {
-    margin-top: -2rem;
-    /* mt-n2 for Galaxy S20 Android */
-  }
-}
-
-/* iPhone 12/13 models (390px width) */
-@media (min-width: 390px) and (max-width: 390px) and (min-height: 844px) {
-  .campaignWithImpactResponsive {
-    margin-top: -2rem;
-    /* mt-n3 for iPhone 12/13 models */
-  }
-}
-
-/* Medium mobile phones (376px to 414px) */
-@media (min-width: 376px) and (max-width: 414px) {
-  .campaignWithImpactResponsive {
-    margin-top: -6rem;
-    /* mt-n6 */
-  }
-}
-
-/* Large mobile phones (415px to 575px) */
-@media (min-width: 415px) and (max-width: 575px) {
-  .campaignWithImpactResponsive {
-    margin-top: -8rem;
-    /* mt-n8 */
+    /* mt-n4 for all mobile devices */
   }
 }
 
