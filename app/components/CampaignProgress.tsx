@@ -68,8 +68,8 @@ export default function CampaignProgress({
     }
   };
 
-  const currentFunding =
-    campaignData.currentFunding + campaignData.totalRedemptionValue * 0.05 || 0;
+  // Use the totalRedemptionValue directly since it's already calculated correctly
+  const currentFunding = campaignData.totalRedemptionValue || 0;
   const fundingGoal = campaignData.fundingGoal || 5000;
   const progressPercentage = (currentFunding / fundingGoal) * 100;
   return (
@@ -108,7 +108,6 @@ export default function CampaignProgress({
               style={{ height: "8px" }}
             />
           </div>
-
         </Card.Body>
       </Card>
 

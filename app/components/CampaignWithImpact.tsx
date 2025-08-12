@@ -21,6 +21,12 @@ export default function CampaignWithImpact({ className = "" }) {
   // Fetch total redeems count from API (no auto-refresh to prevent unnecessary calls)
   const { totalRedeems, loading, error } = useTotalRedeems(false);
 
+  // Calculate total redemption value: base funding + (claims * $0.05 per claim)
+  const baseFunding = 1250;
+  const perClaimValue = 0.05;
+  const calculatedRedemptionValue =
+    baseFunding + (totalRedeems || 0) * perClaimValue;
+
   // Create campaign data object with the specified values
   const campaignData: CampaignData = {
     id: "1",
@@ -28,8 +34,8 @@ export default function CampaignWithImpact({ className = "" }) {
     description:
       "Our goal: Access to safe and clean water eliminating waterborne illness.",
     fundingGoal: 5000,
-    currentFunding: 1250,
-    totalRedemptionValue: totalRedeems || 0, // Use totalRedeems from API
+    currentFunding: baseFunding,
+    totalRedemptionValue: calculatedRedemptionValue, // Current funding + (claims * $0.05)
     isActive: true,
   };
 
@@ -39,11 +45,14 @@ export default function CampaignWithImpact({ className = "" }) {
       totalRedeems,
       loading,
       error,
-      campaignDataTotalRedemptionValue: totalRedeems || 0,
+      baseFunding,
+      perClaimValue,
+      calculatedRedemptionValue,
+      campaignDataTotalRedemptionValue: calculatedRedemptionValue,
       timestamp: new Date().toISOString(),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalRedeems, loading]); // Log when totalRedeems or loading changes
+  }, [totalRedeems, loading, calculatedRedemptionValue]); // Log when totalRedeems, loading, or calculated value changes
 
   return (
     <div className={`${styles.container} ${className}`}>

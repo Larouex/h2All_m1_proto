@@ -129,6 +129,11 @@ export const emailClaims = pgTable("email_claims", {
     .$defaultFn(() => createId()),
   email: text("email").notNull().unique(), // indexed for lookup
   claimCount: integer("claim_count").notNull().default(1),
+  campaignId: text("campaign_id").default("local-test"),
+  redemptionValue: decimal("redemption_value", {
+    precision: 10,
+    scale: 2,
+  }).default("1.00"),
   createdAt: date("created_at").notNull(),
   updatedAt: date("updated_at").notNull(),
 });

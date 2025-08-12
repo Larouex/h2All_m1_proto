@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import VersionFooter from "@/app/components/VersionFooter";
 import StickyHeader from "@/app/components/StickyHeader";
@@ -10,6 +10,12 @@ import styles from "./EmailClaim.module.css";
 export default function EmailClaimPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure component only renders after hydration to prevent hydration mismatches
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Email validation function
   const isValidEmail = (email: string) => {
@@ -32,23 +38,57 @@ export default function EmailClaimPage() {
         body: JSON.stringify({ email }),
       });
 
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers.get("content-type"));
+
       if (response.ok) {
-        const data = await response.json();
-        console.log("Email claim successful:", data);
+        // Check if response has content before parsing JSON
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          console.log("Email claim successful:", data);
 
-        // Store email in localStorage for tracking page
-        localStorage.setItem("userEmail", email);
+          // Store email in localStorage for tracking page
+          localStorage.setItem("userEmail", email);
 
-        // Redirect to track page after successful email submission
-        window.location.href = "/track";
+          // Redirect to track page after successful email submission
+          window.location.href = "/track";
+        } else {
+          console.error("Response is not JSON:", await response.text());
+          alert("Invalid response format from server.");
+        }
       } else {
-        const errorData = await response.json();
-        console.error("Email claim failed:", errorData);
-        alert("Failed to process email claim. Please try again.");
+        // Check if error response has content before parsing JSON
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          console.error("Email claim failed:", errorData);
+          alert("Failed to process email claim. Please try again.");
+        } else {
+          const errorText = await response.text();
+          console.error("Non-JSON error response:", errorText);
+          alert(`Server error: ${response.status} ${response.statusText}`);
+        }
       }
     } catch (error) {
-      console.error("Network error:", error);
-      alert("Network error. Please check your connection and try again.");
+      console.error("Network error details:", {
+        error,
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        alert(
+          "Cannot connect to server. Please check if the server is running and try again."
+        );
+      } else if (
+        error instanceof SyntaxError &&
+        error.message.includes("JSON")
+      ) {
+        alert("Server returned invalid data. Please try again.");
+      } else {
+        alert("Network error. Please check your connection and try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -72,43 +112,55 @@ export default function EmailClaimPage() {
           Enter email to track contribution.
         </p>
 
-        {/* Email Input Form */}
-        <Form onSubmit={handleSubmit}>
-          <div className={`${styles.emailInputContainer} mb-3`}>
-            <Form.Control
-              type="email"
-              placeholder="your.email@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={styles.emailInput}
-              required
-            />
-          </div>
+        {/* Email Input Form - Only render after client hydration */}
+        {isClient && (
+          <Form onSubmit={handleSubmit}>
+            <div className={`${styles.emailInputContainer} mb-3`}>
+              <Form.Control
+                type="email"
+                placeholder="your.email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={styles.emailInput}
+                required
+                suppressHydrationWarning
+              />
+            </div>
 
-          {/* Claim Button */}
-          <div className="d-grid gap-2 mb-4">
-            <Button
-              variant="warning"
-              size="lg"
-              className={`py-3 fw-bold fs-5 text-white ${styles.claimButton}`}
-              type="submit"
-              disabled={!isValidEmail(email) || isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <span
-                    className="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                  Processing...
-                </>
-              ) : (
-                "Claim My Bottle"
-              )}
-            </Button>
+            {/* Claim Button */}
+            <div className="d-grid gap-2 mb-4">
+              <Button
+                variant="warning"
+                size="lg"
+                className={`py-3 fw-bold fs-5 text-white ${styles.claimButton}`}
+                type="submit"
+                disabled={!isValidEmail(email) || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Processing...
+                  </>
+                ) : (
+                  "Claim My Bottle"
+                )}
+              </Button>
+            </div>
+          </Form>
+        )}
+
+        {/* Loading placeholder when not hydrated */}
+        {!isClient && (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           </div>
-        </Form>
+        )}
 
         {/* Subtext */}
         <p className="text-muted subtext">
