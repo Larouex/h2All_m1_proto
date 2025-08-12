@@ -68,6 +68,17 @@ export default function AdminEmailClaims() {
 
       if (response.ok) {
         const result = await response.json();
+        console.log("🔍 FRONTEND DEBUG - API Response:", {
+          claimsCount: result.claims?.length,
+          firstClaim: result.claims?.[0],
+          sampleDates: result.claims?.slice(0, 2).map((claim: any) => ({
+            email: claim.email,
+            createdAt: claim.createdAt,
+            updatedAt: claim.updatedAt,
+            createdAtType: typeof claim.createdAt,
+            updatedAtType: typeof claim.updatedAt,
+          })),
+        });
         setData(result);
       } else {
         setError("Failed to load email claims data");
@@ -285,8 +296,32 @@ export default function AdminEmailClaims() {
                           {claim.claimCount}
                         </Badge>
                       </td>
-                      <td>{formatDate(claim.createdAt)}</td>
-                      <td>{formatDate(claim.updatedAt)}</td>
+                      <td>
+                        {(() => {
+                          console.log(
+                            "🔍 FRONTEND DEBUG - Formatting createdAt:",
+                            {
+                              email: claim.email,
+                              createdAt: claim.createdAt,
+                              type: typeof claim.createdAt,
+                            }
+                          );
+                          return formatDate(claim.createdAt);
+                        })()}
+                      </td>
+                      <td>
+                        {(() => {
+                          console.log(
+                            "🔍 FRONTEND DEBUG - Formatting updatedAt:",
+                            {
+                              email: claim.email,
+                              updatedAt: claim.updatedAt,
+                              type: typeof claim.updatedAt,
+                            }
+                          );
+                          return formatDate(claim.updatedAt);
+                        })()}
+                      </td>
                       <td>
                         <Button
                           size="sm"

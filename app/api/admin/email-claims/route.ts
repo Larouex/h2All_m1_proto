@@ -26,6 +26,23 @@ async function handleGetEmailClaims(request: NextRequest) {
       .limit(limit)
       .offset(offset);
 
+    // Debug: Log what we're getting from the database
+    console.log("🔍 EMAIL CLAIMS DEBUG - Database raw data:", {
+      totalClaims: claims.length,
+      firstClaimSample: claims[0]
+        ? {
+            id: claims[0].id,
+            email: claims[0].email,
+            createdAt: claims[0].createdAt,
+            updatedAt: claims[0].updatedAt,
+            createdAtType: typeof claims[0].createdAt,
+            updatedAtType: typeof claims[0].updatedAt,
+            createdAtString: String(claims[0].createdAt),
+            updatedAtString: String(claims[0].updatedAt),
+          }
+        : "No claims found",
+    });
+
     // Calculate stats from all claims
     const totalEmails = allClaims.length;
     const totalClaims = allClaims.reduce(
