@@ -5,6 +5,7 @@ import {
   boolean,
   timestamp,
   decimal,
+  date,
 } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 
@@ -128,8 +129,8 @@ export const emailClaims = pgTable("email_claims", {
     .$defaultFn(() => createId()),
   email: text("email").notNull().unique(), // indexed for lookup
   claimCount: integer("claim_count").notNull().default(1),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: date("created_at").notNull(),
+  updatedAt: date("updated_at").notNull(),
 });
 
 // Export types for use in the application

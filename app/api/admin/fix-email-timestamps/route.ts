@@ -50,16 +50,17 @@ export async function POST(request: NextRequest) {
     // Fix each invalid record
     let fixedCount = 0;
     const now = new Date();
+    const dateString = now.toISOString().split("T")[0]; // YYYY-MM-DD format
 
     for (const record of invalidRecords) {
       console.log(`🔧 Fixing record ${record.id} with email ${record.email}`);
 
       const updateValues = {
-        updatedAt: now,
+        updatedAt: dateString,
         // If createdAt is also invalid, set it to now (we can't recover the original)
         ...((!record.createdAt ||
           isNaN(new Date(record.createdAt).getTime())) && {
-          createdAt: now,
+          createdAt: dateString,
         }),
       };
 

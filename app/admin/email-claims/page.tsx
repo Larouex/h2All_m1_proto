@@ -296,32 +296,8 @@ export default function AdminEmailClaims() {
                           {claim.claimCount}
                         </Badge>
                       </td>
-                      <td>
-                        {(() => {
-                          console.log(
-                            "🔍 FRONTEND DEBUG - Formatting createdAt:",
-                            {
-                              email: claim.email,
-                              createdAt: claim.createdAt,
-                              type: typeof claim.createdAt,
-                            }
-                          );
-                          return formatDate(claim.createdAt);
-                        })()}
-                      </td>
-                      <td>
-                        {(() => {
-                          console.log(
-                            "🔍 FRONTEND DEBUG - Formatting updatedAt:",
-                            {
-                              email: claim.email,
-                              updatedAt: claim.updatedAt,
-                              type: typeof claim.updatedAt,
-                            }
-                          );
-                          return formatDate(claim.updatedAt);
-                        })()}
-                      </td>
+                      <td>{formatDate(claim.createdAt)}</td>
+                      <td>{formatDate(claim.updatedAt)}</td>
                       <td>
                         <Button
                           size="sm"

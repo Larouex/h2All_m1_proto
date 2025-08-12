@@ -51,8 +51,9 @@ export function createEmailClaimInsertValues(
   email: string,
   claimCount: number = 1
 ) {
-  // FORCE explicit timestamp creation - NEVER null or undefined
+  // Create date string in YYYY-MM-DD format for date columns
   const now = new Date();
+  const dateString = now.toISOString().split("T")[0]; // YYYY-MM-DD format
 
   // Validate the date is valid
   if (isNaN(now.getTime())) {
@@ -62,15 +63,15 @@ export function createEmailClaimInsertValues(
   const insertValues = {
     email: email.toLowerCase().trim(),
     claimCount,
-    createdAt: now, // EXPLICIT DATE FROM CODE - NOT DATABASE DEFAULT
-    updatedAt: now, // EXPLICIT DATE FROM CODE - NOT DATABASE DEFAULT
+    createdAt: dateString, // DATE STRING for database date column
+    updatedAt: dateString, // DATE STRING for database date column
   };
 
   console.log("📅 CREATE EMAIL CLAIM - Insert values:", {
     email: insertValues.email,
     claimCount: insertValues.claimCount,
-    createdAt: insertValues.createdAt.toISOString(),
-    updatedAt: insertValues.updatedAt.toISOString(),
+    createdAt: insertValues.createdAt,
+    updatedAt: insertValues.updatedAt,
   });
 
   // Final validation - ensure no null/undefined dates
@@ -92,8 +93,9 @@ export function createEmailClaimUpdateValues(
     email: string;
   }>
 ) {
-  // FORCE explicit timestamp creation - NEVER null or undefined
+  // Create date string in YYYY-MM-DD format for date columns
   const now = new Date();
+  const dateString = now.toISOString().split("T")[0]; // YYYY-MM-DD format
 
   // Validate the date is valid
   if (isNaN(now.getTime())) {
@@ -101,11 +103,11 @@ export function createEmailClaimUpdateValues(
   }
 
   const updateValues: {
-    updatedAt: Date;
+    updatedAt: string;
     claimCount?: number;
     email?: string;
   } = {
-    updatedAt: now, // EXPLICIT DATE FROM CODE - NOT DATABASE DEFAULT
+    updatedAt: dateString, // DATE STRING for database date column
   };
 
   if (updates.claimCount !== undefined) {
@@ -117,7 +119,7 @@ export function createEmailClaimUpdateValues(
   }
 
   console.log("📅 UPDATE EMAIL CLAIM - Update values:", {
-    updatedAt: updateValues.updatedAt.toISOString(),
+    updatedAt: updateValues.updatedAt,
     claimCount: updateValues.claimCount,
     email: updateValues.email,
   });
