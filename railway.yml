@@ -16,8 +16,6 @@ deploy:
 
 # Environment variables
 env:
-  # Set NODE_ENV for production
-  NODE_ENV: production
   # Default port if not provided by Railway
   PORT: 3000
 
