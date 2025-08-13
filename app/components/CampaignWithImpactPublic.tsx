@@ -3,7 +3,7 @@
 import React from "react";
 import CampaignProgressPublic from "@/app/components/CampaignProgressPublic";
 import MyImpactPublic from "@/app/components/MyImpactPublic";
-import { useTotalRedeems } from "@/app/hooks/useTotalRedeems";
+import { useImpact } from "@/app/components/ImpactContext";
 import styles from "./CampaignWithImpact.module.css";
 
 // Define the CampaignData interface locally
@@ -18,8 +18,9 @@ interface CampaignData {
 }
 
 export default function CampaignWithImpactPublic({ className = "" }) {
-  // Fetch total redeems count from API (no auto-refresh to prevent unnecessary calls)
-  const { totalRedeems, loading, error } = useTotalRedeems(false);
+  // Get impact data including total redeems from shared context
+  const { impactData, loading, error } = useImpact();
+  const totalRedeems = impactData?.totalRedeems || 0;
 
   // Calculate total redemption value: base funding + (claims * $0.05 per claim)
   const baseFunding = 1250;

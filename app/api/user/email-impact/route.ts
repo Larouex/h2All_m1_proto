@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sum } from "drizzle-orm";
 
 async function handleGET(request: NextRequest) {
   try {
@@ -32,6 +32,16 @@ async function handleGET(request: NextRequest) {
       .where(eq(emailClaims.email, email))
       .limit(1);
 
+    // Also get total redeems count to avoid separate API call
+    const totalRedeemsResult = await db
+      .select({ totalClaims: sum(emailClaims.claimCount) })
+      .from(emailClaims);
+
+    const totalRedeems = parseInt(
+      totalRedeemsResult[0]?.totalClaims || "0",
+      10
+    );
+
     if (emailClaim.length === 0) {
       // No claims found for this email
       return NextResponse.json({
@@ -40,6 +50,7 @@ async function handleGET(request: NextRequest) {
         waterFunded: 0,
         email: email,
         hasData: false,
+        totalRedeems: totalRedeems, // Include total redeems even for new users
       });
     }
 
@@ -55,6 +66,7 @@ async function handleGET(request: NextRequest) {
       email: email,
       lastClaimDate: claim.updatedAt,
       hasData: true,
+      totalRedeems: totalRedeems, // Include total redeems to avoid separate API call
     });
   } catch (error) {
     console.error("Error fetching email impact:", error);
