@@ -4,15 +4,20 @@ import Script from "next/script";
 import { useEffect, useState } from "react";
 
 export default function GoogleAnalytics() {
-  const [isProduction, setIsProduction] = useState(false);
+  const [shouldLoadAnalytics, setShouldLoadAnalytics] = useState(false);
 
   useEffect(() => {
-    // Only set to true in production environment on client side
-    setIsProduction(process.env.NODE_ENV === "production");
+    // Check if Google Analytics should be disabled via environment variable
+    const isDisabled =
+      process.env.NEXT_PUBLIC_DISABLE_GOOGLE_ANALYTICS === "true";
+    const isProduction = process.env.NODE_ENV === "production";
+
+    // Only load analytics in production AND when not explicitly disabled
+    setShouldLoadAnalytics(isProduction && !isDisabled);
   }, []);
 
-  // Don't render anything during SSR or in development
-  if (!isProduction) return null;
+  // Don't render anything during SSR, in development, or when disabled
+  if (!shouldLoadAnalytics) return null;
 
   return (
     <>
