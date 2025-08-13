@@ -133,15 +133,8 @@ export default function MyImpactPublic({
       {
         icon: "bi-currency-dollar",
         iconColor: "text-success",
-        label: "Total Contribution",
+        label: "Contribution",
         value: `$${impactData.totalContribution.toFixed(2)}`,
-      },
-      {
-        icon: "bi-droplet-fill",
-        iconColor: "text-info",
-        label: "Water Funded",
-        value: impactData.waterFunded.toFixed(0),
-        unit: "liters",
       },
     ];
   };
@@ -186,26 +179,13 @@ export default function MyImpactPublic({
         <h3 className="fs-5 fw-bold text-black mb-3">My Impact</h3>
 
         {metrics.length > 0 ? (
-          <div className="row g-2">
+          <div className="d-flex justify-content-between align-items-center bg-light rounded p-3">
             {metrics.map((metric, index) => (
-              <div key={index} className="col-12">
-                <div className="d-flex align-items-center gap-3 p-2 bg-light rounded">
-                  <div className="d-flex align-items-center justify-content-center">
-                    <i
-                      className={`${metric.icon} ${metric.iconColor} fs-4`}
-                    ></i>
-                  </div>
-                  <div className="flex-grow-1">
-                    <div className="small text-muted mb-0">{metric.label}</div>
-                    <div className="fw-bold text-black">
-                      {metric.value}
-                      {metric.unit && (
-                        <span className="small text-muted ms-1">
-                          {metric.unit}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+              <div key={index} className="d-flex align-items-center gap-2">
+                <i className={`${metric.icon} ${metric.iconColor} fs-4`}></i>
+                <div>
+                  <div className="small text-muted mb-0">{metric.label}</div>
+                  <div className="fw-bold text-black">{metric.value}</div>
                 </div>
               </div>
             ))}

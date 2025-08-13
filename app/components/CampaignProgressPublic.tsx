@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card, ProgressBar } from "react-bootstrap";
 
 interface CampaignProgressPublicProps {
@@ -22,6 +23,7 @@ export default function CampaignProgressPublic({
   campaignData: propCampaignData,
 }: CampaignProgressPublicProps) {
   // Use prop data if provided, otherwise fall back to static placeholder data
+  // Update campaignData when propCampaignData changes
   const campaignData: CampaignData = propCampaignData || {
     id: "kodema-village",
     name: "Campaign Progress",
@@ -33,6 +35,11 @@ export default function CampaignProgressPublic({
     isActive: true,
   };
 
+  const [editData, setEditData] = useState({
+    title: campaignData.name,
+    description: campaignData.description,
+  });
+
   // Use the totalRedemptionValue directly since it's already calculated correctly
   const currentFunding = campaignData.totalRedemptionValue || 0;
   const fundingGoal = campaignData.fundingGoal || 5000;
@@ -42,10 +49,10 @@ export default function CampaignProgressPublic({
     <Card className={`shadow ${className}`}>
       <Card.Body className="p-3">
         <div className="d-flex align-items-center justify-content-between mb-2">
-          <h3 className="fs-5 fw-bold text-black mb-0">{campaignData.name}</h3>
+          <h3 className="fs-5 fw-bold text-black mb-0">{editData.title}</h3>
         </div>
 
-        <p className="text-muted mb-3 small">{campaignData.description}</p>
+        <p className="text-muted mb-3 small">{editData.description}</p>
 
         <div className="mb-3">
           <div className="d-flex align-items-baseline gap-2 mb-2">

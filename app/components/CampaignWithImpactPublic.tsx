@@ -48,13 +48,26 @@ export default function CampaignWithImpactPublic({ className = "" }) {
       baseFunding,
       perClaimValue,
       calculatedRedemptionValue,
+      campaignDataTotalRedemptionValue: calculatedRedemptionValue,
+      timestamp: new Date().toISOString(),
     });
-  }, [totalRedeems, loading, error, calculatedRedemptionValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalRedeems, loading, calculatedRedemptionValue]); // Log when totalRedeems, loading, or calculated value changes
 
   return (
-    <div className={`${styles.campaignWithImpact} ${className}`}>
-      <CampaignProgressPublic campaignData={campaignData} className="mb-3" />
-      <MyImpactPublic />
+    <div className={`${styles.container} ${className}`}>
+      <div
+        className={styles.campaignProgressNoBottomRadius}
+        style={{ marginBottom: 0, paddingBottom: 0 }}
+      >
+        <CampaignProgressPublic campaignData={campaignData} />
+      </div>
+      <div
+        className={styles.impactSection}
+        style={{ marginTop: 0, paddingTop: 0 }}
+      >
+        <MyImpactPublic />
+      </div>
     </div>
   );
 }

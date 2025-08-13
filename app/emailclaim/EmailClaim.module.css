@@ -26,8 +26,8 @@
   background-color: #f3f4f6 !important;
   /* bg-gray-100 */
   border: 0 !important;
-  border-radius: 50px !important;
-  /* rounded-full */
+  border-radius: 8px !important;
+  /* rounded-lg - reduced from 50px for less roundness */
   padding: 16px 48px 16px 16px !important;
   font-size: 1rem;
   color: #6b7280;
