@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
+import Image from "next/image";
 import VersionFooter from "@/app/components/VersionFooter";
 import StickyHeader from "@/app/components/StickyHeader";
 import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
@@ -93,14 +94,27 @@ export default function EmailClaimPage() {
     <div className="bg-white d-flex flex-column align-items-center px-3">
       <StickyHeader />
 
+      {/* Header Image */}
+      <div className="w-100 d-flex justify-content-center mb-4">
+        <Image
+          src="/h2all-emailclaim-header.png"
+          alt="H2All Email Claim Header"
+          width={500}
+          height={300}
+          className="img-fluid"
+          style={{ maxWidth: "100%", height: "auto" }}
+          priority
+        />
+      </div>
+
       {/* Main Content Container with Mobile Width */}
       <div className={`${styles.mainContent} text-center mb-5`}>
-        <h2 className={`display-6 fw-bold text-dark lh-sm pt-5 mb-0`}>
+        <h2 className={`display-6 fw-bold text-dark lh-sm pt-3 mb-0`}>
           See your impact.
         </h2>
 
         {/* Email Instructions */}
-        <p className={`fs-5 text-dark pb-5 emailInstructions`}>
+        <p className={`fs-5 text-dark pb-3 emailInstructions`}>
           Enter email to track contribution.
         </p>
 
