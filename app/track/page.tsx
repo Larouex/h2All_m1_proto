@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import CampaignWithImpact from "@/app/components/CampaignWithImpact";
+import CampaignWithImpactPublic from "@/app/components/CampaignWithImpactPublic";
 import VersionFooter from "@/app/components/VersionFooter";
 import GoogleAnalytics from "@/app/components/analytics/GoogleAnalytics";
 import StickyHeader from "@/app/components/StickyHeader";
@@ -53,8 +53,8 @@ export default function TrackPage() {
           </div>
         </div>
 
-        {/* CampaignWithImpact Component - Below image with responsive negative margin */}
-        <CampaignWithImpact
+        {/* CampaignWithImpactPublic Component - Below image with responsive negative margin */}
+        <CampaignWithImpactPublic
           className={`mb-3 ${styles.campaignWithImpactResponsive}`}
         />
 

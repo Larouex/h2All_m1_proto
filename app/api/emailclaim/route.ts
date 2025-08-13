@@ -205,8 +205,8 @@ async function handleEmailClaim(request: NextRequest) {
   }
 }
 
-// Export secured handlers - Email claims require API key for domain protection
-export const POST = withSecurity(handleEmailClaim, SECURITY_CONFIGS.PROTECTED);
+// Export secured handlers - Email claims are public for easy access
+export const POST = withSecurity(handleEmailClaim, SECURITY_CONFIGS.PUBLIC);
 
 async function getEmailClaimStatus() {
   return NextResponse.json({

@@ -26,6 +26,15 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const isHomePage = pathname === "/";
   const isPrivacyPage = pathname === "/privacy";
 
+  // Determine if page needs authentication
+  const needsAuth =
+    isAdminPage ||
+    (!isClaimPage &&
+      !isEmailClaimPage &&
+      !isTrackPage &&
+      !isHomePage &&
+      !isPrivacyPage);
+
   // Check if we're on redeem subdomain and handle redirects
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -58,6 +67,18 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Helper component to conditionally wrap with AuthProvider
+  const ConditionalAuthProvider = ({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) => {
+    if (needsAuth) {
+      return <AuthProvider>{children}</AuthProvider>;
+    }
+    return <>{children}</>;
+  };
+
   // For claim flow pages or home page, render without navbar/footer and without padding
   if (
     isClaimPage ||
@@ -67,34 +88,34 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     isPrivacyPage
   ) {
     return (
-      <AuthProvider>
+      <ConditionalAuthProvider>
         <div className="d-flex flex-column min-vh-100">
           <main className="flex-grow-1">{children}</main>
         </div>
-      </AuthProvider>
+      </ConditionalAuthProvider>
     );
   }
 
   // For admin pages, render without navbar/footer but with main-content padding
   if (isAdminPage) {
     return (
-      <AuthProvider>
+      <ConditionalAuthProvider>
         <div className="d-flex flex-column min-vh-100">
           <main className="flex-grow-1 main-content">{children}</main>
         </div>
-      </AuthProvider>
+      </ConditionalAuthProvider>
     );
   }
 
   // For regular pages, render with navbar/footer and main-content padding
   return (
-    <AuthProvider>
+    <ConditionalAuthProvider>
       <div className="d-flex flex-column min-vh-100">
         <NavBar />
         <main className="flex-grow-1 main-content">{children}</main>
         <Footer />
       </div>
-    </AuthProvider>
+    </ConditionalAuthProvider>
   );
 }
 

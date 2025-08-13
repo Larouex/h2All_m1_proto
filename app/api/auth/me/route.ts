@@ -78,4 +78,4 @@ async function handleGET(request: NextRequest) {
 }
 
 // Export secured handler
-export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PROTECTED);
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PUBLIC);

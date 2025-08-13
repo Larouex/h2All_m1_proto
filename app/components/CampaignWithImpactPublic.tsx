@@ -1,0 +1,60 @@
+"use client";
+
+import React from "react";
+import CampaignProgressPublic from "@/app/components/CampaignProgressPublic";
+import MyImpactPublic from "@/app/components/MyImpactPublic";
+import { useTotalRedeems } from "@/app/hooks/useTotalRedeems";
+import styles from "./CampaignWithImpact.module.css";
+
+// Define the CampaignData interface locally
+interface CampaignData {
+  id: string;
+  name: string;
+  description: string;
+  fundingGoal: number;
+  currentFunding: number;
+  totalRedemptionValue: number;
+  isActive: boolean;
+}
+
+export default function CampaignWithImpactPublic({ className = "" }) {
+  // Fetch total redeems count from API (no auto-refresh to prevent unnecessary calls)
+  const { totalRedeems, loading, error } = useTotalRedeems(false);
+
+  // Calculate total redemption value: base funding + (claims * $0.05 per claim)
+  const baseFunding = 1250;
+  const perClaimValue = 0.05;
+  const calculatedRedemptionValue =
+    baseFunding + (totalRedeems || 0) * perClaimValue;
+
+  // Create campaign data object with the specified values
+  const campaignData: CampaignData = {
+    id: "1",
+    name: "Kodema Village",
+    description:
+      "Our goal: Access to safe and clean water eliminating waterborne illness.",
+    fundingGoal: 5000,
+    currentFunding: baseFunding,
+    totalRedemptionValue: calculatedRedemptionValue, // Current funding + (claims * $0.05)
+    isActive: true,
+  };
+
+  // Log the value to console for testing (only when totalRedeems changes)
+  React.useEffect(() => {
+    console.log("CampaignWithImpactPublic - API data update:", {
+      totalRedeems,
+      loading,
+      error,
+      baseFunding,
+      perClaimValue,
+      calculatedRedemptionValue,
+    });
+  }, [totalRedeems, loading, error, calculatedRedemptionValue]);
+
+  return (
+    <div className={`${styles.campaignWithImpact} ${className}`}>
+      <CampaignProgressPublic campaignData={campaignData} className="mb-3" />
+      <MyImpactPublic />
+    </div>
+  );
+}
