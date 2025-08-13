@@ -28,15 +28,18 @@
   border: 0 !important;
   border-radius: 8px !important;
   /* rounded-lg - reduced from 50px for less roundness */
-  padding: 16px 48px 16px 16px !important;
+  padding: 16px 5px !important;
+  /* 5px left and right padding */
+  width: 100% !important;
+  /* Full width of parent container */
   font-size: 1rem;
   color: #6b7280;
   /* text-gray-600 */
 }
 
 .emailInput::placeholder {
-  color: #9ca3af;
-  /* text-gray-500 */
+  color: #4b5563;
+  /* text-gray-700 - darkened from text-gray-500 */
 }
 
 .emailInput:focus {
@@ -45,8 +48,22 @@
   box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
 }
 
+.formContainer {
+  width: 100%;
+}
+
 .emailInputContainer {
   position: relative;
+  width: 100%;
+  /* Full width of parent container for input */
+}
+
+.buttonContainer {
+  /* Keep button constrained to a reasonable width */
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  /* Center the button container */
 }
 
 .inputIcon {

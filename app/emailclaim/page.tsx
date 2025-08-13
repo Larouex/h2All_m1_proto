@@ -105,7 +105,7 @@ export default function EmailClaimPage() {
         </p>
 
         {/* Email Input Form */}
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} className={styles.formContainer}>
           <div className={`${styles.emailInputContainer} mb-3`}>
             <Form.Control
               type="email"
@@ -118,28 +118,30 @@ export default function EmailClaimPage() {
             />
           </div>
 
-          {/* Claim Button */}
-          <div className="d-grid gap-2 mb-4">
-            <Button
-              variant="warning"
-              size="lg"
-              className={`py-3 fw-bold fs-5 text-white ${styles.claimButton}`}
-              type="submit"
-              disabled={!isValidEmail(email) || isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <span
-                    className="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                  Processing...
-                </>
-              ) : (
-                "Claim My Bottle"
-              )}
-            </Button>
+          <div className={styles.buttonContainer}>
+            {/* Claim Button */}
+            <div className="d-grid gap-2 mb-4">
+              <Button
+                variant="warning"
+                size="lg"
+                className={`py-3 fw-bold fs-5 text-white ${styles.claimButton}`}
+                type="submit"
+                disabled={!isValidEmail(email) || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Processing...
+                  </>
+                ) : (
+                  "Claim My Bottle"
+                )}
+              </Button>
+            </div>
           </div>
         </Form>
 
