@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { projectQueries } from "@/app/lib/database-pg";
 
 // Specify runtime for Node.js compatibility
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const { projectId } = await request.json();
 
@@ -61,18 +62,26 @@ export async function POST(request: NextRequest) {
 }
 
 // Prevent other HTTP methods
-export async function GET() {
+// Export secured handler
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.PUBLIC);
+
+async function handleGET() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function PUT() {
+async function handlePUT() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function PATCH() {
+async function handlePATCH() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function DELETE() {
+async function handleDELETE() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
+
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PUBLIC);
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.PUBLIC);
+export const PATCH = withSecurity(handlePATCH, SECURITY_CONFIGS.PUBLIC);
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.PUBLIC);

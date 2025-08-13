@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+async function handleDELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -93,7 +94,7 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+async function handlePUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { id, ...updateData } = body;
@@ -138,3 +139,8 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
+// Export secured handlers
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.ADMIN);
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.ADMIN);

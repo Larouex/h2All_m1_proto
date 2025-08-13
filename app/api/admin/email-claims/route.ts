@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -61,7 +62,7 @@ async function handleGetEmailClaims(request: NextRequest) {
 }
 
 // Export handlers
-export const GET = handleGetEmailClaims;
+export const GET = withSecurity(handleGetEmailClaims, SECURITY_CONFIGS.ADMIN);
 
 async function handleDeleteEmailClaim(request: NextRequest) {
   try {
@@ -100,7 +101,10 @@ async function handleDeleteEmailClaim(request: NextRequest) {
   }
 }
 
-export const DELETE = handleDeleteEmailClaim;
+export const DELETE = withSecurity(
+  handleDeleteEmailClaim,
+  SECURITY_CONFIGS.ADMIN
+);
 
 async function handleUpdateEmailClaim(request: NextRequest) {
   try {
@@ -160,4 +164,4 @@ async function handleUpdateEmailClaim(request: NextRequest) {
   }
 }
 
-export const PUT = handleUpdateEmailClaim;
+export const PUT = withSecurity(handleUpdateEmailClaim, SECURITY_CONFIGS.ADMIN);

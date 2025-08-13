@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 
-export async function GET(request: NextRequest) {
+async function testGet(request: NextRequest) {
   console.log("🧪 TEST API - GET request received");
   return NextResponse.json({
     success: true,
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   });
 }
 
-export async function POST(request: NextRequest) {
+async function testPost(request: NextRequest) {
   try {
     console.log("🧪 TEST API - POST request received");
     const body = await request.json();
@@ -33,3 +34,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Secure test endpoints - public access with origin validation
+export const GET = withSecurity(testGet, SECURITY_CONFIGS.PUBLIC);
+export const POST = withSecurity(testPost, SECURITY_CONFIGS.PUBLIC);

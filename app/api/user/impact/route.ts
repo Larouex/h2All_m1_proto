@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { verifyToken } from "@/app/lib/auth";
 import { db } from "@/db";
 import { redemptionCodes, campaigns } from "@/db/schema";
@@ -32,7 +33,7 @@ import { eq, and } from "drizzle-orm";
  *       404:
  *         description: No impact data found
  */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     // Verify authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -153,15 +154,22 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Export secured handler
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PROTECTED);
+
 // Only allow GET method
-export async function POST() {
+async function handlePOST() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function PUT() {
+async function handlePUT() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function DELETE() {
+async function handleDELETE() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
+
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.PROTECTED);
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.PROTECTED);
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.PROTECTED);

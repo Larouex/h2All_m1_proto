@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
@@ -63,3 +64,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// Export secured handler
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PUBLIC);

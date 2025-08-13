@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
 import { sql } from "drizzle-orm";
@@ -7,7 +8,7 @@ import { sql } from "drizzle-orm";
  * Admin endpoint to fix email claims with invalid timestamps
  * This will update any records that have null or invalid dates
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     console.log("🔧 FIXING EMAIL CLAIMS TIMESTAMPS - Starting repair process");
 
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   // Just show current status without fixing
   try {
     const allClaims = await db.select().from(emailClaims);
@@ -136,3 +137,7 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// Export secured handlers
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);

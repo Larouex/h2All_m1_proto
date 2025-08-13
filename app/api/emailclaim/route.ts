@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
@@ -204,12 +205,14 @@ async function handleEmailClaim(request: NextRequest) {
   }
 }
 
-// Export POST handler
-export const POST = handleEmailClaim;
+// Export secured handlers - Email claims require API key for domain protection
+export const POST = withSecurity(handleEmailClaim, SECURITY_CONFIGS.PROTECTED);
 
-export async function GET(request: NextRequest) {
+async function getEmailClaimStatus() {
   return NextResponse.json({
     message: "Email claim API is running",
     timestamp: new Date().toISOString(),
   });
 }
+
+export const GET = withSecurity(getEmailClaimStatus, SECURITY_CONFIGS.PUBLIC);

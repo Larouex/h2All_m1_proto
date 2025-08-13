@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { campaignQueries, redemptionCodeQueries } from "@/app/lib/database-pg";
 
 // Specify runtime for Node.js compatibility
 export const runtime = "nodejs";
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const campaignId = searchParams.get("campaign_id");
@@ -103,3 +104,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// Export secured handler
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PUBLIC);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import {
   campaigns,
@@ -8,7 +9,7 @@ import {
   subscriptions,
 } from "@/db/schema";
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // This is a destructive operation - add extra validation
     const userAgent = request.headers.get("user-agent") || "";
@@ -98,3 +99,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export secured handler
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);

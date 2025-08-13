@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/app/lib/auth";
 import { userQueries } from "@/app/lib/database-pg";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 
 // Specify runtime for Node.js compatibility
 export const runtime = "nodejs";
@@ -33,7 +34,7 @@ export const runtime = "nodejs";
  *       404:
  *         description: User not found
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // Verify admin authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -93,6 +94,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);
+
 /**
  * @swagger
  * /api/admin/promote-user:
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
  *       200:
  *         description: Instructions returned
  */
-export async function GET() {
+async function handleGET() {
   return NextResponse.json({
     message: "User Promotion API",
     usage: {
@@ -119,3 +122,5 @@ export async function GET() {
     },
   });
 }
+
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);

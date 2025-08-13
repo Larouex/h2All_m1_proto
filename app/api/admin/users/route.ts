@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { userQueries } from "@/app/lib/database-pg";
 
 // GET /api/admin/users - List all users
@@ -162,7 +163,7 @@ async function handleDELETE(request: NextRequest) {
   }
 }
 
-// Export endpoints
-export const GET = handleGET;
-export const PUT = handlePUT;
-export const DELETE = handleDELETE;
+// Export secured admin endpoints - require API key and origin validation
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.ADMIN);
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.ADMIN);

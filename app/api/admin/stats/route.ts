@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { users, campaigns, redemptionCodes } from "@/db/schema";
 import { sql, eq, desc } from "drizzle-orm";
 
-export async function GET() {
+async function getAdminStats() {
   try {
     // Get total campaigns
     const totalCampaignsResult = await db
@@ -101,3 +102,6 @@ export async function GET() {
     );
   }
 }
+
+// Secure admin stats endpoint - requires API key and origin validation
+export const GET = withSecurity(getAdminStats, SECURITY_CONFIGS.ADMIN);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { verifyToken } from "@/app/lib/auth";
 import {
   campaignQueries,
@@ -45,7 +46,7 @@ export const runtime = "nodejs";
  *         description: Campaign or code not found
  */
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // Verify authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -201,19 +202,27 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Export secured handlers
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.PROTECTED);
+
 // Prevent other HTTP methods
-export async function GET() {
+async function handleGET() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function PUT() {
+async function handlePUT() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function PATCH() {
+async function handlePATCH() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function DELETE() {
+async function handleDELETE() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
+
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PROTECTED);
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.PROTECTED);
+export const PATCH = withSecurity(handlePATCH, SECURITY_CONFIGS.PROTECTED);
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.PROTECTED);

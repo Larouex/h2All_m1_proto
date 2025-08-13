@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
 
 /**
  * Diagnostic endpoint to check raw database structure and data
  */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     console.log("🔍 DIAGNOSTIC - Starting email claims table investigation");
 
@@ -59,3 +60,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// Export secured handler
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);

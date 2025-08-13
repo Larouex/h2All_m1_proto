@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import VersionFooter from "@/app/components/VersionFooter";
 import StickyHeader from "@/app/components/StickyHeader";
@@ -10,12 +10,6 @@ import styles from "./EmailClaim.module.css";
 export default function EmailClaimPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  // Ensure component only renders after hydration to prevent hydration mismatches
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   // Email validation function
   const isValidEmail = (email: string) => {
@@ -34,6 +28,7 @@ export default function EmailClaimPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "",
         },
         body: JSON.stringify({ email }),
       });
@@ -100,10 +95,7 @@ export default function EmailClaimPage() {
 
       {/* Main Content Container with Mobile Width */}
       <div className={`${styles.mainContent} text-center mb-5`}>
-        <h2
-          className={`display-6 fw-bold text-dark lh-sm pt-5`}
-          style={{ marginBottom: 0 }}
-        >
+        <h2 className={`display-6 fw-bold text-dark lh-sm pt-5 mb-0`}>
           See your impact.
         </h2>
 
@@ -112,55 +104,44 @@ export default function EmailClaimPage() {
           Enter email to track contribution.
         </p>
 
-        {/* Email Input Form - Only render after client hydration */}
-        {isClient && (
-          <Form onSubmit={handleSubmit}>
-            <div className={`${styles.emailInputContainer} mb-3`}>
-              <Form.Control
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={styles.emailInput}
-                required
-                suppressHydrationWarning
-              />
-            </div>
-
-            {/* Claim Button */}
-            <div className="d-grid gap-2 mb-4">
-              <Button
-                variant="warning"
-                size="lg"
-                className={`py-3 fw-bold fs-5 text-white ${styles.claimButton}`}
-                type="submit"
-                disabled={!isValidEmail(email) || isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    Processing...
-                  </>
-                ) : (
-                  "Claim My Bottle"
-                )}
-              </Button>
-            </div>
-          </Form>
-        )}
-
-        {/* Loading placeholder when not hydrated */}
-        {!isClient && (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
+        {/* Email Input Form */}
+        <Form onSubmit={handleSubmit}>
+          <div className={`${styles.emailInputContainer} mb-3`}>
+            <Form.Control
+              type="email"
+              placeholder="your.email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={styles.emailInput}
+              required
+              suppressHydrationWarning
+            />
           </div>
-        )}
+
+          {/* Claim Button */}
+          <div className="d-grid gap-2 mb-4">
+            <Button
+              variant="warning"
+              size="lg"
+              className={`py-3 fw-bold fs-5 text-white ${styles.claimButton}`}
+              type="submit"
+              disabled={!isValidEmail(email) || isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  Processing...
+                </>
+              ) : (
+                "Claim My Bottle"
+              )}
+            </Button>
+          </div>
+        </Form>
 
         {/* Subtext */}
         <p className="text-muted subtext">

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import {
   hashPassword,
   generateToken,
@@ -29,7 +30,7 @@ function getClientIP(request: NextRequest): string {
   return "127.0.0.1";
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const body: RegisterUserDto = await request.json();
     const { email, firstName, lastName, country, password } = body;
@@ -222,3 +223,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }
 }
+
+// Export secured handler
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.PUBLIC);

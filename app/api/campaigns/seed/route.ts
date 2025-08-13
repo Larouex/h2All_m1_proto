@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { campaignQueries } from "@/app/lib/database-pg";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 
 /**
  * Seed endpoint to create sample campaign data for development/testing
  * GET /api/campaigns/seed - Creates sample campaigns if they don't exist
  */
-export async function GET() {
+async function handleGET() {
   try {
     // Check if kodema-village campaign already exists
     const existingCampaign = await campaignQueries.findById("kodema-village");
@@ -62,14 +63,22 @@ export async function GET() {
 }
 
 // Only allow GET method for seeding
-export async function POST() {
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);
+
+async function handlePOST() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function PUT() {
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);
+
+async function handlePUT() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function DELETE() {
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.ADMIN);
+
+async function handleDELETE() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
+
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.ADMIN);

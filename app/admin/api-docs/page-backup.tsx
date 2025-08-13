@@ -13,7 +13,7 @@ import {
   ListGroup,
 } from "react-bootstrap";
 import { useRouter } from "next/navigation";
-import SwaggerUI from "../../components/SwaggerUI";
+import SwaggerUI from "@/app/components/SwaggerUI";
 
 interface SwaggerSpec {
   openapi: string;
@@ -79,24 +79,23 @@ export default function AdminApiDocs() {
     const stats: ApiStats = {
       totalEndpoints: 0,
       byCategory: {},
-      byMethod: {},
+      byMethod: {}
     };
 
     Object.entries(spec.paths).forEach(([path, methods]) => {
       Object.entries(methods).forEach(([method, details]) => {
         stats.totalEndpoints++;
-
+        
         // Count by method
         const methodUpper = method.toUpperCase();
         stats.byMethod[methodUpper] = (stats.byMethod[methodUpper] || 0) + 1;
-
+        
         // Count by category (tags)
         if (details.tags && details.tags.length > 0) {
           const category = details.tags[0];
           stats.byCategory[category] = (stats.byCategory[category] || 0) + 1;
         } else {
-          stats.byCategory["Uncategorized"] =
-            (stats.byCategory["Uncategorized"] || 0) + 1;
+          stats.byCategory['Uncategorized'] = (stats.byCategory['Uncategorized'] || 0) + 1;
         }
       });
     });
@@ -106,18 +105,12 @@ export default function AdminApiDocs() {
 
   const getMethodBadgeColor = (method: string) => {
     switch (method.toLowerCase()) {
-      case "get":
-        return "primary";
-      case "post":
-        return "success";
-      case "put":
-        return "warning";
-      case "delete":
-        return "danger";
-      case "patch":
-        return "info";
-      default:
-        return "secondary";
+      case 'get': return 'primary';
+      case 'post': return 'success';
+      case 'put': return 'warning';
+      case 'delete': return 'danger';
+      case 'patch': return 'info';
+      default: return 'secondary';
     }
   };
 
@@ -145,10 +138,7 @@ export default function AdminApiDocs() {
                 <Button variant="outline-danger" onClick={fetchSwaggerSpec}>
                   Retry
                 </Button>
-                <Button
-                  variant="outline-secondary"
-                  onClick={() => router.push("/admin")}
-                >
+                <Button variant="outline-secondary" onClick={() => router.push("/admin")}>
                   Back to Admin
                 </Button>
               </div>
@@ -167,23 +157,18 @@ export default function AdminApiDocs() {
             <div>
               <h1>🔧 API Documentation</h1>
               <p className="text-muted">
-                Complete H2All M1 Proto API Reference -{" "}
-                {swaggerSpec?.info?.version}
+                Complete H2All M1 Proto API Reference - {swaggerSpec?.info?.version}
               </p>
             </div>
             <div className="d-flex gap-2">
-              <Button
-                variant="outline-info"
-                size="sm"
+              <Button 
+                variant="outline-info" 
+                size="sm" 
                 onClick={() => setShowStats(!showStats)}
               >
-                {showStats ? "Hide" : "Show"} Stats
+                {showStats ? 'Hide' : 'Show'} Stats
               </Button>
-              <Button
-                variant="outline-secondary"
-                size="sm"
-                onClick={() => router.push("/admin")}
-              >
+              <Button variant="outline-secondary" size="sm" onClick={() => router.push("/admin")}>
                 Back to Admin
               </Button>
             </div>
@@ -200,40 +185,33 @@ export default function AdminApiDocs() {
                     <Row>
                       <Col md={3}>
                         <div className="text-center">
-                          <h3 className="text-primary">
-                            {apiStats.totalEndpoints}
-                          </h3>
+                          <h3 className="text-primary">{apiStats.totalEndpoints}</h3>
                           <small className="text-muted">Total Endpoints</small>
                         </div>
                       </Col>
                       <Col md={4}>
                         <h6>By HTTP Method</h6>
                         <div className="d-flex flex-wrap gap-1">
-                          {Object.entries(apiStats.byMethod).map(
-                            ([method, count]) => (
-                              <Badge
-                                key={method}
-                                bg={getMethodBadgeColor(method)}
-                                className="d-flex align-items-center gap-1"
-                              >
-                                {method}{" "}
-                                <span className="badge bg-light text-dark">
-                                  {count}
-                                </span>
-                              </Badge>
-                            )
-                          )}
+                          {Object.entries(apiStats.byMethod).map(([method, count]) => (
+                            <Badge 
+                              key={method} 
+                              bg={getMethodBadgeColor(method)}
+                              className="d-flex align-items-center gap-1"
+                            >
+                              {method} <span className="badge bg-light text-dark">{count}</span>
+                            </Badge>
+                          ))}
                         </div>
                       </Col>
                       <Col md={5}>
                         <h6>By Category</h6>
-                        <div style={{ maxHeight: "120px", overflowY: "auto" }}>
+                        <div style={{ maxHeight: '120px', overflowY: 'auto' }}>
                           <ListGroup variant="flush" className="small">
                             {Object.entries(apiStats.byCategory)
-                              .sort(([, a], [, b]) => b - a)
+                              .sort(([,a], [,b]) => b - a)
                               .map(([category, count]) => (
-                                <ListGroup.Item
-                                  key={category}
+                                <ListGroup.Item 
+                                  key={category} 
                                   className="d-flex justify-content-between align-items-center py-1 px-2"
                                 >
                                   <span>{category}</span>
@@ -279,40 +257,152 @@ export default function AdminApiDocs() {
                 <Row>
                   <Col md={6}>
                     <ul className="mb-0">
-                      <li>
-                        <strong>Complete Coverage:</strong> All{" "}
-                        {apiStats?.totalEndpoints} endpoints documented
-                      </li>
-                      <li>
-                        <strong>Interactive Testing:</strong> Try endpoints
-                        directly from the docs
-                      </li>
-                      <li>
-                        <strong>Security Information:</strong> Authentication
-                        requirements clearly marked
-                      </li>
+                      <li><strong>Complete Coverage:</strong> All {apiStats?.totalEndpoints} endpoints documented</li>
+                      <li><strong>Interactive Testing:</strong> Try endpoints directly from the docs</li>
+                      <li><strong>Security Information:</strong> Authentication requirements clearly marked</li>
                     </ul>
                   </Col>
                   <Col md={6}>
                     <ul className="mb-0">
-                      <li>
-                        <strong>Request/Response Examples:</strong> Full schema
-                        definitions
-                      </li>
-                      <li>
-                        <strong>Categorized Organization:</strong> Grouped by
-                        functionality
-                      </li>
-                      <li>
-                        <strong>Development Ready:</strong> Copy-paste code
-                        examples
-                      </li>
+                      <li><strong>Request/Response Examples:</strong> Full schema definitions</li>
+                      <li><strong>Categorized Organization:</strong> Grouped by functionality</li>
+                      <li><strong>Development Ready:</strong> Copy-paste code examples</li>
                     </ul>
                   </Col>
                 </Row>
               </Alert>
             </Col>
           </Row>
+        </Col>
+      </Row>
+    </Container>
+  );
+}
+      } else {
+        setError("Failed to load API documentation");
+      }
+    } catch (err) {
+      setError("Error loading API documentation");
+      console.error("Swagger spec error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container className="py-5">
+        <Row className="justify-content-center">
+          <Col md={8} className="text-center">
+            <Spinner animation="border" role="status" className="mb-3">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+            <p>Loading API documentation...</p>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container className="py-5">
+        <Row className="justify-content-center">
+          <Col md={8}>
+            <Alert variant="danger">
+              <Alert.Heading>Error Loading API Documentation</Alert.Heading>
+              <p>{error}</p>
+              <Button variant="outline-danger" onClick={fetchSwaggerSpec}>
+                Try Again
+              </Button>
+            </Alert>
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
+
+  return (
+    <Container fluid className="py-4">
+      <Row>
+        <Col>
+          <Card className="mb-4">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <Card.Title className="h4">
+                    {swaggerSpec?.info?.title || "H2All M1 API Documentation"}
+                  </Card.Title>
+                  <Card.Text className="text-muted">
+                    {swaggerSpec?.info?.description ||
+                      "Complete API documentation for the H2All M1 campaign and redemption code system. Test all endpoints directly in your browser."}
+                  </Card.Text>
+                  {swaggerSpec?.info?.version && (
+                    <small className="text-muted">
+                      Version: {swaggerSpec.info.version}
+                    </small>
+                  )}
+                </div>
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => router.push("/admin")}
+                  size="sm"
+                >
+                  ← Back to Admin
+                </Button>
+              </div>
+
+              <div className="d-flex gap-2 flex-wrap">
+                <Button
+                  variant="outline-primary"
+                  href="/api/test"
+                  target="_blank"
+                  size="sm"
+                >
+                  🧪 Database Tests
+                </Button>
+                <Button
+                  variant="outline-info"
+                  href="/test-campaign-api.html"
+                  target="_blank"
+                  size="sm"
+                >
+                  📊 Campaign Tests
+                </Button>
+                <Button
+                  variant="outline-success"
+                  href="/test-redemption-api.html"
+                  target="_blank"
+                  size="sm"
+                >
+                  🎫 Redemption Tests
+                </Button>
+                <Button
+                  variant="outline-warning"
+                  href="/api/swagger"
+                  target="_blank"
+                  size="sm"
+                >
+                  📄 Raw JSON
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+
+          {swaggerSpec && (
+            <Card>
+              <Card.Header>
+                <h5 className="mb-0">🚀 Interactive API Explorer</h5>
+                <small className="text-muted">
+                  Click any endpoint below to expand it, then use &quot;Try it
+                  out&quot; to test your APIs directly
+                </small>
+              </Card.Header>
+              <Card.Body className="p-0">
+                <SwaggerUI spec={swaggerSpec} />
+              </Card.Body>
+            </Card>
+          )}
         </Col>
       </Row>
     </Container>

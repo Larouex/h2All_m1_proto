@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
 import { desc } from "drizzle-orm";
 
-export async function GET() {
+async function handleGET() {
   try {
     // Get all email claims ordered by most recent
     const claims = await db
@@ -24,3 +25,6 @@ export async function GET() {
     );
   }
 }
+
+// Export secured handler
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);

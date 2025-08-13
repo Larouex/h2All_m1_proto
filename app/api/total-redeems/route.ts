@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { emailClaims } from "@/db/schema";
 import { sum } from "drizzle-orm";
@@ -8,7 +9,7 @@ const CACHE_DURATION = 30 * 1000; // 30 seconds cache
 let cachedCount: number | null = null;
 let cacheTimestamp: number = 0;
 
-export async function GET(_request: NextRequest) {
+async function handleGET(_request: NextRequest) {
   try {
     // Check cache first for fast response
     const now = Date.now();
@@ -99,7 +100,7 @@ export async function GET(_request: NextRequest) {
 }
 
 // Optional: Add POST method for cache invalidation (admin use)
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const { action } = await request.json();
 
@@ -137,3 +138,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export secured handlers
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PUBLIC);
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.PROTECTED);

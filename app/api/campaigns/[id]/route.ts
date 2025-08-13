@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { campaignQueries } from "@/app/lib/database-pg";
 import { verifyToken } from "@/app/lib/auth";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 
 /**
  * @swagger
@@ -23,7 +24,7 @@ import { verifyToken } from "@/app/lib/auth";
  *       404:
  *         description: Campaign not found
  */
-export async function GET(
+async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -63,6 +64,8 @@ export async function GET(
     );
   }
 }
+
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.PUBLIC);
 
 /**
  * @swagger
@@ -106,7 +109,7 @@ export async function GET(
  *       404:
  *         description: Campaign not found
  */
-export async function PUT(
+async function handlePUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -190,6 +193,8 @@ export async function PUT(
   }
 }
 
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.ADMIN);
+
 /**
  * @swagger
  * /api/campaigns/{id}:
@@ -215,7 +220,7 @@ export async function PUT(
  *       404:
  *         description: Campaign not found
  */
-export async function DELETE(
+async function handleDELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -265,3 +270,5 @@ export async function DELETE(
     );
   }
 }
+
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.ADMIN);

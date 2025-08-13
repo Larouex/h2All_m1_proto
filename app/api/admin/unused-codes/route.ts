@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { redemptionCodes, campaigns } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 
-export async function GET() {
+async function handleGET() {
   try {
     const unusedCodes = await db
       .select({
@@ -31,3 +32,5 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);

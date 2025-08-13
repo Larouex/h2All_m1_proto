@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 
-export async function GET() {
+async function handleGET() {
   try {
     const userData = await db
       .select({
@@ -76,7 +77,7 @@ export async function GET() {
 }
 
 // Note: User import is intentionally restricted for security and privacy reasons
-export async function POST() {
+async function handlePOST() {
   return NextResponse.json(
     {
       error:
@@ -87,3 +88,7 @@ export async function POST() {
     { status: 403 }
   );
 }
+
+// Export secured handlers
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);

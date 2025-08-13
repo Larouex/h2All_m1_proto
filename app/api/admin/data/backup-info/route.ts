@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import {
   campaigns,
@@ -8,7 +9,7 @@ import {
   subscriptions,
 } from "@/db/schema";
 
-export async function GET() {
+async function handleGET() {
   try {
     // Get current database statistics for backup planning
     const stats = {
@@ -91,3 +92,6 @@ export async function GET() {
     );
   }
 }
+
+// Export secured handler
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { redemptionCodes, type NewRedemptionCode } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function GET() {
+async function handleGET() {
   try {
     const codesData = await db.select().from(redemptionCodes);
 
@@ -62,7 +63,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -248,3 +249,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export secured handlers
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);

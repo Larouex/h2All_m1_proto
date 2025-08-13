@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Button } from "react-bootstrap";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import VersionFooter from "@/app/components/VersionFooter";
 import StickyHeader from "@/app/components/StickyHeader";
 import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
@@ -10,14 +11,13 @@ import styles from "./Claim.module.css";
 
 export default function ClaimPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleClaimBottle = async () => {
     setIsLoading(true);
-    // Simulate claim process
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Redirect to emailclaim page after successful claim
-    window.location.href = "/emailclaim";
+    // Use Next.js router for faster navigation
+    router.push("/emailclaim");
   };
 
   return (

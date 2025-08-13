@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { campaignQueries } from "@/app/lib/database-pg";
 import { campaigns } from "@/db/schema";
 import { verifyToken } from "@/app/lib/auth";
@@ -29,7 +30,7 @@ import type { CreateCampaignDto, UpdateCampaignDto } from "@/types/campaign";
  *       404:
  *         description: Campaign not found
  */
-export async function GET(request: NextRequest) {
+async function getCampaigns(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const campaignId = searchParams.get("id");
@@ -100,6 +101,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Secure campaigns GET endpoint - public read access with origin validation
+export const GET = withSecurity(getCampaigns, SECURITY_CONFIGS.PUBLIC);
+
 /**
  * @swagger
  * /api/campaigns:
@@ -124,7 +128,7 @@ export async function GET(request: NextRequest) {
  *       403:
  *         description: Forbidden (admin only)
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // Verify admin authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -228,7 +232,7 @@ export async function POST(request: NextRequest) {
  *       404:
  *         description: Campaign not found
  */
-export async function PUT(request: NextRequest) {
+async function handlePUT(request: NextRequest) {
   try {
     // Verify admin authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -334,7 +338,7 @@ export async function PUT(request: NextRequest) {
  *       404:
  *         description: Campaign not found
  */
-export async function DELETE(request: NextRequest) {
+async function handleDELETE(request: NextRequest) {
   try {
     // Verify admin authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -387,3 +391,8 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+// Export secured handlers
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.ADMIN);
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.ADMIN);

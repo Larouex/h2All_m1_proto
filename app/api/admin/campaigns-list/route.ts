@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 import { campaigns } from "@/db/schema";
 
-export async function GET() {
+async function handleGET() {
   try {
     const campaignData = await db
       .select({
@@ -27,3 +28,6 @@ export async function GET() {
     );
   }
 }
+
+// Export secured handler
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);

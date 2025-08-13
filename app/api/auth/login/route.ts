@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { authenticate, createJWT } from "../../../lib/auth";
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
@@ -66,3 +67,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export secured handler
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.PUBLIC);

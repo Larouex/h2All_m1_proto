@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { redemptionCodes, campaigns, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 
 /**
  * Seed endpoint to create sample redemption data for impact testing
  * GET /api/user/impact/seed - Creates sample redemption codes for testing
  */
-export async function GET() {
+async function handleGET() {
   try {
     // Check if we have campaigns to work with
     const existingCampaigns = await db.select().from(campaigns).limit(1);
@@ -139,15 +140,21 @@ export async function GET() {
   }
 }
 
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);
+
 // Only allow GET method for seeding
-export async function POST() {
+async function handlePOST() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function PUT() {
+async function handlePUT() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 
-export async function DELETE() {
+async function handleDELETE() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
+
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);
+export const PUT = withSecurity(handlePUT, SECURITY_CONFIGS.ADMIN);
+export const DELETE = withSecurity(handleDELETE, SECURITY_CONFIGS.ADMIN);

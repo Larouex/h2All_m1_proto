@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { redemptionCodeQueries, campaignQueries } from "@/app/lib/database-pg";
 import { verifyToken } from "@/app/lib/auth";
 import type {
@@ -41,7 +42,7 @@ import type {
  *       404:
  *         description: Redemption code not found
  */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -197,7 +198,7 @@ export async function GET(request: NextRequest) {
  *       404:
  *         description: Campaign or code not found
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // Verify authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -352,3 +353,7 @@ function generateUniqueCode(): string {
   }
   return code;
 }
+
+// Export secured handlers
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);

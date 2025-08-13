@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { campaigns, type NewCampaign } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 
 async function handleGET() {
   try {
@@ -227,5 +228,5 @@ async function handlePOST(request: NextRequest) {
 }
 
 // Export endpoints
-export const GET = handleGET;
-export const POST = handlePOST;
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);

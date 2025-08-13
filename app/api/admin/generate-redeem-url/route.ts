@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { verifyToken } from "@/app/lib/auth";
 import { redemptionCodeQueries, campaignQueries } from "@/app/lib/database-pg";
 
@@ -52,7 +53,7 @@ interface GenerateUrlRequest {
   };
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     // Verify admin authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     // Verify admin authentication
     const authToken = request.cookies.get("auth-token")?.value;
@@ -226,3 +227,7 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// Export secured handlers
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);
+export const GET = withSecurity(handleGET, SECURITY_CONFIGS.ADMIN);

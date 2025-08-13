@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
 
-export async function POST() {
+async function handlePOST() {
   try {
     console.log("Creating email_claims table...");
 
@@ -52,3 +53,6 @@ export async function POST() {
     );
   }
 }
+
+// Export secured handler
+export const POST = withSecurity(handlePOST, SECURITY_CONFIGS.ADMIN);
