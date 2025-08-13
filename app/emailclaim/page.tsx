@@ -101,7 +101,7 @@ export default function EmailClaimPage() {
           alt="H2All Email Claim Header"
           width={500}
           height={300}
-          className="img-fluid"
+          className="img-fluid rounded-4"
           style={{ maxWidth: "100%", height: "auto" }}
           priority
         />
@@ -109,12 +109,12 @@ export default function EmailClaimPage() {
 
       {/* Main Content Container with Mobile Width */}
       <div className={`${styles.mainContent} text-center mb-5`}>
-        <h2 className={`display-6 fw-bold text-dark lh-sm pt-3 mb-0`}>
+        <h2 className={`display-6 fw-bold text-dark lh-sm pt-2 mb-0`}>
           See your impact.
         </h2>
 
         {/* Email Instructions */}
-        <p className={`fs-5 text-dark pb-3 emailInstructions`}>
+        <p className={`fs-5 text-dark pb-2 emailInstructions`}>
           Enter email to track contribution.
         </p>
 
