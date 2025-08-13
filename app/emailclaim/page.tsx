@@ -95,7 +95,7 @@ export default function EmailClaimPage() {
       <StickyHeader />
 
       {/* Header Image */}
-      <div className="w-100 d-flex justify-content-center mb-4">
+      <div className="w-100 d-flex justify-content-center mb-4 mt-1">
         <Image
           src="/h2all-emailclaim-815-header.png"
           alt="H2All Email Claim Header"
@@ -121,9 +121,11 @@ export default function EmailClaimPage() {
         {/* Email Input Form */}
         <Form onSubmit={handleSubmit} className={styles.formContainer}>
           <div className={`${styles.emailInputContainer} mb-3`}>
+            <label className={`${styles.emailLabel} text-start mb-1 d-block`}>
+              Email
+            </label>
             <Form.Control
               type="email"
-              placeholder="your.email@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={styles.emailInput}
