@@ -83,10 +83,10 @@ export default function TrackPage() {
             {/* Bottom Image removed from About section */}
           </div>
           {/* Bottom Image moved to very bottom */}
-          <div className="mt-4 rounded overflow-hidden">
+          <div className="mt-4 rounded-4 overflow-hidden">
             <Image
-              src="/track-bottom-81525..png"
-              alt="People collecting water from contaminated source in Kodema Village"
+              src="/children-with-buckets.png"
+              alt="Children with water buckets in Kodema Village"
               width={700}
               height={525}
               className={`${styles.bottomImage} w-100 h-auto`}
