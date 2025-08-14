@@ -97,7 +97,7 @@ export default function EmailClaimPage() {
       {/* Header Image */}
       <div className="w-100 d-flex justify-content-center mb-4 mt-1">
         <Image
-          src="/h2all-emailclaim-815-header.png"
+          src="/h2all-emailclaim-815-woman-header.png"
           alt="H2All Email Claim Header"
           width={500}
           height={300}

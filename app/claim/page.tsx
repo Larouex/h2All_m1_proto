@@ -30,8 +30,8 @@ export default function ClaimPage() {
         <div className="position-relative mb-3">
           <div className="position-relative overflow-hidden rounded">
             <Image
-              src="/h2all-proto-children.png"
-              alt="Two smiling children with arms around each other"
+              src="/child-water-jug.jpg"
+              alt="Child holding a water jug"
               width={400}
               height={500}
               className="w-100 h-auto object-fit-cover rounded-4 m-1"
