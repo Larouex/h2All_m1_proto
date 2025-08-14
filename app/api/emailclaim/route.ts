@@ -31,26 +31,73 @@ async function handleEmailClaim(request: NextRequest) {
       .toString(36)
       .substr(2, 6)}`;
 
-    // Production-optimized UPSERT - single atomic operation
-    const result = await db.execute(sql`
-      INSERT INTO email_claims (id, email, claim_count, created_at, updated_at)
-      VALUES (${claimId}, ${normalizedEmail}, 1, NOW(), NOW())
-      ON CONFLICT (email) 
-      DO UPDATE SET 
-        claim_count = email_claims.claim_count + 1,
-        updated_at = NOW()
-      RETURNING id, email, claim_count, created_at, updated_at, 
-               (xmax = 0) AS is_insert
-    `);
+    // Production-safe UPSERT with fallback error handling
+    try {
+      const result = await db.execute(sql`
+        INSERT INTO email_claims (id, email, claim_count, created_at, updated_at)
+        VALUES (${claimId}, ${normalizedEmail}, 1, NOW(), NOW())
+        ON CONFLICT (email) 
+        DO UPDATE SET 
+          claim_count = email_claims.claim_count + 1,
+          updated_at = NOW()
+        RETURNING id, email, claim_count, created_at, updated_at
+      `);
 
-    const row = result.rows[0];
-    return NextResponse.json({
-      success: true,
-      email: row.email,
-      claimCount: Number(row.claim_count),
-      isNewClaim: row.is_insert,
-      timestamp: new Date().toISOString(),
-    });
+      const row = result.rows[0];
+      return NextResponse.json({
+        success: true,
+        email: row.email,
+        claimCount: Number(row.claim_count),
+        isNewClaim: Number(row.claim_count) === 1,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (upsertError) {
+      // Fallback to traditional SELECT + INSERT/UPDATE for production compatibility
+      console.error("UPSERT failed, using fallback:", upsertError);
+
+      const existingCheck = await db.execute(sql`
+        SELECT id, email, claim_count, created_at, updated_at
+        FROM email_claims 
+        WHERE email = ${normalizedEmail}
+        LIMIT 1
+      `);
+
+      if (existingCheck.rows.length > 0) {
+        // Update existing claim
+        const existingRecord = existingCheck.rows[0];
+        const newClaimCount = (Number(existingRecord.claim_count) || 0) + 1;
+
+        await db.execute(sql`
+          UPDATE email_claims 
+          SET 
+            claim_count = ${newClaimCount},
+            updated_at = NOW()
+          WHERE email = ${normalizedEmail}
+        `);
+
+        return NextResponse.json({
+          success: true,
+          email: normalizedEmail,
+          claimCount: newClaimCount,
+          isNewClaim: false,
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        // Create new claim
+        await db.execute(sql`
+          INSERT INTO email_claims (id, email, claim_count, created_at, updated_at)
+          VALUES (${claimId}, ${normalizedEmail}, 1, NOW(), NOW())
+        `);
+
+        return NextResponse.json({
+          success: true,
+          email: normalizedEmail,
+          claimCount: 1,
+          isNewClaim: true,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
   } catch (error) {
     // Production error logging with context
     console.error("Email claim error:", {
