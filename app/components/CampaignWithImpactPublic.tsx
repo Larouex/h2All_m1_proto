@@ -40,21 +40,6 @@ export default function CampaignWithImpactPublic({ className = "" }) {
     isActive: true,
   };
 
-  // Log the value to console for testing (only when totalRedeems changes)
-  React.useEffect(() => {
-    console.log("CampaignWithImpactPublic - API data update:", {
-      totalRedeems,
-      loading,
-      error,
-      baseFunding,
-      perClaimValue,
-      calculatedRedemptionValue,
-      campaignDataTotalRedemptionValue: calculatedRedemptionValue,
-      timestamp: new Date().toISOString(),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalRedeems, loading, calculatedRedemptionValue]); // Log when totalRedeems, loading, or calculated value changes
-
   return (
     <div className={`${styles.container} ${className}`}>
       <div

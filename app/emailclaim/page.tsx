@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import VersionFooter from "@/app/components/VersionFooter";
 import StickyHeader from "@/app/components/StickyHeader";
 import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
@@ -11,6 +12,7 @@ import styles from "./EmailClaim.module.css";
 export default function EmailClaimPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   // Email validation function
   const isValidEmail = (email: string) => {
@@ -34,48 +36,20 @@ export default function EmailClaimPage() {
         body: JSON.stringify({ email }),
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers.get("content-type"));
-
       if (response.ok) {
-        // Check if response has content before parsing JSON
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-          console.log("Email claim successful:", data);
+        // Store email in localStorage for tracking page
+        localStorage.setItem("userEmail", email);
 
-          // Store email in localStorage for tracking page
-          localStorage.setItem("userEmail", email);
-
-          // Redirect to track page after successful email submission
-          window.location.href = "/track";
-        } else {
-          console.error("Response is not JSON:", await response.text());
-          alert("Invalid response format from server.");
-        }
+        // Use Next.js router for faster navigation
+        router.push("/track");
       } else {
-        // Check if error response has content before parsing JSON
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const errorData = await response.json();
-          console.error("Email claim failed:", errorData);
-          alert("Failed to process email claim. Please try again.");
-        } else {
-          const errorText = await response.text();
-          console.error("Non-JSON error response:", errorText);
-          alert(`Server error: ${response.status} ${response.statusText}`);
-        }
+        alert("Failed to process email claim. Please try again.");
       }
     } catch (error) {
-      console.error("Network error details:", {
-        error,
-        message: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-
+      // Minimal error handling without verbose logging
       if (error instanceof TypeError && error.message.includes("fetch")) {
         alert(
-          "Cannot connect to server. Please check if the server is running and try again."
+          "Cannot connect to server. Please check your connection and try again."
         );
       } else if (
         error instanceof SyntaxError &&
@@ -83,7 +57,7 @@ export default function EmailClaimPage() {
       ) {
         alert("Server returned invalid data. Please try again.");
       } else {
-        alert("Network error. Please check your connection and try again.");
+        alert("Network error. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -94,28 +68,26 @@ export default function EmailClaimPage() {
     <div className="bg-white d-flex flex-column align-items-center px-3">
       <StickyHeader />
 
-      {/* Header Image */}
-      <div className="w-100 d-flex justify-content-center mb-4 mt-1">
-        <Image
-          src="/h2all-emailclaim-815-woman-header.png"
-          alt="H2All Email Claim Header"
-          width={500}
-          height={300}
-          className="img-fluid rounded-4"
-          style={{ maxWidth: "100%", height: "auto" }}
-          priority
-        />
-      </div>
-
       {/* Main Content Container with Mobile Width */}
       <div className={`${styles.mainContent} text-center mb-5`}>
+        {/* Header Image */}
+        <div className="w-100 d-flex justify-content-center mb-4 mt-1">
+          <Image
+            src="/h2all-emailclaim-815-woman-header.png"
+            alt="H2All Email Claim Header"
+            width={500}
+            height={300}
+            className="img-fluid rounded-4"
+            priority
+          />
+        </div>
         <h2 className={`display-6 fw-bold text-dark lh-sm pt-2 mb-0`}>
-          See your impact.
+          Enter email. See impact.
         </h2>
 
         {/* Email Instructions */}
         <p className={`fs-5 text-dark pb-2 emailInstructions`}>
-          Enter email to track contribution.
+          View your contribution.
         </p>
 
         {/* Email Input Form */}

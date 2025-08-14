@@ -29,10 +29,10 @@ export default function TrackPage() {
             <Image
               src="/track-top-81525.png"
               alt="People in Kodema Village working to access clean water"
-              layout="responsive"
               width={700}
               height={525}
-              style={{ objectFit: "contain", width: "100%", height: "auto" }}
+              className="w-100 h-auto"
+              style={{ objectFit: "contain" }}
             />
             <div
               className="position-absolute top-0 start-0 w-100 d-flex justify-content-center"
@@ -87,11 +87,10 @@ export default function TrackPage() {
             <Image
               src="/track-bottom-81525..png"
               alt="People collecting water from contaminated source in Kodema Village"
-              layout="responsive"
               width={700}
               height={525}
-              className={styles.bottomImage}
-              style={{ objectFit: "contain", width: "100%", height: "auto" }}
+              className={`${styles.bottomImage} w-100 h-auto`}
+              style={{ objectFit: "contain" }}
             />
           </div>
           {/* Version Footer */}
