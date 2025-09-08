@@ -24,6 +24,7 @@ export function getAllowedOrigins(): string[] {
     // Default to localhost and production domains if not set
     return [
       "http://localhost:3000",
+      "http://localhost:3002",
       "https://h2allm1monitor-production.up.railway.app",
       "https://h2all-ux-and-api-service-production.up.railway.app",
       "https://redeem.h2all.com",
@@ -36,17 +37,31 @@ export function getAllowedOrigins(): string[] {
  * Validate request origin against allowed origins
  */
 export function validateOrigin(request: Request): boolean {
+  // TEMPORARY: Allow all origins in development
+  if (process.env.NODE_ENV === 'development') {
+    return true;
+  }
+  
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
   const allowedOrigins = getAllowedOrigins();
 
+  console.log("🔍 Origin validation:", {
+    origin,
+    referer,
+    allowedOrigins,
+    url: request.url
+  });
+
   // Allow requests without origin (direct API calls, server-to-server)
   if (!origin && !referer) {
+    console.log("✅ No origin/referer - allowing");
     return true;
   }
 
   // Check origin header
   if (origin && allowedOrigins.includes(origin)) {
+    console.log("✅ Origin allowed:", origin);
     return true;
   }
 
@@ -55,12 +70,16 @@ export function validateOrigin(request: Request): boolean {
     try {
       const refererUrl = new URL(referer);
       const refererOrigin = `${refererUrl.protocol}//${refererUrl.host}`;
-      return allowedOrigins.includes(refererOrigin);
+      const allowed = allowedOrigins.includes(refererOrigin);
+      console.log("🔍 Referer check:", { refererOrigin, allowed });
+      return allowed;
     } catch {
+      console.log("❌ Invalid referer URL");
       return false;
     }
   }
 
+  console.log("❌ Origin not allowed");
   return false;
 }
 
@@ -73,12 +92,22 @@ export function validateApiKey(request: Request): boolean {
     request.headers.get("authorization")?.replace("Bearer ", "");
   const validApiKey = process.env.API_KEY;
 
+  console.log("🔑 API Key check:", {
+    receivedKey: apiKey,
+    validKey: validApiKey,
+    hasValidKey: !!validApiKey,
+    match: apiKey === validApiKey
+  });
+
   if (!validApiKey) {
     // If no API key is configured, allow the request
+    console.log("✅ No API key configured - allowing");
     return true;
   }
 
-  return apiKey === validApiKey;
+  const isValid = apiKey === validApiKey;
+  console.log(isValid ? "✅ API key valid" : "❌ API key invalid");
+  return isValid;
 }
 
 /**

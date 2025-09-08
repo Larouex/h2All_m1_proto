@@ -13,6 +13,7 @@ export default function EmailClaimPage() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  // Fix: Use hardcoded API key for dev
 
   // Email validation function
   const isValidEmail = (email: string) => {
@@ -31,7 +32,7 @@ export default function EmailClaimPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "",
+          "x-api-key": "dev_api_key_change_in_production",
         },
         body: JSON.stringify({ email }),
       });

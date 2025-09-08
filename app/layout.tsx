@@ -6,10 +6,9 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import "./styles/negative-margins.css";
 import { AuthProvider } from "@/lib/auth-context";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import GoogleAnalytics from "@/app/components/analytics/GoogleAnalytics";
 
 const nunitoSans = Nunito_Sans({
   variable: "--font-nunito-sans",
@@ -111,9 +110,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <ConditionalAuthProvider>
       <div className="d-flex flex-column min-vh-100">
-        <NavBar />
         <main className="flex-grow-1 main-content">{children}</main>
-        <Footer />
       </div>
     </ConditionalAuthProvider>
   );
@@ -135,6 +132,7 @@ export default function RootLayout({
       </head>
       <body className={`${nunitoSans.variable} antialiased`}>
         <LayoutContent>{children}</LayoutContent>
+        <GoogleAnalytics />
       </body>
     </html>
   );

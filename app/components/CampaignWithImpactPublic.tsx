@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import CampaignProgressPublic from "@/app/components/CampaignProgressPublic";
-import MyImpactPublic from "@/app/components/MyImpactPublic";
 import { useImpact } from "@/app/components/ImpactContext";
 import styles from "./CampaignWithImpact.module.css";
 
@@ -42,17 +40,20 @@ export default function CampaignWithImpactPublic({ className = "" }) {
 
   return (
     <div className={`${styles.container} ${className}`}>
-      <div
-        className={styles.campaignProgressNoBottomRadius}
-        style={{ marginBottom: 0, paddingBottom: 0 }}
-      >
-        <CampaignProgressPublic campaignData={campaignData} />
+      <div className={styles.campaignProgressNoBottomRadius}>
+        <h2>Campaign: {campaignData.name}</h2>
+        <p>{campaignData.description}</p>
+        <p>Goal: ${campaignData.fundingGoal}</p>
+        <p>Current: ${campaignData.totalRedemptionValue.toFixed(2)}</p>
       </div>
-      <div
-        className={styles.impactSection}
-        style={{ marginTop: 0, paddingTop: 0 }}
-      >
-        <MyImpactPublic />
+      <div className={styles.impactSection}>
+        {impactData && (
+          <>
+            <h3>Your Impact</h3>
+            <p>Bottles Claimed: {impactData.claimedBottles}</p>
+            <p>Water Funded: {impactData.waterFunded}oz</p>
+          </>
+        )}
       </div>
     </div>
   );
