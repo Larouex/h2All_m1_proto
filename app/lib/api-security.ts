@@ -160,7 +160,7 @@ export function validateSecurity(
 /**
  * Security wrapper for API route handlers
  */
-export function withSecurity<T extends any[]>(
+export function withSecurity<T extends unknown[]>(
   handler: (...args: T) => Promise<Response>,
   config: SecurityConfig
 ) {

@@ -1,5 +1,58 @@
 /* Claim Page Styles - Mobile First */
 
+/* Hero Section with Background Image */
+.heroSection {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background-image: url('/child-water-jug.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  /* Performance optimizations */
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  border-radius: 1rem;
+}
+
+/* Mobile - Fixed height */
+.heroSection {
+  height: 400px;
+  min-height: 400px;
+  max-height: 400px;
+}
+
+/* Hero content positioning */
+.heroContent {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.heroTextContainer {
+  max-width: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+
+.heroTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.8);
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* Legacy styles for other elements */
 .imageContainer {
   position: relative;
   border-radius: 1rem;
@@ -65,21 +118,47 @@
 
 .mainContent {
   max-width: 320px;
+  padding-top: 20px;
 }
 
-/* Mobile styles */
-@media (max-width: 575px) {
-  .fullWidthImageSection {
+/* Small mobile screens */
+@media (max-width: 480px) {
+  .heroSection {
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
     width: 100vw;
+    max-width: 100vw;
+    border-radius: 0;
+    margin-left: -1rem;
+    margin-right: -1rem;
   }
   
-  .heroImage {
-    max-height: 400px;
-    width: 100%;
+  .heroTitle {
+    font-size: 1.75rem;
   }
 }
 
-/* Responsive adjustments */
+/* Very small mobile screens */
+@media (max-width: 360px) {
+  .heroSection {
+    height: 320px;
+    min-height: 320px;
+    max-height: 320px;
+    width: 100vw;
+    max-width: 100vw;
+    border-radius: 0;
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+  
+  .heroTitle {
+    font-size: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
+/* Tablet and larger mobile */
 @media (min-width: 576px) {
   .contentContainer {
     max-width: 450px;
@@ -88,8 +167,19 @@
   .mainContent {
     max-width: 450px;
   }
+  
+  .heroSection {
+    height: 450px;
+    min-height: 450px;
+    max-height: 450px;
+  }
+  
+  .heroTitle {
+    font-size: 2.5rem;
+  }
 }
 
+/* Desktop */
 @media (min-width: 768px) {
   .contentContainer {
     max-width: 500px;
@@ -97,5 +187,58 @@
 
   .mainContent {
     max-width: 500px;
+  }
+  
+  .heroSection {
+    height: 300px;
+    min-height: 300px;
+    max-height: 300px;
+  }
+  
+  .heroTitle {
+    font-size: 2rem;
+  }
+  
+  .heroTextContainer {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1024px) {
+  .heroSection {
+    height: 300px;
+    min-height: 300px;
+    max-height: 300px;
+  }
+}
+
+/* Portrait orientation override for consistency */
+@media (orientation: portrait) and (max-width: 480px) {
+  .heroSection {
+    height: 350px !important;
+    min-height: 350px !important;
+    max-height: 350px !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .heroTitle {
+    text-shadow: none;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .heroSection {
+    will-change: auto;
   }
 }

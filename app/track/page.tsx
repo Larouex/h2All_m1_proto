@@ -1,6 +1,5 @@
 "use client";
 
-import CampaignWithImpactPublic from "@/app/components/CampaignWithImpactPublic";
 import CleanWaterProject from "@/app/components/CleanWaterProject";
 import ShareH2All from "@/app/components/ShareH2All";
 import CleanWaterImpact from "@/app/components/CleanWaterImpact";
@@ -15,8 +14,8 @@ export default function TrackPage() {
       <div className="bg-white d-flex flex-column align-items-center px-3">
         <GoogleAnalytics />
         <StickyHeader />
-        <ClaimedBottleSuccess />
       </div>
+      <ClaimedBottleSuccess />
       <CleanWaterProject />
       <ShareH2All />
       <CleanWaterImpact />

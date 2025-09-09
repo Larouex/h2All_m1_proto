@@ -4,7 +4,7 @@
   max-width: 500px;
   margin: 0 auto;
   background: transparent;
-  border-radius: 0 0 16px 16px; /* Square top to match ClaimedBottleSuccess, rounded bottom */
+  border-radius: 0; /* No rounding - completely square */
   overflow: hidden;
   box-shadow: none;
   position: relative;
@@ -24,7 +24,7 @@
   /* Move text to top of image */
   padding-top: 20px;
   /* Removed forced black background to allow image to show */
-  border-radius: 0 0 16px 16px; /* Square top, rounded bottom */
+  border-radius: 0; /* No rounding - completely square */
 }
 
 .backgroundImage::before {
@@ -36,7 +36,7 @@
   bottom: 0;
   /* Light overlay for text readability */
   background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
-  border-radius: 0 0 16px 16px; /* Match parent border radius */
+  border-radius: 0; /* No rounding - completely square */
   z-index: 1;
 }
 
@@ -73,7 +73,7 @@
   position: relative;
   z-index: 3;
   margin: -150px 5% 0 5%;
-  border-radius: 16px;
+  border-radius: 0; /* No rounding */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -83,7 +83,7 @@
   border-bottom: 1px solid #e5e7eb;
   /* Explicit white background for accessibility */
   background: #ffffff !important;
-  border-radius: 16px;
+  border-radius: 0; /* No rounding */
 }
 
 .villageName {
@@ -266,11 +266,11 @@
 @media (max-width: 480px) {
   .container {
     margin: 0;
-    border-radius: 0 0 16px 16px; /* Keep consistent border radius on mobile */
+    border-radius: 0; /* No rounding on mobile */
   }
 
   .backgroundImage {
-    border-radius: 0 0 16px 16px; /* Keep bottom rounded on mobile */
+    border-radius: 0; /* No rounding on mobile */
     padding-top: 60px;
   }
 
@@ -294,12 +294,12 @@
 
   .projectInfo {
     padding: 24px 20px 20px 20px;
-    border-radius: 12px 12px 0 0;
+    border-radius: 0; /* No rounding */
   }
 
   .impactSection {
     padding: 20px;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0; /* No rounding */
   }
 
   .contentCard {

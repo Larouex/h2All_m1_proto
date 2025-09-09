@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+// Remove unused import
 
 /**
  * H2All M1 Proto - Admin API Extensions

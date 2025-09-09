@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { emailClaims } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
-  createEmailClaimInsertValues,
-  createEmailClaimUpdateValues,
   isValidEmail,
   normalizeEmail,
 } from "../../lib/utils/emailClaimUtils";
@@ -54,7 +51,13 @@ async function handleEmailClaim(request: NextRequest) {
       // Update existing claim
       console.log("📧 EMAIL CLAIM API - Updating existing email claim");
 
-      const existingRecord = existingClaim.rows[0] as any;
+      const existingRecord = existingClaim.rows[0] as {
+        id: string;
+        email: string;
+        claim_count: number;
+        created_at: string;
+        updated_at: string;
+      };
       const newClaimCount = (Number(existingRecord.claim_count) || 0) + 1;
 
       // Update using raw SQL to avoid new column issues

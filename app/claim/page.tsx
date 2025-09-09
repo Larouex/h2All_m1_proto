@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import StickyHeader from "@/app/components/StickyHeader";
@@ -22,19 +21,11 @@ export default function ClaimPage() {
     <div className="bg-white d-flex flex-column align-items-center">
       <StickyHeader />
 
-      {/* Full Width Image Section */}
-      <div className={styles.fullWidthImageSection}>
-        <div className="position-relative">
-          <Image
-            src="/child-water-jug.jpg"
-            alt="Child holding a water jug"
-            width={500}
-            height={596}
-            className={styles.heroImage}
-            priority
-          />
-          <div className="position-absolute bottom-0 start-0 end-0 p-3">
-            <h2 className="text-white fs-1 fw-bold mb-0 text-center">
+      {/* Full Width Hero Section with Background Image */}
+      <div className={styles.heroSection}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroTextContainer}>
+            <h2 className={styles.heroTitle}>
               Your water bottle just changed a life.
             </h2>
           </div>
@@ -42,8 +33,7 @@ export default function ClaimPage() {
       </div>
 
       {/* Main Content Container with Mobile Width */}
-      <div className={`${styles.mainContent} px-3`} style={{paddingTop: '20px'}}>
-        {/* Content continues below */}
+      <div className={`${styles.mainContent} px-3`}>
 
         {/* Call to Action Button */}
         <div className="mb-4">

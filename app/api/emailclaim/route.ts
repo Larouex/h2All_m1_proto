@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withSecurity, SECURITY_CONFIGS } from "@/app/lib/api-security";
 import { db } from "@/db";
-import { emailClaims } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
-  createEmailClaimInsertValues,
-  createEmailClaimUpdateValues,
   isValidEmail,
   normalizeEmail,
 } from "../../lib/utils/emailClaimUtils";
