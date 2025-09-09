@@ -1,10 +1,8 @@
 "use client";
 
 import { Nunito_Sans } from "next/font/google";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import "./styles/minimal.css";
 import "./globals.css";
-import "./styles/negative-margins.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
@@ -63,6 +61,19 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         "content",
         "Track the environmental impact of your purchases"
       );
+    }
+    
+    // Register service worker for offline support
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('SW registered:', registration);
+          })
+          .catch(error => {
+            console.log('SW registration failed:', error);
+          });
+      });
     }
   }, []);
 

@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Form, Button } from "react-bootstrap";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import VersionFooter from "@/app/components/VersionFooter";
 import StickyHeader from "@/app/components/StickyHeader";
 import GoogleAnalytics from "../components/analytics/GoogleAnalytics";
 import styles from "./EmailClaim.module.css";
@@ -92,28 +90,25 @@ export default function EmailClaimPage() {
         </p>
 
         {/* Email Input Form */}
-        <Form onSubmit={handleSubmit} className={styles.formContainer}>
+        <form onSubmit={handleSubmit} className={styles.formContainer}>
           <div className={`${styles.emailInputContainer} mb-3`}>
             <label className={`${styles.emailLabel} text-start mb-1 d-block`}>
               Email
             </label>
-            <Form.Control
+            <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={styles.emailInput}
+              className={`form-control ${styles.emailInput}`}
               required
-              suppressHydrationWarning
             />
           </div>
 
           <div className={styles.buttonContainer}>
             {/* Claim Button */}
             <div className="d-grid gap-2 mb-4">
-              <Button
-                variant="warning"
-                size="lg"
-                className={`py-3 fw-bold fs-5 text-white ${styles.claimButton}`}
+              <button
+                className={`btn btn-primary btn-lg btn-block ${styles.claimButton}`}
                 type="submit"
                 disabled={!isValidEmail(email) || isSubmitting}
               >
@@ -129,22 +124,20 @@ export default function EmailClaimPage() {
                 ) : (
                   "Claim My Bottle"
                 )}
-              </Button>
+              </button>
             </div>
           </div>
-        </Form>
+        </form>
 
         {/* Subtext */}
-        <p className="text-muted subtext">
+        <p className="text-muted subtext" style={{ fontSize: '12px' }}>
           By entering your email, you agree to receive updates about this
           campaign and messages about future H2ALL initiatives.{" "}
-          <a href="/privacy" className="text-decoration-underline text-primary">
+          <a href="https://www.h2all.com/privacy" className="text-decoration-underline text-primary">
             Privacy Policy
           </a>
         </p>
 
-        {/* Version Footer */}
-        <VersionFooter />
       </div>
       {/* Google Analytics (production only) */}
       <GoogleAnalytics />

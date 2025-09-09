@@ -1,11 +1,45 @@
 /* Claim Page Styles - Mobile First */
 
-.imageCard {
+.imageContainer {
+  position: relative;
   border-radius: 1rem;
+  overflow: hidden;
 }
 
-.overlayGradient {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+.imageOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 33%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.overlayText {
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  margin: 0;
+}
+
+.fullWidthImageSection {
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.heroImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  max-height: 600px;
 }
 
 .claimButton {
@@ -31,6 +65,18 @@
 
 .mainContent {
   max-width: 320px;
+}
+
+/* Mobile styles */
+@media (max-width: 575px) {
+  .fullWidthImageSection {
+    width: 100vw;
+  }
+  
+  .heroImage {
+    max-height: 400px;
+    width: 100%;
+  }
 }
 
 /* Responsive adjustments */

@@ -1,17 +1,17 @@
 {
-  "timestamp": "2025-09-08T22:37:49.821Z",
+  "timestamp": "2025-09-09T00:09:28.132Z",
   "pages": {
     "claim": {
       "url": "http://localhost:3000/claim",
-      "loadTime": 2690,
+      "loadTime": 1093,
       "metrics": {
-        "domContentLoaded": 0,
+        "domContentLoaded": 0.20000000298023224,
         "loadComplete": 0,
-        "domInteractive": 1067.6000000089407,
-        "responseTime": 1062.7999999970198,
-        "fetchStart": 0.9000000059604645,
+        "domInteractive": 60.599999994039536,
+        "responseTime": 48.900000005960464,
+        "fetchStart": 1.2999999970197678,
         "connectTime": 0,
-        "ttfb": 1049.7999999970198,
+        "ttfb": 45.400000005960464,
         "apiCalls": []
       },
       "resourceCount": 8,
@@ -25,49 +25,49 @@
       "resources": [
         {
           "name": "http://localhost:3000/_next/static/chunks/webpack.js",
-          "duration": 13.200000002980232,
+          "duration": 6.5999999940395355,
           "size": 10853,
           "type": "link"
         },
         {
-          "name": "http://localhost:3000/_next/static/chunks/app-pages-internals.js",
-          "duration": 20,
-          "size": 41997,
-          "type": "script"
-        },
-        {
           "name": "http://localhost:3000/_next/static/chunks/main-app.js",
-          "duration": 286.5,
+          "duration": 153,
           "size": 1945547,
           "type": "script"
         },
         {
+          "name": "http://localhost:3000/_next/static/chunks/app-pages-internals.js",
+          "duration": 9.699999988079071,
+          "size": 41997,
+          "type": "script"
+        },
+        {
           "name": "http://localhost:3000/_next/static/media/e4af272ccee01ff0-s.p.woff2",
-          "duration": 6.4000000059604645,
+          "duration": 2,
           "size": 48732,
           "type": "link"
         },
         {
-          "name": "http://localhost:3000/_next/static/css/app/layout.css?v=1757371070800",
-          "duration": 7.200000002980232,
+          "name": "http://localhost:3000/_next/static/css/app/layout.css?v=1757376568190",
+          "duration": 2.9000000059604645,
           "size": 10808,
           "type": "link"
         },
         {
           "name": "http://localhost:3000/_next/static/chunks/app/layout.js",
-          "duration": 73.29999999701977,
+          "duration": 66.59999999403954,
           "size": 1040056,
           "type": "script"
         },
         {
           "name": "http://localhost:3000/_next/static/chunks/_app-pages-browser_node_modules_tanstack_query-devtools_build_DevtoolsComponent_EDEL3XIZ_js.js",
-          "duration": 36.79999999701977,
+          "duration": 40.70000000298023,
           "size": 389846,
           "type": "script"
         },
         {
           "name": "http://localhost:3000/favicon.ico",
-          "duration": 1.5999999940395355,
+          "duration": 2,
           "size": 300,
           "type": "other"
         }
@@ -75,15 +75,15 @@
     },
     "emailclaim": {
       "url": "http://localhost:3000/emailclaim",
-      "loadTime": 1095,
+      "loadTime": 1065,
       "metrics": {
-        "domContentLoaded": 0.10000000894069672,
+        "domContentLoaded": 0,
         "loadComplete": 0,
-        "domInteractive": 56.29999999701977,
-        "responseTime": 54.900000005960464,
+        "domInteractive": 26.700000002980232,
+        "responseTime": 23.299999997019768,
         "fetchStart": 0.4000000059604645,
         "connectTime": 0,
-        "ttfb": 46.79999999701977,
+        "ttfb": 17.400000005960464,
         "apiCalls": []
       },
       "resourceCount": 7,
@@ -102,15 +102,15 @@
           "type": "link"
         },
         {
-          "name": "http://localhost:3000/_next/static/chunks/app-pages-internals.js",
-          "duration": 7.899999991059303,
-          "size": 41997,
+          "name": "http://localhost:3000/_next/static/chunks/main-app.js",
+          "duration": 153.79999999701977,
+          "size": 1945547,
           "type": "script"
         },
         {
-          "name": "http://localhost:3000/_next/static/chunks/main-app.js",
-          "duration": 152.79999999701977,
-          "size": 1945547,
+          "name": "http://localhost:3000/_next/static/chunks/app-pages-internals.js",
+          "duration": 7.399999991059303,
+          "size": 41997,
           "type": "script"
         },
         {
@@ -120,20 +120,20 @@
           "type": "link"
         },
         {
-          "name": "http://localhost:3000/_next/static/css/app/layout.css?v=1757371078281",
-          "duration": 3,
+          "name": "http://localhost:3000/_next/static/css/app/layout.css?v=1757376575105",
+          "duration": 2.6000000089406967,
           "size": 10808,
           "type": "link"
         },
         {
           "name": "http://localhost:3000/_next/static/chunks/app/layout.js",
-          "duration": 68.59999999403954,
+          "duration": 150.90000000596046,
           "size": 1040056,
           "type": "script"
         },
         {
           "name": "http://localhost:3000/_next/static/chunks/_app-pages-browser_node_modules_tanstack_query-devtools_build_DevtoolsComponent_EDEL3XIZ_js.js",
-          "duration": 35.6000000089407,
+          "duration": 35.5,
           "size": 389846,
           "type": "script"
         }
@@ -141,15 +141,15 @@
     },
     "track": {
       "url": "http://localhost:3000/track",
-      "loadTime": 1074,
+      "loadTime": 1059,
       "metrics": {
-        "domContentLoaded": 0.09999999403953552,
+        "domContentLoaded": 0,
         "loadComplete": 0,
-        "domInteractive": 26.400000005960464,
-        "responseTime": 23.099999994039536,
+        "domInteractive": 24.30000001192093,
+        "responseTime": 20.099999994039536,
         "fetchStart": 0.5,
         "connectTime": 0,
-        "ttfb": 20.599999994039536,
+        "ttfb": 18,
         "apiCalls": []
       },
       "resourceCount": 7,
@@ -163,19 +163,19 @@
       "resources": [
         {
           "name": "http://localhost:3000/_next/static/chunks/webpack.js",
-          "duration": 4.200000002980232,
+          "duration": 3.3999999910593033,
           "size": 10853,
           "type": "link"
         },
         {
           "name": "http://localhost:3000/_next/static/chunks/app-pages-internals.js",
-          "duration": 7.4000000059604645,
+          "duration": 7.700000002980232,
           "size": 41997,
           "type": "script"
         },
         {
           "name": "http://localhost:3000/_next/static/chunks/main-app.js",
-          "duration": 198.79999999701977,
+          "duration": 143,
           "size": 1945547,
           "type": "script"
         },
@@ -186,20 +186,20 @@
           "type": "link"
         },
         {
-          "name": "http://localhost:3000/_next/static/css/app/layout.css?v=1757371079358",
-          "duration": 2.300000011920929,
+          "name": "http://localhost:3000/_next/static/css/app/layout.css?v=1757376576166",
+          "duration": 2.6000000089406967,
           "size": 10808,
           "type": "link"
         },
         {
           "name": "http://localhost:3000/_next/static/chunks/app/layout.js",
-          "duration": 63.29999999701977,
+          "duration": 66,
           "size": 1040056,
           "type": "script"
         },
         {
           "name": "http://localhost:3000/_next/static/chunks/_app-pages-browser_node_modules_tanstack_query-devtools_build_DevtoolsComponent_EDEL3XIZ_js.js",
-          "duration": 34.29999999701977,
+          "duration": 33.8999999910593,
           "size": 389846,
           "type": "script"
         }
@@ -218,7 +218,7 @@
       "http://localhost:3000/_next/static/chunks/webpack.js"
     ],
     "styles": [
-      "http://localhost:3000/_next/static/css/app/layout.css?v=1757371079358"
+      "http://localhost:3000/_next/static/css/app/layout.css?v=1757376576166"
     ]
   }
 }
