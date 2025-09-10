@@ -34,7 +34,6 @@ export default function ClaimPage() {
 
       {/* Main Content Container with Mobile Width */}
       <div className={`${styles.mainContent} px-3`}>
-
         {/* Call to Action Button */}
         <div className="mb-4">
           <button
@@ -49,26 +48,28 @@ export default function ClaimPage() {
                 Claiming...
               </>
             ) : (
-              "Claim My Bottle"
+              "Select to Claim My Bottle"
             )}
           </button>
         </div>
 
         {/* Message Text */}
         <div className="text-center mb-4">
-          <p className="text-dark mb-0" style={{ fontSize: '24px', fontWeight: 900 }}>
+          <p
+            className="text-dark mb-0"
+            style={{ fontSize: "24px", fontWeight: 900 }}
+          >
             Millions lack clean, safe water. Your bottle helps change that.
           </p>
         </div>
 
         {/* Funding Information */}
         <div className="text-center mb-4">
-          <p className="fw-medium text-dark mb-0" style={{ fontSize: '18px' }}>
+          <p className="fw-medium text-dark mb-0" style={{ fontSize: "18px" }}>
             Track your impact in real time, as each bottle provides access to
             clean and safe water.
           </p>
         </div>
-
       </div>
       {/* Google Analytics (production only) */}
       <GoogleAnalytics />
