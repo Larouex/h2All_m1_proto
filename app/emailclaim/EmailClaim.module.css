@@ -51,12 +51,16 @@
 }
 
 .emailLabel {
-  font-size: 0.875rem;
-  /* text-sm */
+  font-size: 1rem;
+  /* increased from 0.875rem */
   color: #374151;
   /* text-gray-700 */
   font-weight: 500;
   /* font-medium */
+  text-align: left;
+  display: block;
+  padding-left: 0;
+  margin-left: 0;
 }
 
 .formContainer {
@@ -96,7 +100,8 @@
 
 .emailInstructions {
   margin-bottom: 0.25rem !important;
-  margin-top: 2.5rem !important;
+  margin-top: 0.25rem !important;
+  font-size: 1.2rem !important;
 }
 
 .subtext {
@@ -130,7 +135,8 @@
 }
 
 .claimButton:disabled {
-  background-color: #666666;
+  background-color: #e9ecef;
   border-color: #e9ecef;
-  color: #6c757d;
+  color: #000000;
+  opacity: 0.65;
 }
