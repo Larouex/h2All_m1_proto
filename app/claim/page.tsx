@@ -48,7 +48,7 @@ export default function ClaimPage() {
                 Claiming Your Bottle...
               </>
             ) : (
-              "Select to Claim Your Bottle"
+              "Tap to Claim Your Bottle"
             )}
           </button>
         </div>
