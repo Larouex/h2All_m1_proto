@@ -45,7 +45,7 @@ export default function ClaimPage() {
             {isLoading ? (
               <>
                 <span className="spinner" aria-hidden="true"></span>
-                Claiming...
+                Claiming Your Bottle...
               </>
             ) : (
               "Select to Claim Your Bottle"
