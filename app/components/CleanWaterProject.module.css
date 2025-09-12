@@ -79,7 +79,7 @@
 
 /* Project info section */
 .projectInfo {
-  padding: 32px 24px 24px 24px;
+  padding: 32px 24px 7px 24px;
   border-bottom: 1px solid #e5e7eb;
   /* Explicit white background for accessibility */
   background: #ffffff !important;
@@ -293,7 +293,7 @@
   }
 
   .projectInfo {
-    padding: 24px 20px 20px 20px;
+    padding: 24px 20px 6px 20px;
     border-radius: 0; /* No rounding */
   }
 

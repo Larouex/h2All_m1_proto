@@ -1,0 +1,114 @@
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.card {
+  background-color: #F7F7F7;
+  border: none;
+  border-radius: 0;
+  padding: 32px 24px 24px 24px;
+  width: 90%;
+  margin: 0 5%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.bottleIcon {
+  width: 34px;
+  height: 34px;
+}
+
+.dropIcon {
+  width: 11px;
+  height: 15px;
+}
+
+.label {
+  flex: 1;
+  font-size: 16px;
+  color: #6c757d;
+  font-weight: 400;
+}
+
+.value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: right;
+  min-width: 60px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-size: 16px;
+}
+
+.error {
+  text-align: center;
+  padding: 20px;
+  color: #dc3545;
+  font-size: 16px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .container {
+    margin: 0;
+  }
+
+  .card {
+    padding: 24px 20px 20px 20px;
+    margin: 0 5%;
+    width: 90%;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .label {
+    font-size: 14px;
+  }
+
+  .value {
+    font-size: 16px;
+  }
+}

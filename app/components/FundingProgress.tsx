@@ -10,8 +10,8 @@ interface FundingProgressProps {
 }
 
 const FundingProgress: React.FC<FundingProgressProps> = ({
-  currentAmount = 2250,
-  targetAmount = 15000,
+  currentAmount = 800,
+  targetAmount = 20000,
   unit = "Gallons",
   title = "Funding Progress",
   className = "",
